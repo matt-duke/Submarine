@@ -1,8 +1,10 @@
 from flask import Flask
 from flask_socketio import SocketIO
-from config import *
+import config as *
+import logging
+import utility
+logger = logging.getLogger(__name__)
 
-#import utility
 sensor[1].value = 3
 def site():
     app = Flask(__name__)

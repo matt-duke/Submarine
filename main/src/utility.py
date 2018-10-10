@@ -1,5 +1,6 @@
 import time as t
-import logger
+import logging
+logger = logging.getLogger(__name__)
 
 sim = False
 try:
@@ -11,6 +12,9 @@ except:
 	
 cam = None
 
+def gpio_init():
+    return
+
 def curr_time(start=1506211200):
     return t.time() - start
 
@@ -21,7 +25,7 @@ def take_photo(path="home/pi/Pictures", res=(800,600)):
 	if sim:
 		return
 	else:
-		if cam is None:
+		if cam == None:
 			cam = PiCamera()
 		cam.resolution = res
 		cam.capture(filename)
@@ -35,7 +39,7 @@ def start_recording(path="home/pi/Videos", res=(800,600)):
 	if sim:
 		return
 	else:	
-		if cam is None:
+		if cam == None:
 			cam = PiCamera()
 		else:
 			logger.error("start_recording(): Camera already initialized.")
@@ -48,7 +52,7 @@ def stop_recording():
 	if sim:
 		return
 	else:
-		if cam not None:
+		if cam != None:
 			cam.stop_recording()
 			cam = None
 
