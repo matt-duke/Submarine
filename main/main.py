@@ -1,18 +1,20 @@
-from config import *
-from webpage import site
 from threading import Thread
-import time
+import config as c
+import utility as u
+import logger
+from time import sleep
 
-def test2():
-    while 1:
-        print(sensor[1].value)
-        time.sleep(.5)
+c.init()
+u.gpioInit()
 
-t1 = Thread(target=site)
-t2 = Thread(target=test2)
-t1.setDaemon(True)
-t2.setDaemon(True)
-t1.start()
-t2.start()
-while True:
-    pass
+
+threads = []
+
+threads[1] = Thread(target=site)
+threads[2] = Thread(target=arduino_status)
+
+for i in len(threads):
+    threads[i].daemon = True
+    threads[i].start()
+    threads[i].join()
+
