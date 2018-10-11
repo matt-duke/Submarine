@@ -2,17 +2,19 @@ import src.sql as sql
 import logging
 
 def var_init():
-    if True:
+    global debug, modeList, mode, sensor, data_db
+    
+    debug = False
+    if debug:
         logging.basicConfig(filename = 'debug.log', filemode ='w', level=logging.DEBUG)
     else:
         logging.basicConfig(level=logging.INFO)
-
-    global modeList, mode, sensor, data_db
     
     db_file_name = "db/test.db"
     db_table_name = "test"
     db_columns = {
-        "time": "varchar(255)", 
+        "date": "char(10)",
+        "time": "char(8)", 
         "status": "varchar(255)", 
         "sensor_id": "varchar(255)", 
         "value": "varchar(255)"
