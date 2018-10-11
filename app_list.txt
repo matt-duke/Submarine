@@ -19,3 +19,5 @@ apt-get autoremove
 
 sudo make upload
 sudo i2cdetect -y 1
+
+HOOK TEST
