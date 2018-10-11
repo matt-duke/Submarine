@@ -1,5 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
+import src.config as config
+from time import sleep
 
 try:
     import smbus
@@ -9,23 +11,20 @@ except:
     
 adr = 0x04
 
-class Sensor:
-    def __init__(self):
-        self.value = None
-        self.type = None
-        self.name = None
-
-    def read_value(val=0x09):
+def start_i2c_read():
+    val=0x09
+    while True:
         if not sim:
             bus.write_byte(adr, val) # trigger send data
             r = bus.read_i2c_block_data(adr, 0)
-            self.value = r[2]
+            config.sensor[0].value = r[2]
         else:
-            self.value = -1
-        return self.value
-    
-    def write_value():
-        if not sim:
-            bus.write_byte(adr, msg)
-        else:
-            return
+            config.sensor[0].value = -1
+            sleep(3)
+            config.sensor[0].value = 1
+            sleep(3)
+def write_value():
+    if not sim:
+        bus.write_byte(adr, msg)
+    else:
+        return
