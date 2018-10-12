@@ -3,14 +3,15 @@ import logging
 from time import sleep
 
 import src.config as config
-from src.utility import gpio_init
-from src.comm import start_i2c_read
+from utility.rpi import gpio_init
+from src.comm import I2c
 
 def main():
     gpio_init()
-
+    mcu = I2c()
+    
     threads = []
-    threads.append(Thread(target=start_i2c_read))
+    threads.append(Thread(target=mcu.connect))
 
     for t in threads:
         t.setDaemon(True)
