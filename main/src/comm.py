@@ -8,15 +8,15 @@ try:
     bus = smbus.SMBus(1)
 except:
     sim = True
-    
-adr = 0x04
+
 
 class I2c():
     def __init__(self):
         self.send = None
         
     def connect(self):
-        val=0x09
+        val = 0x09
+        adr = 0x04
         while True:
             if not sim:
                 bus.write_byte(adr, val) # trigger send data

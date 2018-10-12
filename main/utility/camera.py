@@ -54,3 +54,6 @@ class Camera():
         if self.cam not None:
             cam.stop_recording()
             self.close_cam()
+            
+    def __del__():
+        self.close_cam()

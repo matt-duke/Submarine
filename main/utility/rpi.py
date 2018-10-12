@@ -1,6 +1,7 @@
 import logging
 logger = logging.getLogger(__name__)
 from subprocess import call
+import src.config as config
 
 sim = False
 try:
@@ -9,13 +10,14 @@ except:
     sim = True
 
 def gpio_init():
-    if sim:
-        return
+    return
 
 def update():
-    logger.debug("update(): started")
-    if sim:
-        return
-    logger.debug("update(): started")
-    call(["sudo apt-get update"])
-    call(["sudo apt-get upgrade"])
+    logger.debug('update(): started')
+    call(['sudo apt-get update'])
+    call(['sudo apt-get upgrade'])
+    call(['git pull'])
+    
+def reboot():
+    logger.debug('reboot()')
+    call(['sudo reboot'])
