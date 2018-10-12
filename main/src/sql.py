@@ -14,7 +14,6 @@ def get_time():
     tm =  t.localtime(t.time())
     date = "{:4d}-{:02d}-{:02d}".format(tm.tm_year, tm.tm_mon, tm.tm_mday)
     time = "{:02d}:{:02d}:{:02d}".format(tm.tm_hour, tm.tm_min, tm.tm_sec)
-    print(time)
     return time, date
  
 class Table():
