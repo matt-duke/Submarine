@@ -1,11 +1,10 @@
 import logging
 import os
 
-sim = False
 try:
     from picamera import PiCamera
 except:
-    sim = True
+    pass
 
 class Camera():
     def __init__(self, save_path, res=(1280x720)):
@@ -32,7 +31,7 @@ class Camera():
     def take_photo(self):
         filename = "{}/image_{counter}.jpg".format(path)
         logger.debug("take_photo(): {}".format(filename))
-        if sim:
+        if config.debug[1]:
             return
         if self.start_cam():
             self.cam.capture(filename)
@@ -42,14 +41,14 @@ class Camera():
     def start_recording(self):
         self.output = self.save_path+'video_{counter}.mp4'
         logger.debug("start_recording(): started {}".format(output))
-        if sim:
+        if config.debug[1]:
             return
         if self.start_cam():
             self.cam.start_recording(output, 'h264')
     
     def stop_recording(self):
         logger.debug("stop_recording(): {}".format(self.output))
-        if sim:
+        if config.debug[1]:
             return
         if self.cam not None:
             cam.stop_recording()

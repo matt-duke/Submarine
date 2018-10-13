@@ -1,10 +1,10 @@
-import src.sql as sql
 import logging
 
-def var_init():
-    global debug, modeList, mode, sensor, data_db
+def init():
+    global debug, modeList, mode, sensor
     
-    debug = True
+    data_db = None
+    debug = [True, True] #[debug mode, sim mode]
     if debug:
         logging.basicConfig(filename = 'debug.log', filemode ='w', level=logging.DEBUG)
     else:
@@ -18,7 +18,10 @@ def var_init():
         sensor.append(s)
     modeList = ["test", "init", "normal", "emergency"]
     mode = 0
-    
+
+def init_db():
+    import src.sql as sql
+    global data_db
     db_file_name = "db/test.db"
     db_table_name = "test"
     db_columns = {

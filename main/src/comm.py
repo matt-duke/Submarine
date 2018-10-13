@@ -7,7 +7,7 @@ try:
     import smbus
     bus = smbus.SMBus(1)
 except:
-    sim = True
+    pass
 
 
 class I2c():
@@ -18,7 +18,7 @@ class I2c():
         val = 0x09
         adr = 0x04
         while True:
-            if not sim:
+            if not config.debug[1]:
                 bus.write_byte(adr, val) # trigger send data
                 r = bus.read_i2c_block_data(adr, 0)
                 config.sensor[0].value = r[2]

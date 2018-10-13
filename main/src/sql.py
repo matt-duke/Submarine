@@ -30,7 +30,7 @@ class Table():
         
     def create_table(self):
         if os.path.isfile(self.file):
-            if config.debug:
+            if config.debug[0]:
                 os.remove(self.file)
             else:
                 backup_file = self.archive_dir + (self.file.split('/')[-1])[:-3] + '_' + str(int(t.time())) + '.db'

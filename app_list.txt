@@ -13,6 +13,8 @@ apt-get install python3-picamera
 apt-get install flask-socketio
 apt-get install python3-serial
 
+sudo apt-get install python3-pip
+pip3 install flask-socketio
 
 apt-get clean
 apt-get autoremove
@@ -20,4 +22,4 @@ apt-get autoremove
 sudo make upload
 sudo i2cdetect -y 1
 
-HOOK TEST
+echo 'export FLASK_ENV=development' > home/pi/.bashrc
