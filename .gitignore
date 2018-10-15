@@ -1,8 +1,4 @@
 *.db
 *.pyc
-*.jpeg
-*.jpg
-*.mp4
-*.png
 */debug.log
 */__pycache__/*
