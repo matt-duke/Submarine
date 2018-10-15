@@ -1,7 +1,18 @@
 import logging
+import os
 
 def init():
-    global debug, modeList, mode, sensor
+    global debug, modeList, mode, sensor, save_path, cam_settings
+    
+    save_path = 'media/'
+    dirs = [save_path+'images', save_path+'videos', save_path+'videos/tmp']
+    for dir in dirs:
+        if not os.path.isdir(dir):
+            os.mkdir(dir)
+    cam_settings = {
+        "resolution": (1280,720),
+        "framerate": 25
+    }
     
     data_db = None
     debug = [True, True] #[debug mode, sim mode]

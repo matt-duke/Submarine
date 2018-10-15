@@ -1,0 +1,19 @@
+<!-- https://stackoverflow.com/questions/37316791/proper-way-to-insert-html-into-flask -->
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script src="{{url_for('static', filename='js/socket.io.js')}}"></script>
+    <script src="{{url_for('static', filename='js/socket.js')}}"></script>
+</head>
+
+<body>
+    <h1>My First Heading</h1>
+    {% include 'test.html' %}
+    <p>My first paragraph.</p>
+    <img src="/video_feed">
+
+</body>
+
+</html>

@@ -43,7 +43,10 @@ class Table():
             sql_cmd += '\t{} {}, \n'.format(k, v)
         sql_cmd = sql_cmd[:-3] + '\n);'
         logger.debug("create_table(): {} in {}".format(self.table_name, self.file))
-        c.execute(sql_cmd)
+        try:
+            c.execute(sql_cmd)
+        except Exception as e:
+            logger.error('create_table(): Error: '+str(e))
         conn.commit()
         conn.close()
         
@@ -66,7 +69,10 @@ class Table():
                 add = "'{}'".format(config.modeList[config.mode])
             sql_cmd += "{}, ".format(add)
         sql_cmd = sql_cmd[:-2] + ');'
-        c.execute(sql_cmd)
+        try:
+            c.execute(sql_cmd)
+        except Exception as e:
+            logger.error('add_row(): Error: '+str(e))
         conn.commit()
         conn.close()
         
