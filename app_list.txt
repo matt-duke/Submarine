@@ -23,3 +23,5 @@ sudo make upload
 sudo i2cdetect -y 1
 
 echo 'export FLASK_ENV=development' > home/pi/.bashrc
+
+TODO: State enum/dictionary for state
