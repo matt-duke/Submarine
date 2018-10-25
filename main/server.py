@@ -1,6 +1,6 @@
 from flask import Flask, render_template, Response
 from utility.camera import Camera
-from flask_socketio import SocketIO
+from flask_socketio import SocketIO, emit
 from threading import Thread
 import logging
 from time import sleep
@@ -19,7 +19,7 @@ b_video = False
 
 def print_sensor(id, delay=1):
     while True:
-        print(config.sensor[id].value)
+        #print(config.sensor[id].value)
         sleep(delay)
         
 def start():
@@ -37,7 +37,6 @@ def start():
         t.start()
 
 def webpage():
-    #global b_image, b_video
     def save_frame(frame):
         global b_image, b_video
         add_to_path = ''
@@ -71,30 +70,32 @@ def webpage():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def socket():
-    #global b_image, b_video
-    @socketio.on('take_photo')
-    def handle_take_photo(message):
-        global b_image
-        print('received message: ' + message)
-        b_image = True
-        
-    @socketio.on('start_video')
-    def handle_start_video(message):
-        global b_video
-        print('received message: ' + message)
-        
-        b_video = True
-        
-    @socketio.on('stop_video')
-    def handle_stop_video(message):
-        global b_video
-        print('received message: ' + message)
-        b_video = False
-        count = len(os.listdir('{}videos'.format(config.save_path)))
-        os.system('ffmpeg -framerate {2} -i {0}videos/tmp/img_%05d.jpeg -vf format=yuv420p {0}videos/mov_{1:03d}.mp4'.format(config.save_path, count, config.cam_settings['framerate']))
-        shutil.rmtree('{}videos/tmp'.format(config.save_path))
-        os.mkdir('{}videos/tmp'.format(config.save_path))
-    
+    msg_map = ['take_photo','start_video', 'stop_video']
+
+    @socketio.on('get_map')
+    def handle_send_map():
+        print('sending map')
+        emit('get_map', msg_map)
+
+    for i in range(len(msg_map)):
+        @socketio.on(msg_map[i])
+        def msg_handler(message):
+            global b_image, b_video
+            if config.debug[0]:
+                print('received message: ' + message)
+            if i == 0:
+                b_image = True
+            elif i == 1:
+                b_video = True
+            elif i == 2:
+                b_video = False
+            elif i == 3:
+                b_video = False
+                count = len(os.listdir('{}videos'.format(config.save_path)))
+                os.system('nice -n 10 ffmpeg -framerate {2} -i {0}videos/tmp/img_%05d.jpeg -vf format=yuv420p {0}videos/mov_{1:03d}.mp4'.format(config.save_path, count, config.cam_settings['framerate']))
+                shutil.rmtree('{}videos/tmp'.format(config.save_path))
+                os.mkdir('{}videos/tmp'.format(config.save_path))
+
 start()
 webpage()
 socket()

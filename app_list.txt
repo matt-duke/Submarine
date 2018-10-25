@@ -6,6 +6,8 @@ apt-get install i2c-tools
 sudo
 apt-get install python3-rpi.gpio
 
+sudo apt-get install samba samba-common-bin
+sudo mkdir -m 1777 /share
 
 apt-get install python3-flask
 apt-get install python3-picamera
