@@ -3,7 +3,7 @@ from time import sleep
 import os
 try:
     import picamera
-finally:
+except:
     pass
 from utility.base_camera import BaseCamera
 

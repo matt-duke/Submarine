@@ -6,6 +6,7 @@ import logging
 from time import sleep
 import os
 import shutil
+import utility.map as map
 
 import src.config as config
 from src.comm import I2c
@@ -70,12 +71,12 @@ def webpage():
                     mimetype='multipart/x-mixed-replace; boundary=frame')
 
 def socket():
-    msg_map = ['take_photo','start_video', 'stop_video']
+    msg_map = ['take_photo','start_video', 'stop_video', 'save_map']
 
-    @socketio.on('get_map')
+    @socketio.on('get_msg_map')
     def handle_send_map():
         print('sending map')
-        emit('get_map', msg_map)
+        emit('get_msg_map', msg_map)
 
     for i in range(len(msg_map)):
         @socketio.on(msg_map[i])
@@ -95,6 +96,9 @@ def socket():
                 os.system('nice -n 10 ffmpeg -framerate {2} -i {0}videos/tmp/img_%05d.jpeg -vf format=yuv420p {0}videos/mov_{1:03d}.mp4'.format(config.save_path, count, config.cam_settings['framerate']))
                 shutil.rmtree('{}videos/tmp'.format(config.save_path))
                 os.mkdir('{}videos/tmp'.format(config.save_path))
+            elif i == 4:
+                print(message)
+                
 
 start()
 webpage()
