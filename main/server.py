@@ -12,16 +12,20 @@ import src.config as config
 from src.comm import I2c
 from utility.rpi import gpio_init
 
+from time import time
+
 app = Flask(__name__, template_folder='webpage/templates', static_folder='webpage/static')
 socketio = SocketIO(app)
 
 b_image = False
 b_video = False
 
-def print_sensor(id, delay=1):
+def thread_test(id, delay=1):
+    start = time()
     while True:
-        #print(config.sensor[id].value)
         sleep(delay)
+        print('Main thread timing accuracy: {:.4f}s'.format(time()-start-delay))
+        start = time()
         
 def start():
     config.init()
@@ -30,9 +34,7 @@ def start():
     
     mcu = I2c()
     threads = []
-    threads.append(Thread(target=mcu.connect))
-    threads.append(Thread(target=print_sensor, args=(0,20)))
-    #threads.append(Thread(target=cam_test))
+    threads.append(Thread(target=thread_test, args=(0,5)))
     for t in threads:
         t.setDaemon(True)
         t.start()

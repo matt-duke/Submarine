@@ -21,6 +21,11 @@ pip3 install flask-socketio
 apt-get clean
 apt-get autoremove
 
+sudo apt-get install screen
+screen /dev/ttyAMC0 <baud>
+:quit
+
+https://pblog.ebaker.me.uk/2014/01/uploading-arduino-sketch-from-raspberry.html
 sudo make upload
 sudo i2cdetect -y 1
 

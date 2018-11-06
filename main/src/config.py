@@ -15,7 +15,7 @@ def init():
     }
     
     data_db = None
-    debug = [True, True] #[debug mode, sim mode]
+    debug = [True, False] #[debug mode, sim mode]
     if debug:
         logging.basicConfig(filename = 'debug.log', filemode ='w', level=logging.DEBUG)
     else:
@@ -31,7 +31,10 @@ def init():
     mode = 0
 
 def init_db():
-    import src.sql as sql
+    try:
+        import src.sql as sql
+    except:
+        import sql
     global data_db
     db_file_name = "db/test.db"
     db_table_name = "test"

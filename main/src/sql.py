@@ -4,7 +4,10 @@ import time as t
 import os
 from shutil import copyfile
 
-import src.config as config
+try:
+    import src.config as config
+except:
+    import config
 
 logger = logging.getLogger(__name__)
 
