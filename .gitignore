@@ -1,5 +1,10 @@
 *.db
 *.pyc
+*.jpeg
+*.jpg
+*.png
 */debug.log
 */__pycache__/*
 */build_uno/*
+*/tiles/*
+main/webpage/static/src/fontawesome-free-5.5.0-web/*

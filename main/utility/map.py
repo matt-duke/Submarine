@@ -22,8 +22,8 @@ def download_url(zoom, xtile, ytile):
     subdomain = randint(1, 4)
     
     url = "http://c.tile.openstreetmap.org/%d/%d/%d.png" % (zoom, xtile, ytile)
-    dir_path = "%s/webpage/tiles/%d/%d/" % (os.getcwd(), zoom, xtile)
-    download_path = "%s/webpage/tiles/%d/%d/%d.png" % (os.getcwd(), zoom, xtile, ytile)
+    dir_path = "%s/webpage/static/tiles/%d/%d/" % (os.getcwd(), zoom, xtile)
+    download_path = "%s/webpage/static/tiles/%d/%d/%d.png" % (os.getcwd(), zoom, xtile, ytile)
     
     if not os.path.exists(dir_path):
         os.makedirs(dir_path)

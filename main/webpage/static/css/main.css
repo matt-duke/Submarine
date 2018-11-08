@@ -1,8 +1,8 @@
 #stream {
     border-radius: 25px;
-    padding: 10px;
-    display: block;
-    margin: 0 auto;
-	width: 60%;
-    height: auto;
+    padding: 15px;
+    background-color: black;
+    margin: 1em 0;
+    width: 85%;
+    height: 20em;
 }

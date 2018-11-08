@@ -1,27 +1,50 @@
-<!-- https://stackoverflow.com/questions/37316791/proper-way-to-insert-html-into-flask -->
-
 <!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Skeleton ROV</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/bootstrap-4.1.3/css/bootstrap.min.css')}}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/fontawesome-free-5.5.0-web/css/fontawesome.css')}}">
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/leaflet/leaflet.css')}}">
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
-    <link rel="stylesheet" href="{{url_for('static', filename='src/bootstrap-4.1.3-dist/css/bootstrap.min.css')}}">
-    
-    <script src="{{url_for('static', filename='src/jquery-3.3.1.min.js')}}"></script>
-    <script src="{{url_for('static', filename='src/bootstrap-4.1.3-dist/js/bootstrap.min.js')}}"></script>
-    <script src="{{url_for('static', filename='src/justgage.js')}}"></script>
-    <script src="{{url_for('static', filename='src/socket.io.js')}}"></script>
-    <script src="{{url_for('static', filename='js/socketio.js')}}"></script>
+
 </head>
 
-<body>
-    <h1>My First Heading</h1>
-    <img id="stream" src="/video_feed">
-    {% include 'test.html' %}
-    <p>My first paragraph.</p>
-</body>
+<div class="container">
+    <div class="mx-auto" id="stream">
+        <div class="btn-toolbar float-left" role="toolbar">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-secondary"><i class="fas fa-camera"></i></button>
+                <button type="button" class="btn btn-secondary">2</button>
+                <button type="button" class="btn btn-secondary">3</button>
+                <button type="button" class="btn btn-secondary">4</button>
+            </div>
+        </div>
+        <div class="btn-toolbar float-right" role="toolbar">
+            <div class="btn-group" role="group">
+                <button type="button" class="btn btn-secondary">5</button>
+                <button type="button" class="btn btn-secondary">6</button>
+                <button type="button" class="btn btn-secondary">7</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+<script src="{{url_for('static', filename='src/jquery-3.3.1.min.js')}}"></script>
+<!-- Include all compiled plugins (below), or include individual files as needed -->
+<script src="{{url_for('static', filename='src/bootstrap-4.1.3/js/bootstrap.min.js')}}"></script>
+<script src="{{url_for('static', filename='src/raphael-2.1.4.min.js')}}"></script>
+
+<script src="{{url_for('static', filename='src/justgage.js')}}"></script>
 
 </html>
