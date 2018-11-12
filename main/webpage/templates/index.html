@@ -10,8 +10,6 @@
 
     <!-- Bootstrap -->
     <link rel="stylesheet" href="{{url_for('static', filename='src/bootstrap-4.1.3/css/bootstrap.min.css')}}">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="{{url_for('static', filename='src/fontawesome-free-5.5.0-web/css/fontawesome.css')}}">
     <!-- Leaflet -->
     <link rel="stylesheet" href="{{url_for('static', filename='src/leaflet/leaflet.css')}}">
     <!-- Stylesheet -->
@@ -23,17 +21,16 @@
     <div class="mx-auto" id="stream">
         <div class="btn-toolbar float-left" role="toolbar">
             <div class="btn-group" role="group">
-                <button type="button" class="btn btn-secondary"><i class="fas fa-camera"></i></button>
-                <button type="button" class="btn btn-secondary">2</button>
-                <button type="button" class="btn btn-secondary">3</button>
-                <button type="button" class="btn btn-secondary">4</button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-camera"></span></button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-record"></span></button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-flash"></span></button>
             </div>
         </div>
         <div class="btn-toolbar float-right" role="toolbar">
             <div class="btn-group" role="group">
                 <button type="button" class="btn btn-secondary">5</button>
-                <button type="button" class="btn btn-secondary">6</button>
-                <button type="button" class="btn btn-secondary">7</button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-wrench"></span></button>
+                <button type="button" class="btn btn-secondary"><span class="glyphicon glyphicon-off"></span></button>
             </div>
         </div>
     </div>
