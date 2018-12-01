@@ -1,0 +1,69 @@
+<div id="accordion">
+    <div class="card">
+        <div class="card-header" id="headingOne">
+            <h5 class="mb-0">
+                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseMap" aria-controls="collapseOne">
+                    <i class="fas fa-map-marked-alt"></i> Map
+                </button>
+            </h5>
+        </div>
+
+        <div id="collapseMap" class="collapse show" data-parent="#accordion">
+            <div class="card-body mx-auto" style="width: 90%">
+                <div id="map"></div>
+                <button type="button" class="btn btn-primary" disabled>Save tiles</button>
+                <button type="button" class="btn btn-secondary">Clear tiles</button>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header" id="headingTwo">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseHw" aria-expanded="false">
+                    <i class="fas fa-microchip"></i> Hardware
+                </button>
+            </h5>
+        </div>
+        <div id="collapseHw" class="collapse show" aria-labelledby="headingTwo" data-parent="#accordion">
+            <div class="card-body">
+                <div class="container">
+                    <div class="row">
+                        <div class="col mx-auto">
+                            <div id="gauge-cpu" class="200x160px"></div>
+                        </div>
+                        <div class="col mx-auto">
+                            <div id="gauge-mem" class="200x160px"></div>
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-3">
+                            Disk use:
+                        </div>
+                        <div class="col-9" style="margin: auto">
+                            <div class="progress">
+                                <div class="progress-bar" role="progressbar" style="width: 15%">OS</div>
+                                <div class="progress-bar bg-success" role="progressbar" style="width: 30%">Media</div>
+                                <div class="progress-bar bg-info" role="progressbar" style="width: 20%">Maps</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="card-header" id="headingThree">
+            <h5 class="mb-0">
+                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseSub" aria-expanded="false" aria-controls="collapseThree">
+                    <i class="fas fa-chart-line"></i> History
+                </button>
+            </h5>
+        </div>
+        <div id="collapseSub" class="collapse show" aria-labelledby="headingThree" data-parent="#accordion">
+            <div class="card-body">
+                    <div id="chart-depth" class="chart" style="height: 100"></div>
+            </div>
+        </div>
+    </div>
+</div>

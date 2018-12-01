@@ -1,13 +1,17 @@
 import io
-from time import sleep
+import time as tm
 import os
+import piexif
 try:
     import picamera
+    import src.config as config 
 except:
     pass
-from utility.base_camera import BaseCamera
-
-import src.config as config 
+try:
+    from utility.base_camera import BaseCamera
+except:
+    from base_camera import BaseCamera
+    
 import logging
 logger = logging.getLogger(__name__)
 
@@ -20,7 +24,7 @@ class Camera(BaseCamera):
             camera.framerate = config.cam_settings['framerate']
             camera.resolution = config.cam_settings['resolution']
             # let camera warm up
-            sleep(2)
+            time.sleep(2)
 
             stream = io.BytesIO()
             for _ in camera.capture_continuous(stream, 'jpeg', use_video_port=True):
@@ -33,3 +37,16 @@ class Camera(BaseCamera):
                 stream.seek(0)
                 stream.truncate()
                     
+if __name__ == '__main__':
+    time = tm.localtime(tm.time())
+    exif_dict = piexif.load("maxresdefault.jpg")
+    print(exif_dict['GPS'])
+    exif_dict['GPS'] = {
+        piexif.GPSIFD.GPSVersionID: (0, 0, 0, 0),
+        piexif.GPSIFD.GPSAltitudeRef: 1, #above or below sea level
+        piexif.GPSIFD.GPSAltitude: 40,
+        piexif.GPSIFD.GPSDateStamp: u"{:04d}:{:02d}:{:02d} {:02d}:{:02d}:{:02d}".format(time.tm_year, time.tm_mon, time.tm_mday, time.tm_hour, time.tm_min, time.tm_sec) }
+    #exif_bytes = piexif.dump(exif_dict)
+    #piexif.insert("maxresdefault", exif_bytes)
+    
+    print(exif_dict)
