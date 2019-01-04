@@ -1,1 +1,1 @@
-from setup.run import run
+from setup.setup import run

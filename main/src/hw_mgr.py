@@ -5,6 +5,8 @@ import psutil
 from pathlib import Path
 from time import sleep
 import shutil
+import logging
+logger = logging.getLogger(__name__)
 
 
 class HwManager(Thread):
@@ -41,10 +43,5 @@ class HwManager(Thread):
             common.sensors['media_disk'].write(self.get_folder_size(media_path))
             common.sensors['tile_disk'].write(self.get_folder_size(tile_path))
             common.sensors['used_disk'].write(self.disk.used)
-            temp = common.sensors['used_disk'].read(do_not_update=True)
-            for i in ['tile_disk','media_disk']:
-                temp = temp - common.sensors[i].read(do_not_update=True)
-            common.sensors['other_disk'].write(temp)
-            common.sensors['cpu_percent'].write(self.cpu)
-            print(self.cpu)
+            common.sensors['cpu_use'].write(self.cpu)
             sleep(self.delay)

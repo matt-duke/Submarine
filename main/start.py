@@ -1,6 +1,6 @@
 import common
 from src import hw_manager
-import setup.run
+import setup
 from webpage import start as start_server
 
 print('ROV Submarine')

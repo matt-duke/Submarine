@@ -1,8 +1,9 @@
 from time import time
 from enum import Enum, auto
+import logging
+logger = logging.getLogger(__name__)
 
-import common.sql as sql
-from common import logger
+import common
 import setup
 
 ## Shared custom data types
@@ -14,13 +15,15 @@ class OpMode(Enum):
     normal = auto()
     emergency = auto()
     error = auto()
-    
+
 class Sensor:
-    timeout = 10
+    timeout = 5
+    log
     type_map = [int, float, str]
-    def __init__(self, type=None, check_valid=True):
+    def __init__(self, name, type, check_valid):
         self.value = None
         self.type = type
+        self.name = name
         self.valid = False
         self.timestamp = -1
         self.check_valid = check_valid
@@ -29,16 +32,16 @@ class Sensor:
         try:
             self.value = Sensor.type_map[self.type](val)
             self.valid = True
+            logger.debug('Writing value {}:{}'.format(self.name, val))
         except Exception as e:
             self.valid = False
-            print(e)
+            logger.error(e)
         self.timestamp = time()
         return self.valid
         
     def read(self, do_not_update=False):
-        if do_not_update:
-            return self.value
-        if (time()-self.timestamp) > Sensor.timeout and self.check_valid:
+        if not do_not_update and (time()-self.timestamp) > Sensor.timeout and self.check_valid:
             self.valid = False
             print('Label validity changed to false')
+        logger.debug('Reading value {}:{}'.format(self.name, self.value))
         return self.value

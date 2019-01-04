@@ -20,6 +20,7 @@ def start_socket(app):
             socketio.sleep(rate)
             for key, sensor in common.sensors.items():
                 socketio.emit('refresh', {'id': key,'data':sensor.__dict__}, namespace = namespace)
+                logger.debug("emitting")
             socketio.emit('refresh', {'name':'mode','data':common.mode.name}, namespace = namespace)
             #socketio.emit('test', 'test', namespace=namespace)
     

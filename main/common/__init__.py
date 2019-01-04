@@ -1,7 +1,3 @@
-import logging
-logging.basicConfig(level=logging.DEBUG)
-logger = logging.getLogger(__name__)
-
 from common import sql
 from common.config import Sensor
 from common.config import OpMode
@@ -10,3 +6,9 @@ from common.config import OpMode
 sensors = {}
 mode = OpMode.none
 config = {}
+log_dict = {"DEBUG": logging.DEBUG,
+            "INFO": logging.INFO,
+            "WARNING": logging.WARNING,
+            "ERROR": logging.ERROR,
+            "CRITICAL": logging.CRITICAL}
+    
