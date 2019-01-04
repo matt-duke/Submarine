@@ -16,6 +16,6 @@ function run(target, id = null) {
             $(id).text = data
         }
         console.log('AJAX: ' + data)
+        return data;
     });
-    return false;
 }

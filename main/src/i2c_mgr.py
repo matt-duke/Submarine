@@ -1,11 +1,4 @@
-import logging
-logger = logging.getLogger(__name__)
-try:
-    import src.config as config
-except:
-    import config
-    config.init()
-    config.init_db()
+import common
 
 from time import time, sleep
 from threading import Thread
@@ -21,7 +14,7 @@ class I2c():
             t.start()
     
     def connect(self):
-        adr = 0x04
+        adr = common.config['ARDUINO']['I2CAddress']
         while True:
             if not config.debug[1]:
                 from smbus import SMBus

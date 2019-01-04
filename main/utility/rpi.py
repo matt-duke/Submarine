@@ -1,7 +1,5 @@
-import logging
-logger = logging.getLogger(__name__)
 from subprocess import call
-import src.config as config
+import common.config as config
 
 sim = False
 try:
@@ -11,6 +9,12 @@ except:
 
 def gpio_init():
     return
+
+def toggle_wifi():
+    if sp_run('ifconfig | grep -c wlan', shell=True):
+        sp_run('rfkill block wifi', shell=True)
+    else:
+        sp_run('rfkill unblock wifi', shell=True)
 
 def update():
     logger.debug('update(): started')

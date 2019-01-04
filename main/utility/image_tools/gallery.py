@@ -96,6 +96,3 @@ class Gallery:
             return(img.epoch)
         self.img.sort(key=key)
 
-g = Gallery()
-g.load()
-

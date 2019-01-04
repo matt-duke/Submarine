@@ -4,13 +4,10 @@ import os
 import piexif
 try:
     import picamera
-    import src.config as config 
 except:
     pass
-try:
-    from utility.base_camera import BaseCamera
-except:
-    from base_camera import BaseCamera
+import common.config
+from utility.image_tools.base_camera import BaseCamera
     
 import logging
 logger = logging.getLogger(__name__)
@@ -21,8 +18,8 @@ class Camera(BaseCamera):
     @staticmethod
     def frames():                
         with picamera.PiCamera() as camera:
-            camera.framerate = config.cam_settings['framerate']
-            camera.resolution = config.cam_settings['resolution']
+            camera.framerate = common.config['camera']['framerate']
+            camera.resolution = (common.config['camera']['resolutionwidth'],common.config['camera']['resolutionwidth'])
             # let camera warm up
             time.sleep(2)
 
