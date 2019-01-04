@@ -25,10 +25,6 @@ def start_logging():
     consoleHandler.setFormatter(logFormatter)
     rootLogger.addHandler(consoleHandler)
     
-    logging.basicConfig(level = log_dict[common.config['LOGGER']['LogLevel']],
-                        filename = common.config['LOGGER']['FileName'],
-                        filemode = 'w',
-                        format = common.config['LOGGER']['Format'])
     logging.getLogger('werkzeug').setLevel('WARNING')
 
 
