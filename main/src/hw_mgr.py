@@ -1,19 +1,12 @@
 import common
-from threading import Thread, enumerate
+from threading import Thread
 import os
 import psutil
 from pathlib import Path
 from time import sleep
 import shutil
-import logging
-logger = logging.getLogger(__name__)
 
-
-class HwManager(Thread):
-    def __init__(self):
-        self.delay = 2
-        Thread.__init__(self, daemon = False)
-
+class SrcClass():
     def get_folder_size(self, path):
         size = 0
         path = Path(path)
@@ -31,17 +24,18 @@ class HwManager(Thread):
         self.process = psutil.Process(os.getpid())
     
     def run(self):
+        self.bus.logger.debug('Starting thread')
         self.update()
         media_path = common.config['PATHS']['MediaPath']
         tile_path = common.config['PATHS']['TileSavePath']
-        common.sensors['total_ram'].write(self.memory.total)
-        common.sensors['total_disk'].write(self.disk.total)
+        self.bus['total_ram'].write(self.memory.total)
+        self.bus['total_disk'].write(self.disk.total)
         while True:
             self.update()
-            common.sensors['free_ram'].write(self.memory.available)
-            common.sensors['ps_ram'].write(self.process.memory_info().rss)
-            common.sensors['media_disk'].write(self.get_folder_size(media_path))
-            common.sensors['tile_disk'].write(self.get_folder_size(tile_path))
-            common.sensors['used_disk'].write(self.disk.used)
-            common.sensors['cpu_use'].write(self.cpu)
+            self.bus['free_ram'].write(self.memory.available)
+            self.bus['ps_ram'].write(self.process.memory_info().rss)
+            self.bus['media_disk'].write(self.get_folder_size(media_path))
+            self.bus['tile_disk'].write(self.get_folder_size(tile_path))
+            self.bus['used_disk'].write(self.disk.used)
+            self.bus['cpu_use'].write(self.cpu)
             sleep(self.delay)

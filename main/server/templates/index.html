@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Skeleton ROV</title>
+
+    <!-- Bootstrap -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/bootstrap-4.1.3/css/bootstrap.min.css')}}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/fontawesome-free-5.5.0-web/css/all.min.css')}}">
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/leaflet/leaflet.css')}}">
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
+
+</head>
+{% include 'modal.html' %}
+<div class="container">
+    <div class="row mx-auto" id="stream">
+        <div class="col-6" style="height: 15%">
+            <div class="btn-toolbar float-left" role="toolbar">
+                <div class="btn-group" role="group">
+                    <button id="btn-cam" type="button" class="btn btn-secondary" onclick="run('camera')"> <i class="fas fa-camera"></i></button>
+                    <button id="btn-vid" type="button" class="btn btn-secondary" data-toggle="button" onclick="run('video')"><i class="fas fa-video"></i></button>
+                    <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('light')"><i class="fas fa-bolt"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="col-6" style="height: 15%">
+            <div class=" btn-toolbar float-right" role="toolbar">
+                <div class="btn-group" role="group">
+                    <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('wifi')"><i class="fas fa-wifi"></i></button>
+                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target=".modal-off"><i class="fas fa-power-off"></i></button>
+                </div>
+            </div>
+        </div>
+        <div class="col-2" style="height: 85%">
+            <div class="btn-toolbar float-left" style="bottom: 2em; position: absolute" role="toolbar">
+                <div class="btn-group-vertical" role="group">
+                    <button type="button" class="btn btn-secondary" data-toggle="button"><i class="fas fa-chevron-up"></i></button>
+                    <button type="button" class="btn btn-secondary" data-toggle="button"><i class="fas fa-chevron-down"></i></button>
+                </div>
+            </div>
+        </div>
+        <div id="joystick" class="col-10" style="height: 85%">
+        </div>
+    </div>
+</div>
+
+<div id="dashboard" class="mx-auto rounded border">
+    <div class="container">
+        <div class="row">
+            <div class="col-sm border mx-auto gauge">
+                <div id="depth" class="200x160px"></div>
+            </div>
+            <div class="col-sm border mx-auto">
+                <div id="voltage" class="200x160px"></div>
+            </div>
+            <div class="col-sm border mx-auto">
+                <div id="pressure" class="200x160px"></div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="conatiner mx-auto" style="width: 80%">
+    {% include 'data.html' %}
+</div>
+<div id="footer">
+
+</div>
+
+<!-- jQuery (necessary for Bootstrap's JavaScrip -->
+<script src="{{url_for('static', filename='src/jquery-3.3.1.min.js')}}"></script>
+<!-- JustGage -->
+<script src="{{url_for('static', filename='src/justgage-1.2.2/raphael-2.1.4.min.js')}}"></script>
+<script src="{{url_for('static', filename='src/justgage-1.2.2/justgage.js')}}"></script>
+<script src="{{url_for('static', filename='js/gage.js')}}"></script>
+<!-- Leaflet -->
+<script src="{{url_for('static', filename='src/leaflet/leaflet.js')}}"></script>
+<script src="{{url_for('static', filename='src/leaflet/leaflet.ajax.min.js')}}"></script>
+<!-- NippleJS -->
+<script src="{{url_for('static', filename='src/nipplejs.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/map.js')}}"></script>
+<!-- Bootstrap -->
+<script src="{{url_for('static', filename='src/bootstrap-4.1.3/js/bootstrap.min.js')}}"></script>
+<!-- Plotly -->
+<script src="{{url_for('static', filename='src/plotly-latest.min.js')}}"></script>
+<script src="{{url_for('static', filename='js/plot.js')}}"></script>
+<script type="text/javascript">
+    var graphs = {{graphJSON | safe}};
+    plot('chart-depth', graphs)
+</script>
+<!-- SocketIO -->
+<script src="{{url_for('static', filename='src/socket.io.js')}}"></script>
+<script src="{{url_for('static', filename='js/socketio.js')}}"></script>
+    
+<!-- Custom -->
+<script src="{{url_for('static', filename='js/button.js')}}"></script>
+
+<!-- Define script root -->
+<script type="text/javascript"> $SCRIPT_ROOT={{ request.script_root|tojson|safe }} </script> 
+    
+</html>

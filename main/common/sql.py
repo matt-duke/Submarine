@@ -4,7 +4,7 @@ import time as t
 import os
 from shutil import copyfile
 
-import common.config as config
+import common
 import logging
 logger = logging.getLogger(__name__)
 

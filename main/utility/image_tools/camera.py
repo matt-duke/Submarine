@@ -6,7 +6,7 @@ try:
     import picamera
 except:
     pass
-import common.config
+import common
 from utility.image_tools.base_camera import BaseCamera
     
 import logging

@@ -1,5 +1,8 @@
 from subprocess import call
-import common.config as config
+import common
+
+import logging
+logger = logging.getLogger(__name__)
 
 sim = False
 try:
