@@ -1,4 +1,4 @@
-from time import time
+from time import time, sleep
 from enum import Enum, auto
 import logging
 from threading import Thread
@@ -23,24 +23,48 @@ class Bus(dict):
         self.logger = logging.getLogger(self.name)
         self.logger.setLevel(config['LogLevel'])
         self.enabled = config['Enabled']
-        self.package = config['Path']
+        self.refresh_rate = config['RefreshRate']
+        module = config['Module']
         self.thread = Thread()
         
-        class_name = "run"
         try:
-            import src.hw_mgr.SrcClass
-            print(__import__(self.package))
-            #thread.start()
+            class_name = "SrcClass"
+            self.module = getattr(__import__(module, fromlist=[class_name]), class_name)(self)
+            self.enabled = common.self_test.verify_src_module(self.module) and self.enabled
         except Exception as e:
-            self.logger.error('Error starting thread:{}'.format(e))
+            self.logger.error('Error importing: {}'.format(e))
+            self.enabled = False
     
-    def add_sensor(self, name, type, check_valid):
-        self[name] = Sensor(name, type, self.logger, check_valid)
+    def write(self, name, value):
+        if name in self.keys():
+            self[name].write(value)
+        else:
+            self.logger.error('Sensor:{} not initialized to {}. Check config.ini'.format(name, self.name))
     
-    def run(self):
-        if not self.thread.isAlive and self.enabled:
-            pass
-            
+    def add_sensor(self, name, **kwargs):
+        if type(kwargs) == Sensor:
+            self[name] = kwargs
+        else:
+            try:
+                self[name] = Sensor(name, kwargs['type'], self.logger, kwargs['check_valid'])
+            except Exception as e:
+                self.logger.error('Error adding sensor to {}. Check {}'.format(self.name, e))
+    
+    def start(self):
+        def run(func):
+            while True:
+                start_time = time()
+                func()
+                end_time = time()
+                sleep(self.refresh_rate)
+        
+        if not self.thread.isAlive() and self.enabled:
+            self.logger.info('Starting {} thread'.format(self.name))
+            self.module.setup()
+            self.thread.target = run
+            self.thread.args = (self.module.loop,)
+            self.thread.start()
+
             
 class Sensor:
     timeout = 5

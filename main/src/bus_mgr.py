@@ -9,16 +9,16 @@ def start():
     i = 0
     while common.config.has_section('BUS_'+str(i)):
         bus_name = 'BUS_'+str(i)
-        data = {'Path': common.config.get(bus_name, 'Path').replace('/','.').replace('.py',''),
+        data = {'Module': common.config.get(bus_name, 'Module').replace('/','.').replace('.py',''),
                 'Enabled': common.config.getboolean(bus_name, 'Enabled'),
                 'LogLevel': common.log_dict[common.config.get(bus_name, 'LogLevel')],
-                'RefreshRate': common.config.get(bus_name, 'RefreshRate')}
+                'RefreshRate': common.config.getint(bus_name, 'RefreshRate')}
         common.bus.append(common.Bus(bus_name, data))
         common.bus[i].logger.info('Adding data bus: '+bus_name)
         i=i+1
 
-    for option in common.config.options('SENSOR'):
-        data = common.config.get('SENSOR', option)
+    for option in common.config.options('SENSORS'):
+        data = common.config.get('SENSORS', option)
         if option == 'validitytimeout':
             common.Sensor.validity_timeout = int(data)
             continue
@@ -29,4 +29,7 @@ def start():
                                                              
             common.bus[bus_index].logger.info('Adding sensor: {} to bus BUS_{}'.format(option, bus_index))
         except Exception as e:
-            common.bus[bus_index].logger.error('Error adding SENSOR: {} - {}'.format(option, e))
+            common.bus[bus_index].logger.error('Error adding sensor: {} - {}'.format(option, e))
+            
+    for bus in common.bus:
+        bus.start()

@@ -1,12 +1,35 @@
-import common
-from threading import Thread
 import os
 import psutil
 from pathlib import Path
 from time import sleep
 import shutil
 
+import common
+
 class SrcClass():
+    def __init__(self, bus):
+        self.bus = bus
+        self.logger = bus.logger
+        
+    def setup(self):
+        self.update()
+        self.media_path = common.config['PATHS']['MediaPath']
+        self.tile_path = common.config['PATHS']['TileSavePath']
+        self.bus.write('total_ram', self.memory.total)
+        self.bus.write('total_disk', self.disk.total)
+    
+    def loop(self):
+        self.update()
+        self.bus.write('free_ram', self.memory.available)
+        self.bus.write('ps_ram', self.process.memory_info().rss)
+        self.bus.write('media_disk', self.get_folder_size(self.media_path))
+        self.bus.write('tile_disk', self.get_folder_size(self.tile_path))
+        self.bus.write('used_disk', self.disk.used)
+        self.bus.write('cpu_use', self.cpu)
+    
+    def test(self):
+        pass
+    
     def get_folder_size(self, path):
         size = 0
         path = Path(path)
@@ -22,20 +45,3 @@ class SrcClass():
         self.disk = shutil.disk_usage(Path('/'))
         self.cpu = psutil.cpu_percent(interval=None, percpu=False)
         self.process = psutil.Process(os.getpid())
-    
-    def run(self):
-        self.bus.logger.debug('Starting thread')
-        self.update()
-        media_path = common.config['PATHS']['MediaPath']
-        tile_path = common.config['PATHS']['TileSavePath']
-        self.bus['total_ram'].write(self.memory.total)
-        self.bus['total_disk'].write(self.disk.total)
-        while True:
-            self.update()
-            self.bus['free_ram'].write(self.memory.available)
-            self.bus['ps_ram'].write(self.process.memory_info().rss)
-            self.bus['media_disk'].write(self.get_folder_size(media_path))
-            self.bus['tile_disk'].write(self.get_folder_size(tile_path))
-            self.bus['used_disk'].write(self.disk.used)
-            self.bus['cpu_use'].write(self.cpu)
-            sleep(self.delay)

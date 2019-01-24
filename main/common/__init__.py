@@ -4,6 +4,8 @@ from common.data_types import Bus
 
 from common.helper import flatten
 
+from common.self_test import *
+
 from common import sql
 
 ## Common variables

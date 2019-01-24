@@ -1,0 +1,2 @@
+from common.self_test.verify_src_module import verify_src_module
+from common.self_test.verify_config_file import verify_config_file

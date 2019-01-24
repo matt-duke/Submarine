@@ -16,7 +16,7 @@ class Sensor {
 
 class DataSubscription {
     constructor(object) {
-        this.object = $(object);
+        this.object = $(object)
         this.equation = object.dataset['subscribe'];
         this.value = null;
         
@@ -31,7 +31,6 @@ class DataSubscription {
     update() {
         try {
             this.value = eval(this.equation)
-            //console.log(this.equation+': '+this.value)
         }
         catch(e) {
             console.log('Error on: '+this.equation)
@@ -66,11 +65,10 @@ socket.on('sensor-list', function(msg){
     for(var i=0; i < msg.length; i++) {
         sensors[msg[i]] = new Sensor(msg[i])
     }
-    var objects=$('[data-subscribe]').toArray();
-    //console.log(objects)
-    for (var i=0;i<objects.length; i++) {
-        subscribers[i] = new DataSubscription(objects[i])
-    }
+    $('[data-subscribe]').each(function(i, obj) {
+        console.log($(obj))
+        subscribers[i] = new DataSubscription(obj)
+    });
 });
 
 socket.on('update', function(msg){

@@ -12,6 +12,7 @@ thread = None
 namespace = '/io'
 
 def start_socket(app):
+    logger.info('Starting SocketIO')
     async_mode = None
     socketio = SocketIO(app, async_mode=async_mode)
     
@@ -27,10 +28,11 @@ def start_socket(app):
                     socketio.emit('update', {'id': key,'data':data}, namespace = namespace)
                 #socketio.emit('update', {'id':'mode','data':common.mode.name}, namespace = namespace)
                 socketio.emit('refresh', namespace=namespace)
-                socketio.sleep(rate)
+        socketio.sleep(rate)
     
     @socketio.on('connect', namespace=namespace)
     def connect():
+        logger.info('Client connected')
         sensor_list = common.flatten([list(b.keys()) for b in common.bus])
         emit('sensor-list', sensor_list, namespace=namespace)
         global thread

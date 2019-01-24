@@ -10,6 +10,7 @@ def config_parser(path):
     config = configparser.ConfigParser()
     config._interpolation = configparser.ExtendedInterpolation()
     config.read(path)
+    
     for option in config.options('PATHS'):
         data = Path(config.get('PATHS', option))
         if not os.path.isdir(data):

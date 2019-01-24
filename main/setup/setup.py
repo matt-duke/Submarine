@@ -1,7 +1,12 @@
 import common
 import logging
+import os
 from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
+
+consoleHandler = logging.StreamHandler()
+logging.getLogger().setLevel(0)
+logging.getLogger().addHandler(consoleHandler)
 
 from setup.config_parser import config_parser
 
@@ -10,29 +15,34 @@ def run():
     ## Includes initializing sensors, parsing config file(s), network details, tests, etc.
     common.mode = common.OpMode.startup
     common.config = config_parser('config.ini')
-    common.Sensor.timeout = common.config.getint('SENSOR','ValidityTimeout')
+    common.self_test.verify_config_file(common.config)
+    
     start_logging()
+    common.Sensor.timeout = common.config.getint('SENSORS','ValidityTimeout')
     
 def start_logging():
+    rootLogger = logging.getLogger()
+    for hdlr in rootLogger.handlers:
+        rootLogger.removeHandler(hdlr)
+    
     class CriticalHandler(logging.Handler):
         def __init__(self):
             logging.Handler.__init__(self)
             self.setLevel(logging.CRITICAL)
         def emit(self, record):
             common.mode = common.OpMode.critical_fault
-            
-    rootLogger = logging.getLogger()
-    rootLogger.setLevel(0)
+
     modeHandler = CriticalHandler()
     rootLogger.addHandler(modeHandler)
-    rootLogger.critical('BAD')
+    
+    if os.path.isfile(common.config['LOGGER']['FileName']):
+        os.remove(common.config['LOGGER']['FileName'])
     
     logFormatter = logging.Formatter(common.config['LOGGER']['Format'], 
                                      common.config['LOGGER']['DateFormat'])
     fileHandler = RotatingFileHandler(common.config['LOGGER']['FileName'],
                                       maxBytes=200*1024,
-                                      backupCount=2,
-                                      mode='w')
+                                      backupCount=2)
     fileHandler.setLevel(common.log_dict[common.config['LOGGER']['FileLogLevel']])
     fileHandler.setFormatter(logFormatter)
     rootLogger.addHandler(fileHandler)

@@ -1,5 +1,12 @@
 //todo: dynamically add gauge from html
 
+$('.gauge').each(function(i, obj) {
+    console.log($(obj).attr('id'))
+    var g = new JustGage({
+        id: $(obj).attr('id')
+    });
+});
+
 gage_dict = {}
 var g = new JustGage({
     id: "depth",
