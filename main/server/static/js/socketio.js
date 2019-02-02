@@ -1,5 +1,3 @@
-console.log('SocketIO')
-
 // SETUP
 // Classes
 class Sensor {
@@ -43,6 +41,11 @@ class DataSubscription {
             }
             this.object.css('width', this.value+'%')
             this.object.attr('aria-valuenow',this.value)
+        } else if (this.object.hasClass('gauge')) {
+            gauge[this.object.attr('id')].refresh(this.value)
+            console.log()
+        } else {
+            
         };
     };
 }
@@ -66,7 +69,6 @@ socket.on('sensor-list', function(msg){
         sensors[msg[i]] = new Sensor(msg[i])
     }
     $('[data-subscribe]').each(function(i, obj) {
-        console.log($(obj))
         subscribers[i] = new DataSubscription(obj)
     });
 });

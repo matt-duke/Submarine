@@ -55,13 +55,13 @@
     <div class="container">
         <div class="row">
             <div class="col-sm border mx-auto">
-                <div id="depth" class="gauge 200x160px"></div>
+                <div id="depth" class="gauge 200x160px" data-subscribe="depth" data-gauge="Depth,m,0,100"></div>
             </div>
             <div class="col-sm border mx-auto">
-                <div id="voltage" class="gauge 200x160px"></div>
+                <div id="voltage" class="gauge 200x160px" data-subscribe="batt_voltage" data-gauge="Voltage,V,0,13"></div>
             </div>
-            <div class="col-sm border mx-auto gauge">
-                <div id="pressure" class="gauge 200x160px"></div>
+            <div class="col-sm border mx-auto">
+                <div id="pressure" class="gauge 200x160px" data-subscribe="" data-gauge="Pressure,psi,20,100"></div>
             </div>
         </div>
     </div>

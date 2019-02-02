@@ -16,20 +16,6 @@ def start():
         common.bus.append(common.Bus(bus_name, data))
         common.bus[i].logger.info('Adding data bus: '+bus_name)
         i=i+1
-
-    for option in common.config.options('SENSORS'):
-        data = common.config.get('SENSORS', option)
-        if option == 'validitytimeout':
-            common.Sensor.validity_timeout = int(data)
-            continue
-        data = data.split(',')
-        try:
-            bus_index = int(data[0])
-            common.bus[bus_index].add_sensor(name=option,type=int(data[1]),check_valid=bool(data[2]))
-                                                             
-            common.bus[bus_index].logger.info('Adding sensor: {} to bus BUS_{}'.format(option, bus_index))
-        except Exception as e:
-            common.bus[bus_index].logger.error('Error adding sensor: {} - {}'.format(option, e))
             
     for bus in common.bus:
         bus.start()

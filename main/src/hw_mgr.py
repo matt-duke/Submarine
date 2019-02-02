@@ -11,6 +11,15 @@ class SrcClass():
         self.bus = bus
         self.logger = bus.logger
         
+        self.bus.add_sensor('total_ram', type=int, check_valid=False)
+        self.bus.add_sensor('total_disk', type=int, check_valid=False)
+        self.bus.add_sensor('free_ram', type=int)
+        self.bus.add_sensor('used_disk', type=int)
+        self.bus.add_sensor('ps_ram', type=int)
+        self.bus.add_sensor('media_disk', type=int)
+        self.bus.add_sensor('tile_disk', type=int)
+        self.bus.add_sensor('cpu_use', type=int)
+        
     def setup(self):
         self.update()
         self.media_path = common.config['PATHS']['MediaPath']

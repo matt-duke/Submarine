@@ -27,8 +27,8 @@ def start_socket(app):
                             }
                     socketio.emit('update', {'id': key,'data':data}, namespace = namespace)
                 #socketio.emit('update', {'id':'mode','data':common.mode.name}, namespace = namespace)
-                socketio.emit('refresh', namespace=namespace)
-        socketio.sleep(rate)
+            socketio.emit('refresh', namespace=namespace)
+            socketio.sleep(rate)
     
     @socketio.on('connect', namespace=namespace)
     def connect():
