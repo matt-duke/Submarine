@@ -1,6 +1,6 @@
 var map = L.map('map', {
     center: [45.2539, -79.4535],
-    zoom: 13,
+    zoom: 13
 });
 
 var watercolour = L.tileLayer('https://stamen-tiles-{s}.a.ssl.fastly.net/watercolor/{z}/{x}/{y}.{ext}', {
@@ -30,13 +30,22 @@ var topo = new L.GeoJSON.AJAX("/static/skel.geojson", {
     style: lineStyle
 });
 
+var imageLayer = L.layerGroup()
+function addImage(lat, lon) {
+    txt = `<b>GPS:</b> ${lat},${lon}`
+    imageLayer.addLayer(L.marker([lat,lon]).bindPopup(txt));
+}
+addImage(45.254888, -79.451657, );
+
 var baseMaps = {
     "Watercolour": watercolour,
     "Nat Geo": natgeo
 };
 
 var overlayMaps = {
+    "Images": imageLayer,
     "Topographic": topo
 };
 
 L.control.layers(baseMaps, overlayMaps).addTo(map);
+natgeo.addTo(map)

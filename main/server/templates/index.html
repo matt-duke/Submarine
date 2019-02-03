@@ -19,40 +19,40 @@
 
 </head>
 {% include 'modal.html' %}
-<div class="container">
-    <div class="row mx-auto" id="stream">
-        <div class="col-6" style="height: 15%">
-            <div class="btn-toolbar float-left" role="toolbar">
-                <div class="btn-group" role="group">
-                    <button id="btn-cam" type="button" class="btn btn-secondary" onclick="run('camera')"> <i class="fas fa-camera"></i></button>
-                    <button id="btn-vid" type="button" class="btn btn-secondary" data-toggle="button" onclick="run('video')"><i class="fas fa-video"></i></button>
-                    <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('light')"><i class="fas fa-bolt"></i></button>
+<div class="conatiner">
+    <div class="container">
+        <div class="row mx-auto" id="stream">
+            <div class="col-6" style="height: 15%">
+                <div class="btn-toolbar float-left" role="toolbar">
+                    <div class="btn-group" role="group">
+                        <button id="btn-cam" type="button" class="btn btn-secondary" onclick="run('camera')"> <i class="fas fa-camera"></i></button>
+                        <button id="btn-vid" type="button" class="btn btn-secondary" data-toggle="button" onclick="run('video')"><i class="fas fa-video"></i></button>
+                        <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('light')"><i class="fas fa-bolt"></i></button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-6" style="height: 15%">
-            <div class=" btn-toolbar float-right" role="toolbar">
-                <div class="btn-group" role="group">
-                    <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('wifi')"><i class="fas fa-wifi"></i></button>
-                    <button type="button" class="btn btn-secondary" data-toggle="modal" data-target=".modal-off"><i class="fas fa-power-off"></i></button>
+            <div class="col-6" style="height: 15%">
+                <div class=" btn-toolbar float-right" role="toolbar">
+                    <div class="btn-group" role="group">
+                        <button type="button" class="btn btn-secondary" data-toggle="button" onclick="run('wifi')"><i class="fas fa-wifi"></i></button>
+                        <button type="button" class="btn btn-secondary" data-toggle="modal" data-target=".modal-off"><i class="fas fa-power-off"></i></button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div class="col-2" style="height: 85%">
-            <div class="btn-toolbar float-left" style="bottom: 2em; position: absolute" role="toolbar">
-                <div class="btn-group-vertical" role="group">
-                    <button type="button" class="btn btn-secondary" data-toggle="button"><i class="fas fa-chevron-up"></i></button>
-                    <button type="button" class="btn btn-secondary" data-toggle="button"><i class="fas fa-chevron-down"></i></button>
+            <div class="col-2" style="height: 85%">
+                <div class="btn-toolbar float-left" style="bottom: 2em; position: absolute" role="toolbar">
+                    <div class="btn-group-vertical" role="group">
+                        <button type="button" class="btn btn-secondary"><i class="fas fa-chevron-up"></i></button>
+                        <button type="button" class="btn btn-secondary"><i class="fas fa-chevron-down"></i></button>
+                    </div>
                 </div>
             </div>
-        </div>
-        <div id="joystick" class="col-10" style="height: 85%">
+            <div id="joystick" class="col-10" style="height: 85%">
+            </div>
         </div>
     </div>
-</div>
 
-<div id="dashboard" class="mx-auto rounded border">
-    <div class="container">
+    <div id="dashboard" class="mx-auto rounded border">
         <div class="row">
             <div class="col-sm border mx-auto">
                 <div id="depth" class="gauge 200x160px" data-subscribe="depth" data-gauge="Depth,m,0,100"></div>
@@ -65,9 +65,9 @@
             </div>
         </div>
     </div>
-</div>
-<div class="conatiner mx-auto" style="width: 80%">
-    {% include 'data.html' %}
+    <div class="conatiner mx-auto" style="width: 80%">
+        {% include 'data.html' %}
+    </div>
 </div>
 <div id="footer">
 

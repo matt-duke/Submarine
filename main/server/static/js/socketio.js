@@ -44,8 +44,14 @@ class DataSubscription {
         } else if (this.object.hasClass('gauge')) {
             gauge[this.object.attr('id')].refresh(this.value)
             console.log()
+        } else if (this.object.is("span")) {
+            if (typeof this.value == "string") {
+                this.object.text(this.value)
+            } else {
+                this.object.text(parseFloat(this.value).toFixed(0))
+            }
         } else {
-            
+            console.log('Unknown type')
         };
     };
 }

@@ -10,7 +10,7 @@ var manager = nipplejs.create(options);
 
 function run(target, id = null) {
     $.get($SCRIPT_ROOT + target, {
-
+        a:'test'
     }, function (data) {
         if (id != null) {
             $(id).text = data

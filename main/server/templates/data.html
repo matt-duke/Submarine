@@ -11,8 +11,8 @@
         <div id="collapseMap" class="collapse show" data-parent="#accordion">
             <div class="card-body mx-auto" style="width: 90%">
                 <div id="map"></div>
-                <button type="button" class="btn btn-primary" disabled>Save tiles</button>
-                <button type="button" class="btn btn-secondary">Clear tiles</button>
+                <button type="button" class="btn btn-primary" onclick="run('save_map')">Save tiles</button>
+                <button type="button" class="btn btn-secondary" onclick="run('clear_map')">Clear tiles</button>
             </div>
         </div>
     </div>
@@ -38,13 +38,19 @@
                     <hr>
                     <div class="row">
                         <div class="col-3">
-                            Disk use:
+                            Storage:
                         </div>
                         <div class="col-9" style="margin: auto">
                             <div class="progress">
-                                <div class="progress-bar" data-subscribe="used_disk/total_disk" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">OS</div>
-                                <div class="progress-bar bg-success" data-subscribe="media_disk/total_disk" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span>Media</span></div>
-                                <div class="progress-bar bg-info" role="progressbar" data-subscribe="tile_disk/total_disk" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span>Maps</span></div>
+                                <div class="progress-bar" data-subscribe="used_disk/total_disk" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span><span data-subscribe="(used_disk/total_disk)*100"></span>%</span>
+                                </div>
+                                <div class="progress-bar bg-success" data-subscribe="media_disk/total_disk" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span>Media</span>
+                                </div>
+                                <div class="progress-bar bg-info" role="progressbar" data-subscribe="tile_disk/total_disk" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span>Maps</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -54,7 +60,9 @@
                         </div>
                         <div class="col-9" style="margin: auto">
                             <div class="progress">
-                                <div class="progress-bar" data-subscribe="free_ram/total_ram" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">Used</div>
+                                <div class="progress-bar" data-subscribe="(total_ram-free_ram)/total_ram" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100">
+                                    <span><span data-subscribe="((total_ram-free_ram)/total_ram)*100"></span>%</span> 
+                                </div>
                                 <div class="progress-bar bg-success" data-subscribe="ps_ram/total_ram" role="progressbar" style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"><span>Process</span></div>
                             </div>
                         </div>

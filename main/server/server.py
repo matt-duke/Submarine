@@ -1,6 +1,6 @@
 import common
 from utility.image_tools import Camera
-import utility
+import server.map
 from server.socket import start_socket
 import logging
 logger = logging.getLogger(__name__)
@@ -9,7 +9,7 @@ from subprocess import run as sp_run
 import os
 from pathlib import Path
 
-from flask import Flask, render_template, Response
+from flask import Flask, render_template, Response, request
 import json
 import plotly as plt
 import numpy as np
@@ -58,7 +58,7 @@ def webpage(app):
             save_frame(frame)
             yield (b'--frame\r\n'
                b'Content-Type: image/jpeg\r\n\r\n' + frame + b'\r\n')
-
+    
     @app.route('/video_feed')
     def video_feed():
         return Response(gen(Camera()),
@@ -95,7 +95,12 @@ def webpage(app):
     def light():
         return 'light'
 
-   
+    @app.route('/save_map')
+    def save_map():
+        print(request.args.get('a', 0, type=int))
+        return 'saved'
+        #map.get()
+    
 def start():
     if common.config.getboolean('SERVER', 'enabled'):
         logger.info('Starting server')
