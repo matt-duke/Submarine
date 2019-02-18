@@ -13,6 +13,7 @@ def config_parser(path):
     
     for option in config.options('PATHS'):
         data = Path(config.get('PATHS', option))
+        #config['PATHS'][option] = data
         if not os.path.isdir(data):
             os.mkdir(data)
     

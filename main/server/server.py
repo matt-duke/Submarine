@@ -1,7 +1,7 @@
 import common
 from utility.image_tools import Camera
-import server.map
-from server.socket import start_socket
+from server import Map
+import server.socket
 import logging
 logger = logging.getLogger(__name__)
 
@@ -17,40 +17,27 @@ import json
 
 
 class Server:
-
+    def __init__(self):
+        self.image_save_path = Path(common.config.get('PATHS','ImageSavePath'))
+        self.video_save_path = Path(common.config['PATHS']['VideoSavePath'])
+        self.tile_save_path = Path(common.config['PATHS']['TileSavePath'])
+        self.app = Flask(__name__, static_folder='static')  
+        self.app.host = common.config['SERVER']['ServerIp']
+        self.app.port = common.config['SERVER']['ServerPort']
+        self.app.config['SECRET_KEY'] = 'secret!'
+        self.map = server.Map(self)
+        self.setup(self.app)        
+    
     def start(self):
         if common.config.getboolean('SERVER', 'enabled'):        
             logger.info('Starting server')
-            self.image_save_path = Path(common.config.get('PATHS','ImageSavePath'))
-            self.video_save_path = Path(common.config['PATHS']['VideoSavePath'])
-            self.tile_save_path = Path(common.config['PATHS']['TileSavePath'])
-            self.app = Flask(__name__, static_folder='static')
-                
-            self.app.host = common.config['SERVER']['ServerIp']
-            self.app.port = common.config['SERVER']['ServerPort']
-            self.app.config['SECRET_KEY'] = 'secret!'
             
-            self.setup_webpage(self.app)
-            socketio = start_socket(self.app)
+            socketio = server.socket(self.app)
             socketio.run(self.app, debug=False)
         else:
             logger.info('Server disabled')
     
-    def setup_webpage(self, app):
-        def save_frame(frame):
-            add_to_path = ''
-            if self.b_image:
-                add_to_path = 'images'
-                self.b_image = False
-            elif self.b_video:
-                add_to_path = 'videos/tmp'
-            else:
-                return
-            count = len(os.listdir(image_save_path))
-            file = open(image_save_path+'/img_{:05d}.jpeg'.format(count),'wb') 
-            file.write(bytearray(frame))
-            file.close()
-
+    def setup(self, app):
         @app.route('/')
         def index():
             count = 500
@@ -114,12 +101,13 @@ class Server:
             lat = request.args.get('lat', 0, type=float)
             lon = request.args.get('lon', 0, type=float)
             print(self.tile_save_path)
-            server.map.get(lat, lon, self.tile_save_path)
+            self.map.get(lat, lon)
             return 'started in thread'
         
         @app.route('/clear_map')
         def clear_map():
-            return ''
+            self.map.clear_tiles()
+            return 'cleared'
             
         @app.route('/tile/<path:filename>')
         def get_tile(filename):

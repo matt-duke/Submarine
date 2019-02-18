@@ -13,8 +13,20 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Camera(BaseCamera):
-
+class Camera(BaseCamera):    
+    def save_frame(self, frame, add_to_path = ''):
+        if self.b_image:
+            add_to_path = 'images'
+            self.b_image = False
+        elif self.b_video:
+            add_to_path = 'videos/tmp'
+        else:
+            return
+        count = len(os.listdir(image_save_path))
+        file = open(image_save_path+'/img_{:05d}.jpeg'.format(count),'wb') 
+        file.write(bytearray(frame))
+        file.close()
+    
     @staticmethod
     def frames():                
         with picamera.PiCamera() as camera:

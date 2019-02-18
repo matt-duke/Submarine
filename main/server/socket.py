@@ -11,7 +11,7 @@ thread_lock = Lock()
 thread = None
 namespace = '/io'
 
-def start_socket(app):
+def socket(app):
     logger.info('Starting SocketIO')
     async_mode = None
     socketio = SocketIO(app, async_mode=async_mode)
