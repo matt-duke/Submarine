@@ -7,9 +7,11 @@ from common.helper import flatten
 from common import sql
 
 ## Common variables
-bus = []
-mode = OpMode.none
+BUS = []
+MODE = OpMode.none
 config = {}
+PLATFORM = None
+
 #log level dictionary corresposding to logging.DEBUG to logging.CRITIAL levels
 log_dict = {"DEBUG": 10,
             "INFO": 20,

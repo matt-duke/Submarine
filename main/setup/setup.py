@@ -16,7 +16,9 @@ import subprocess as sp
 def run():
     ## By the end of this function, all startup items should be done.
     ## Includes initializing sensors, parsing config file(s), network details, tests, etc.
-    common.mode = common.OpMode.startup
+    common.MODE = common.OpMode.startup
+    common.PLATFORM = platform.system()
+    
     self_test.run_post()
     
     common.config = config_parser('config.ini')

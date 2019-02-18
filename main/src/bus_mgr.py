@@ -13,9 +13,9 @@ def start():
                 'Enabled': common.config.getboolean(bus_name, 'Enabled'),
                 'LogLevel': common.log_dict[common.config.get(bus_name, 'LogLevel')],
                 'RefreshRate': common.config.getint(bus_name, 'RefreshRate')}
-        common.bus.append(common.Bus(bus_name, data))
-        common.bus[i].logger.info('Adding data bus: '+bus_name)
+        common.BUS.append(common.Bus(bus_name, data))
+        common.BUS[i].logger.info('Adding data bus: '+bus_name)
         i=i+1
             
-    for bus in common.bus:
+    for bus in common.BUS:
         bus.start()

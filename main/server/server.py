@@ -1,5 +1,5 @@
 import common
-from utility.image_tools import Camera
+from control.image_tools import Camera
 from server import Map
 import server.socket
 import logging

@@ -5,10 +5,8 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-PLATFORM = platform.system()
-
 def disk_test():
-    if not PLATFORM == 'Linux':
+    if not common.PLATFORM == 'Linux':
         logger.warning('Disk test: platform not supported')
         return
         
