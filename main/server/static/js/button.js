@@ -8,10 +8,9 @@ var options = {
 };
 var manager = nipplejs.create(options);
 
-function run(target, id = null) {
-    $.get($SCRIPT_ROOT + target, {
-        a:'test'
-    }, function (data) {
+function run(target, id = null, vars=null) {
+    console.log(vars)
+    $.get($SCRIPT_ROOT + target, vars, function (data) {
         if (id != null) {
             $(id).text = data
         }

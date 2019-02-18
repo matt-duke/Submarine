@@ -14,6 +14,8 @@
     <link rel="stylesheet" href="{{url_for('static', filename='src/fontawesome-free-5.5.0-web/css/all.min.css')}}">
     <!-- Leaflet -->
     <link rel="stylesheet" href="{{url_for('static', filename='src/leaflet/leaflet.css')}}">
+    <!-- Lightbox -->
+    <link rel="stylesheet" href="{{url_for('static', filename='src/ekko-lightbox/ekko-lightbox.css')}}">
     <!-- Stylesheet -->
     <link rel="stylesheet" href="{{url_for('static', filename='css/main.css')}}">
 
@@ -61,17 +63,20 @@
                 <div id="voltage" class="gauge 200x160px" data-subscribe="batt_voltage" data-gauge="Voltage,V,0,13"></div>
             </div>
             <div class="col-sm border mx-auto">
-                <div id="pressure" class="gauge 200x160px" data-subscribe="" data-gauge="Pressure,psi,20,100"></div>
+                <div id="pressure" class="gauge 200x160px" data-subscribe="pressure" data-gauge="Pressure,psi,20,100"></div>
             </div>
         </div>
     </div>
-    <div class="conatiner mx-auto" style="width: 80%">
+    <div class="conatiner mx-auto" style="width: 75%">
         {% include 'data.html' %}
     </div>
 </div>
 <div id="footer">
 
 </div>
+
+<!-- Define script root -->
+<script type="text/javascript"> $SCRIPT_ROOT={{ request.script_root|tojson|safe }} </script> 
 
 <!-- jQuery (necessary for Bootstrap's JavaScrip -->
 <script src="{{url_for('static', filename='src/jquery-3.3.1.min.js')}}"></script>
@@ -90,18 +95,25 @@
 <!-- Plotly -->
 <script src="{{url_for('static', filename='src/plotly-latest.min.js')}}"></script>
 <script src="{{url_for('static', filename='js/plot.js')}}"></script>
+<!-- Lightbox -->
+<script src="{{url_for('static', filename='src/ekko-lightbox/ekko-lightbox.js')}}"></script>
+<script type="text/javascript">
+    $(document).on('click', '[data-toggle="lightbox"]', function(event) {
+        event.preventDefault();
+        $(this).ekkoLightbox();
+    });
+</script>
+
+<!-- Common/Misc -->
+<script src="{{url_for('static', filename='js/button.js')}}"></script>
+
 <script type="text/javascript">
     var graphs = {{graphJSON | safe}};
     plot('chart-depth', graphs)
 </script>
+
 <!-- SocketIO -->
 <script src="{{url_for('static', filename='src/socket.io.js')}}"></script>
 <script src="{{url_for('static', filename='js/socketio.js')}}"></script>
-    
-<!-- Custom -->
-<script src="{{url_for('static', filename='js/button.js')}}"></script>
-
-<!-- Define script root -->
-<script type="text/javascript"> $SCRIPT_ROOT={{ request.script_root|tojson|safe }} </script> 
     
 </html>

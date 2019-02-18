@@ -1,1 +1,2 @@
-from server.server import start
+from server.server import Server
+start = Server().start

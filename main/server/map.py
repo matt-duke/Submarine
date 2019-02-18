@@ -4,6 +4,7 @@ from urllib.request import urlopen
 from random import randint
 from threading import Thread
 from queue import Queue
+from os import path, getcwd
 
 def deg2num(lat_deg, lon_deg, zoom):
     lat_rad = math.radians(lat_deg)
@@ -14,32 +15,37 @@ def deg2num(lat_deg, lon_deg, zoom):
 
 def thread_worker(q):
     while q != None:
-        q.get()()
+        task = q.get()
+        task[0](task[1])
         q.task_done()
     
-def download_url(zoom, xtile, ytile):
+def download_url(data):
+    zoom, xtile, ytile, tile_folder = str(data[0]), str(data[1]), str(data[2]), data[3]
     # Switch between otile1 - otile4
-    subdomain = randint(1, 4)
-    
-    url = "http://c.tile.openstreetmap.org/%d/%d/%d.png" % (zoom, xtile, ytile)
-    dir_path = "%s/webpage/static/tiles/%d/%d/" % (os.getcwd(), zoom, xtile)
-    download_path = "%s/webpage/static/tiles/%d/%d/%d.png" % (os.getcwd(), zoom, xtile, ytile)
+    #subdomain = randint(1, 4)
+    ext = 'jpg'
+    url = "https://server.arcgisonline.com/ArcGIS/rest/services/NatGeo_World_Map/MapServer/tile/{}/{}/{}".format(zoom, xtile, ytile)
+    dir_path = path.join(getcwd(), tile_folder, zoom, xtile)
+    save_path = str(path.join(getcwd(), tile_folder, zoom, xtile, ytile))+'.'+ext
     
     if not os.path.exists(dir_path):
-        os.makedirs(dir_path)
+        try:
+            os.makedirs(dir_path)
+        except FileExistsError:
+            print("forlder already exists: "+dir_path)
     
-    if(not os.path.isfile(download_path)):
-        print("downloading {} -> {}".format(url, download_path))
+    if(not os.path.isfile(save_path)):
+        print("downloading {} -> {}".format(url, save_path))
         source = urlopen(url)
         content = source.read()
         source.close()
-        destination = open(download_path,'wb')
+        destination = open(save_path,'wb')
         destination.write(content)
         destination.close()
     else: print("skipped {}".format(url))
 
 
-def get(lat, lon, maxzoom=15):
+def get(lat, lon, tile_folder, maxzoom=15):
     q = Queue()
     for i in range(5):
         t = Thread(target = thread_worker, args=(q,))
@@ -49,7 +55,7 @@ def get(lat, lon, maxzoom=15):
     for zoom in range(1,7,1):
         for x in range(0,2**zoom,1):
             for y in range(0,2**zoom,1):
-                q.put(download_url(zoom, x, y))
+                q.put((download_url, (zoom, x, y, tile_folder)))
 
     # from 6 to 15 ranges
     for zoom in range(7, int(maxzoom)+1, 1):
@@ -59,6 +65,6 @@ def get(lat, lon, maxzoom=15):
         print("{}:{}-{}/{}-{}".format(zoom, xtile, final_xtile, ytile, final_ytile))
         for x in range(xtile, final_xtile + 1, 1):
             for y in range(ytile, final_ytile - 1, -1):                
-                q.put(download_url(zoom, x, y))
+                q.put((download_url, (zoom, x, y, tile_folder)))
     q = None
   

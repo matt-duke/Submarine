@@ -14,9 +14,11 @@ class SrcClass():
     def setup(self):
         self.bus.add_sensor('batt_voltage', type=int, check_valid=False)
         self.bus.add_sensor('depth', type=int, check_valid=False)
+        self.bus.add_sensor('pressure', type=int, check_valid=False)
     
         self.bus.write('batt_voltage', 5)
         self.bus.write('depth', 20)
+        self.bus.write('depth', 40)
     
     def loop(self):
         pass

@@ -22,8 +22,9 @@ class DataSubscription {
         for(var i = 0; i < keys.length; i++) {
             if (this.equation.includes(keys[i])) {
                 this.equation = this.equation.replace(new RegExp(keys[i], "g"), 'sensors["'+keys[i]+'"].value');
-                console.log(this.equation)
+                //console.log(this.equation)
             }
+        //console.log(this.equation)
         };
     };
     update() {
@@ -33,9 +34,12 @@ class DataSubscription {
         catch(e) {
             console.log('Error on: '+this.equation)
         };
+        if (this.value == undefined){
+            console.log('Undefined value: ' + this.equation)
+        }
         if (this.object.hasClass('progress-bar')) {
             this.object.show()
-            this.value = Math.round(this.value*100)
+            this.value = Math.round(this.value)
             if (this.value < 5) {
                 this.object.hide()
             }
@@ -43,7 +47,6 @@ class DataSubscription {
             this.object.attr('aria-valuenow',this.value)
         } else if (this.object.hasClass('gauge')) {
             gauge[this.object.attr('id')].refresh(this.value)
-            console.log()
         } else if (this.object.is("span")) {
             if (typeof this.value == "string") {
                 this.object.text(this.value)
@@ -69,7 +72,7 @@ socket.on('refresh', function(msg) {
 });
 
 socket.on('sensor-list', function(msg){
-    console.log(msg)
+    //console.log(msg)
     //Define sensors
     for(var i=0; i < msg.length; i++) {
         sensors[msg[i]] = new Sensor(msg[i])

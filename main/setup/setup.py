@@ -4,12 +4,14 @@ import os
 from logging.handlers import RotatingFileHandler
 logger = logging.getLogger(__name__)
 
+## Start initial logging ##
 consoleHandler = logging.StreamHandler()
 logging.getLogger().setLevel(0)
 logging.getLogger().addHandler(consoleHandler)
 
 from setup.config_parser import config_parser
 import self_test
+import subprocess as sp
 
 def run():
     ## By the end of this function, all startup items should be done.
@@ -61,3 +63,6 @@ def start_logging():
 
 def start_network():
     pass
+    
+def check_links():
+    sp.run()
