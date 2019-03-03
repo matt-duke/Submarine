@@ -22,7 +22,7 @@ class Server:
         self.video_save_path = Path(common.config['PATHS']['VideoSavePath'])
         self.tile_save_path = Path(common.config['PATHS']['TileSavePath'])
         self.app = Flask(__name__, static_folder='static')  
-        self.app.host = common.config['SERVER']['ServerIp']
+        self.app.host = 'localhost'
         self.app.port = common.config['SERVER']['ServerPort']
         self.app.config['SECRET_KEY'] = 'secret!'
         self.map = server.Map(self)

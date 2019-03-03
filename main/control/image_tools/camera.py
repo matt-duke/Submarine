@@ -2,12 +2,12 @@ import io
 import time as tm
 import os
 import piexif
+import common
 try:
     import picamera
 except:
     pass
-import common
-from utility.image_tools.base_camera import BaseCamera
+from control.image_tools.base_camera import BaseCamera
     
 import logging
 logger = logging.getLogger(__name__)

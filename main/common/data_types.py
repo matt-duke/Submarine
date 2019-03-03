@@ -17,7 +17,7 @@ class OpMode(Enum):
 
             
 class Sensor:
-    timeout = 5
+    timeout = 30
     def __init__(self, name, type, logger, check_valid):
         self.logger = logger
         self.value = None
@@ -28,35 +28,30 @@ class Sensor:
         self.check_valid = check_valid
         
     def write(self, val):
-        try:
-            self.value = self.type(val)
-            self.valid = True
-            self.logger.debug('Writing value {}:{}'.format(self.name, val))
-        except Exception as e:
-            self.valid = False
-            self.logger.error(e)
+        self.logger.debug('Writing value {}:{}'.format(self.name, val))
+        self.value = self.type(val)
         self.timestamp = time()
+        self.valid = True
         return self.valid
         
-    def read(self, do_not_update=False):
-        if not do_not_update and (time()-self.timestamp) > Sensor.timeout and self.check_valid:
+    def read(self):           
+        if all([((time()-self.timestamp) > Sensor.timeout), self.check_valid]):
             self.valid = False
-            self.logger.warning('Label validity changed to false')
+            self.logger.warning(self.name+': validity changed to false: time delta '+str(time()-self.timestamp))
         self.logger.debug('Reading value {}:{}'.format(self.name, self.value))
         return self.value
         
 class Bus(dict):
-    def __init__(self, name, config):        
+    def __init__(self, name, config, platform):        
         dict.__init__(self)
-        
         self.name = name
+        self.platform = platform
         self.logger = logging.getLogger(self.name)
         self.logger.setLevel(config['LogLevel'])
         self.enabled = config['Enabled']
         self.refresh_rate = config['RefreshRate']
         module = config['Module']
         self.thread = Thread()
-        
         try:
             class_name = "SrcClass"
             self.module = getattr(__import__(module, fromlist=[class_name]), class_name)(self)
@@ -67,7 +62,10 @@ class Bus(dict):
     
     def write(self, name, value):
         if name in self.keys():
-            self[name].write(value)
+            if not self[name].write(value):
+                self.logger.error('Error writing to '+name)
+            else:
+                pass
         else:
             self.logger.error('Sensor:{} not initialized to {}.'.format(name, self.name))
     

@@ -2,6 +2,7 @@ import sqlite3
 import platform
 import subprocess
 import logging
+import common
 
 logger = logging.getLogger(__name__)
 

@@ -11,7 +11,7 @@ logging.getLogger().addHandler(consoleHandler)
 
 from setup.config_parser import config_parser
 import self_test
-import subprocess as sp
+import platform
 
 def run():
     ## By the end of this function, all startup items should be done.
@@ -61,10 +61,3 @@ def start_logging():
     greylist = ['werkzeug', 'engineio', 'socketio']
     for name in greylist:
         logging.getLogger(name).setLevel('WARNING')
-
-
-def start_network():
-    pass
-    
-def check_links():
-    sp.run()

@@ -20,11 +20,11 @@ def socket(app):
         logger.info('Background socket stream started')
         rate = common.config.getint('SERVER', 'GuiRefresh')  
         while True:
-            for bus in common.bus:
+            for bus in common.BUS:
                 for key, sensor in bus.items():
-                    data = {'value': sensor.value,
+                    data = {'value': sensor.read(),
                             'valid': sensor.valid
-                            }
+                           }
                     socketio.emit('update', {'id': key,'data':data}, namespace = namespace)
                 #socketio.emit('update', {'id':'mode','data':common.mode.name}, namespace = namespace)
             socketio.emit('refresh', namespace=namespace)
@@ -33,7 +33,7 @@ def socket(app):
     @socketio.on('connect', namespace=namespace)
     def connect():
         logger.info('Client connected')
-        sensor_list = common.flatten([list(b.keys()) for b in common.bus])
+        sensor_list = common.flatten([list(b.keys()) for b in common.BUS])
         emit('sensor-list', sensor_list, namespace=namespace)
         global thread
         if thread == None:
