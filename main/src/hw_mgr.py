@@ -7,7 +7,7 @@ import random
 
 import common
 
-class SrcClass():
+class SrcClass(common.data_types.Bus):
     def __init__(self, bus):
         self.bus = bus
         self.logger = bus.logger

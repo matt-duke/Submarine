@@ -6,11 +6,9 @@ import shutil
 
 import common
 
-class SrcClass():
-    def __init__(self, bus):
-        self.bus = bus
-        self.logger = bus.logger
-        
+class SrcClass(common.data_types.Bus):
+    def __init__(self):
+        common.data_types.Bus.__init__()
         self.bus.add_sensor('batt_voltage', type=int, check_valid=False)
         self.bus.add_sensor('depth', type=int, check_valid=False)
         self.bus.add_sensor('pressure', type=int, check_valid=False)

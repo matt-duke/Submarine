@@ -2,6 +2,8 @@ from time import time, sleep
 from enum import Enum, auto
 import logging
 from threading import Thread
+from queue import Queue
+import common
 
 from self_test import verify_src_module
 
@@ -42,23 +44,22 @@ class Sensor:
         return self.value
         
 class Bus(dict):
-    def __init__(self, name, config, platform):        
+    def __init__(self, name, platform):        
         dict.__init__(self)
-        self.name = name
+        self.name = "Bus"
+        
         self.platform = platform
         self.logger = logging.getLogger(self.name)
-        self.logger.setLevel(config['LogLevel'])
-        self.enabled = config['Enabled']
-        self.refresh_rate = config['RefreshRate']
-        module = config['Module']
+        self.logger.setLevel(20)
+        self.enabled = True
+        self.refresh_rate = 1
         self.thread = Thread()
-        try:
-            class_name = "SrcClass"
-            self.module = getattr(__import__(module, fromlist=[class_name]), class_name)(self)
-            self.enabled = verify_src_module(self.module) and self.enabled
-        except Exception as e:
-            self.logger.error('Error importing: {}'.format(e))
-            self.enabled = False
+    
+    def setup(self):
+        return None
+    
+    def loop(self):
+        return None
     
     def write(self, name, value):
         if name in self.keys():

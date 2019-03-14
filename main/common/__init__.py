@@ -1,6 +1,7 @@
 from common.data_types import Sensor
 from common.data_types import OpMode
-from common.data_types import Bus
+
+from common import bus_mgr
 
 from common.helper import flatten, get_sensor
 
