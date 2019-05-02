@@ -1,0 +1,14 @@
+{
+  "MPC": {
+    "idle": {
+      "crc": "C5F46F08"
+    },
+    "runtime": {
+      "crc": "2E9975F7"
+    }
+  },
+  "SBC": {
+    "version": 0.1,
+    "crc": "960502BC"
+  }
+}

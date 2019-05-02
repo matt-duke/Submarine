@@ -1,1 +1,5 @@
-/main/trace.log
+*.py
+__pycache__/
+venv/
+build-mega2560/
+*.tar
