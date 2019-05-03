@@ -7,7 +7,7 @@ try:
     import picamera
 except:
     pass
-from control.image_tools.base_camera import BaseCamera
+from .base_camera import BaseCamera
     
 import logging
 logger = logging.getLogger(__name__)

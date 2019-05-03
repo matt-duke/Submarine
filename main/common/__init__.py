@@ -1,22 +1,16 @@
-from common.data_types import Sensor
-from common.data_types import OpMode
-
-from common import bus_mgr
-
+from common import data_types
 from common.helper import flatten, get_sensor
 
-from common import sql
 
-## Common variables
-BUS = []
-MODE = OpMode.none
-config = {}
-PLATFORM = None
+## Managers
+from common.BusManager import BusManager
+BusManager = BusManager()
 
-#log level dictionary corresposding to logging.DEBUG to logging.CRITIAL levels
+
+#Shared/common variables
 log_dict = {"DEBUG": 10,
             "INFO": 20,
             "WARNING": 30,
             "ERROR": 40,
             "CRITICAL": 50}
-        
+OpMode = None

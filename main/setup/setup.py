@@ -12,19 +12,21 @@ logging.getLogger().addHandler(consoleHandler)
 from setup.config_parser import config_parser
 import self_test
 import platform
+from common.data_types import OpMode
 
 def run():
     ## By the end of this function, all startup items should be done.
     ## Includes initializing sensors, parsing config file(s), network details, tests, etc.
-    common.MODE = common.OpMode.startup
+    common.MODE = OpMode.startup
     common.PLATFORM = platform.system()
-    
-    self_test.run_post()
     
     common.config = config_parser('config.ini')
     self_test.verify_config_file(common.config)
     
     start_logging()
+    common.BusManager.add_interfaces()
+    self_test.post.run()
+    #common.test_interfaces()
     
 def start_logging():
     rootLogger = logging.getLogger()
@@ -58,6 +60,6 @@ def start_logging():
     consoleHandler.setLevel(common.log_dict[common.config['LOGGER']['StreamLogLevel']])
     rootLogger.addHandler(consoleHandler)
     
-    greylist = ['werkzeug', 'engineio', 'socketio']
+    greylist = ['werkzeug', 'engineio', 'socketio', 'transitions']
     for name in greylist:
         logging.getLogger(name).setLevel('WARNING')

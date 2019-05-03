@@ -1,4 +1,3 @@
-from self_test.verify_src_module import verify_src_module
 from self_test.verify_config_file import verify_config_file
 
-from self_test.post import run_post
+import self_test.post as post
