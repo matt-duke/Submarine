@@ -1,0 +1,1 @@
+from .main import NetController as main
