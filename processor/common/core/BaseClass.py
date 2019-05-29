@@ -1,6 +1,7 @@
 from threading import Thread, Event
 from queue import Queue
-import subprocess as sp
+import subprocess
+from subprocess import PIPE
 import platform
 import logging
 
@@ -67,10 +68,11 @@ class BaseClass:
             self.closeThread(block)
             
     def systemCall(self, cmd):
-        CmpPr = subprocess.run(cmd, capture_output=True)
+        #CmpPr = subprocess.run(cmd, capture_output=True) -not compatible with Python3.5
+        CmpPr = subprocess.run(cmd, stdout=PIPE, stderr=PIPE)
         self.logger.debug(CmpPr.stdout)
         if CmpPr.returncode > 0:
-            self.logger.error('Non-zero return code in systemCall. stderr: {}'.format(Cmp.stderr))
-            return False
+            self.logger.error('Non-zero return code in systemCall. stderr: {}'.format(CmpPr.stderr))
+            return CmpPr.returncode
         else:
-            return True
+            return CmpPr.returncode

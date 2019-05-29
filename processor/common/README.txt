@@ -7,3 +7,5 @@ In the python start sequence:
     import os
     from os import path
     sys.path.append(path.abspath(path.join(os.getcwd(),'../..','common')))
+
+Dataload build sequence should bundle these folders into application folder

@@ -39,11 +39,9 @@ class OpModeMachine(core.BaseClass):
     def boot_complete(self): return self.post and self.calibrated
     
     def on_enter_setup(self):
-        self.logger.info('Entering '+self.state)
         core.BaseClass.MpcController.setup()
     
     def on_enter_post(self):
-        self.logger.info('Entering '+self.state)
         self.post = core.BaseClass.MpcController.POST.start(minimal=self.post)
         if self.post:
             self.logger.info('POST finished successfully')
@@ -52,10 +50,9 @@ class OpModeMachine(core.BaseClass):
             self.toCritical()
     
     def on_enter_test(self):
-        self.logger.info('Entering '+self.state)
+        pass
     
     def on_enter_normal(self):
-        self.logger.info('Entering '+self.state)
         core.BaseClass.HardwareController.monitor()
         common.CDS.start_logging()
     

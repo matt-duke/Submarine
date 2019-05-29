@@ -14,7 +14,7 @@ class PostClass(core.BaseClass):
         return result
         
     def _disk_test(self):
-        if not common.CDS.read('platform') == 'Linux':
+        if not common.platform == 'Linux':
             self.logger.warning('Disk test: platform not supported')
             return True
             
@@ -27,7 +27,7 @@ class PostClass(core.BaseClass):
                        32: 'Fsck canceled by user request',
                        128: 'Shared library error' }
                        
-        return_code = subprocesses.call('fsck -T', shell=True)
+        return_code = self.systemCall(['fsck', '-M'])
         
         if return_code == 0:
             self.logger.info(result_map[return_code])
@@ -43,8 +43,8 @@ class PostClass(core.BaseClass):
     def _file_check(self):
         result = True
         for key, item in common.Paths.items():
-            if not os.path.exists(item):
-                self.logger.critical('File does not exist: {}'.format(item))
+            if not os.path.exists(item[0]) and item[1]:
+                self.logger.critical('File does not exist: {}'.format(item[1]))
                 result &= False
         return result
         

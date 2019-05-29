@@ -4,3 +4,4 @@ win_env/
 venv/
 build-mega2560/
 *.tar
+*.log

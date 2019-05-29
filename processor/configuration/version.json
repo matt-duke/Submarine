@@ -1,27 +1,20 @@
 {
-    "MCU": {
-        "name": "Microcontroller Unit",
-        "idle": {
-            "crc": "C5F46F08"
-        },
-        "runtime": {
-            "crc": "2E9975F7"
-        }
+  "MPC": {
+    "idle": {
+      "crc": "C5F46F08"
     },
-    "MPC": {
-        "name":"Main Processor Card",
-        "image": {
-            "version": 0.1,
-            "crc": "A803CB0A"
-        },
-        "uboot": {
-            "version": 0.1,
-            "crc": "ABC111"
-        }
-    },
-    "APC": {
-        "name": "Auxillary Processor Card",
-        "version":0.1,
-        "crc":"ABCEF"
+    "runtime": {
+      "crc": "2E9975F7"
     }
+  },
+  "SBC": {
+    "image": {
+      "version": 0.1,
+      "crc": "A803CB0A"
+    },
+    "uboot": {
+      "version": 0.1,
+      "crc": "ABC111"
+    }
+  }
 }

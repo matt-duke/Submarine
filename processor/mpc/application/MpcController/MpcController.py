@@ -41,11 +41,10 @@ class MpcController(core.BaseClass):
             consoleHandler.setLevel(common.config['LOGGER']['StreamLogLevel'])
             rootLogger.addHandler(consoleHandler)
             
-            greylist = ['werkzeug', 'engineio', 'socketio', 'transitions']
+            greylist = ['werkzeug', 'engineio', 'socketio']
             for name in greylist:
                 logging.getLogger(name).setLevel('WARNING')
     
-            
         __import_config()
         __configureRootLogger()
         

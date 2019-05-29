@@ -1,4 +1,4 @@
-#!/bin/python3
+#!/usr/bin/python3
 
 import platform
 import logging
@@ -8,9 +8,13 @@ from os.path import join
 from time import sleep
 
 ## Initial setup
-sys.path.append(os.path.abspath(join(os.getcwd(),'../..','common')))
-import common
-import core
+try:
+    import common
+    import core
+except:
+    sys.path.append(os.path.abspath(join(os.getcwd(),'../..','common')))
+    import common
+    import core
 
 import StateMachines
 from transitions.core import MachineError
@@ -18,8 +22,8 @@ from transitions.core import MachineError
     
 def add_paths():
     root = os.getcwd()
-    if common.CDS.read('platform') == 'Linux':
-        volatile = '/vol'
+    if common.platform == 'Linux':
+        volatile = '/tmp'
         config = '/configuration'
         common.Paths['DATABASE'] = '/media/data.db'
         
@@ -28,16 +32,16 @@ def add_paths():
         config = os.path.abspath(join(os.getcwd(),'../..','configuration'))
         common.Paths['DATABASE'] = join(root,'data.db')
    
-    common.Paths['DEBUG_LOG'] = join(volatile,'debug.log')
-    common.Paths['CONFIG'] = join(config, 'config.ini')
-    common.Paths['CONFIG_SCHEMA'] = join(config, 'schema.ini')
-    common.Paths['VERSION'] = join(config, 'version.json')
-    common.Paths['VOLATILE'] = volatile
+    common.Paths.critical('DEBUG_LOG', join(volatile,'debug.log'))
+    common.Paths.critical('CONFIG',join(config, 'config.ini'))
+    common.Paths.critical('CONFIG_SCHEMA',join(config, 'schema.ini'))
+    common.Paths.critical('VERSION',join(config, 'version.json'))
+    common.Paths.critical('VOLATILE',volatile)
     
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    logger=logging.getLogger(__name__)
+    logger=logging.getLogger('bootsequence')
         
     common.CDS = common.CommonDataStructure()
     common.CDS.write('platform', platform.system())
@@ -53,11 +57,13 @@ if __name__ == '__main__':
     
     while not common.OpMode.is_normal() and not common.OpMode.is_critical():
         curr_state = common.OpMode.state
+        print('loop')
         try:
             logger.info('requesting transition')
-            common.OpMode.next()
-            while common.OpMode.state == curr_state:
-                pass
+            tmp = common.OpMode.next()
         except MachineError as e:
             logger.error(e)
-            break
+        
+        while common.OpMode.state == curr_state:
+            pass
+        
