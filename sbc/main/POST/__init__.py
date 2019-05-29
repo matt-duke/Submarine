@@ -1,1 +1,0 @@
-from .POST import POST as main
