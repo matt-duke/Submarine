@@ -44,7 +44,7 @@ class PostClass(core.BaseClass):
         result = True
         for key, item in common.Paths.items():
             if not os.path.exists(item[0]) and item[1]:
-                self.logger.critical('File does not exist: {}'.format(item[1]))
+                self.logger.critical('File does not exist: {}'.format(item[0]))
                 result &= False
         return result
         

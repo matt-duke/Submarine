@@ -32,7 +32,7 @@ def add_paths():
         config = os.path.abspath(join(os.getcwd(),'../..','configuration'))
         common.Paths['DATABASE'] = join(root,'data.db')
    
-    common.Paths.critical('DEBUG_LOG', join(volatile,'debug.log'))
+    common.Paths['DEBUG_LOG'] = join(volatile,'debug.log')
     common.Paths.critical('CONFIG',join(config, 'config.ini'))
     common.Paths.critical('CONFIG_SCHEMA',join(config, 'schema.ini'))
     common.Paths.critical('VERSION',join(config, 'version.json'))
@@ -57,13 +57,12 @@ if __name__ == '__main__':
     
     while not common.OpMode.is_normal() and not common.OpMode.is_critical():
         curr_state = common.OpMode.state
-        print('loop')
         try:
             logger.info('requesting transition')
             tmp = common.OpMode.next()
         except MachineError as e:
             logger.error(e)
-        
+            
         while common.OpMode.state == curr_state:
             pass
         

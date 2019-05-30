@@ -1,6 +1,7 @@
 import common
 import core
 
+import os
 from time import sleep
 import random
 
@@ -12,7 +13,7 @@ class HardwareController(core.BaseClass):
         core.BaseClass.__init__(self)
         self.Light = HardwareObjects.Light()
         self.Fan = HardwareObjects.Fan()
-        self.Mcu = Mcu.McuClass()
+        self.Mcu = Mcu.McuClass('/dev/ttyACM0')
         
     def monitor(self):
         def run():
@@ -25,3 +26,11 @@ class HardwareController(core.BaseClass):
             common.CDS.get('cpu_temp').write(random.randrange(25, 40))
             
         self.addThread('hwctrl_monitor',run,sleep=2).start()
+        
+    def update_mcu(self, dir):
+        if common.testmode:
+            logger.warning('Unable to flash MCU in testmode')
+            return
+            
+        dir='/tmp/update/build-mega2560'
+        self.Mcu.upload(os.path.join(dir, 'update.hex'))

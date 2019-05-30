@@ -22,9 +22,9 @@ class OpModeMachine(core.BaseClass):
         
         self.machine.add_transition('toCritical', source='*', dest='critical')
         
-        self.machine.add_transition('next', source='initial', dest='post')
-        self.machine.add_transition('next', source='post', dest='setup')
-        self.machine.add_transition('next', source='setup', dest='test')
+        self.machine.add_transition('next', source='initial', dest='setup', conditions=['setup_test'])
+        self.machine.add_transition('next', source='setup', dest='post')
+        self.machine.add_transition('next', source='post', dest='test')
         self.machine.add_transition('next', source='test', dest='normal', conditions=['boot_complete'])
     
         import MpcController
@@ -38,11 +38,14 @@ class OpModeMachine(core.BaseClass):
     
     def boot_complete(self): return self.post and self.calibrated
     
+    def setup_test(self): return core.BaseClass.MpcController.POST.start(minimal=True)
+    
     def on_enter_setup(self):
         core.BaseClass.MpcController.setup()
+        core.BaseClass.HardwareController.Mcu.open_serial()
     
     def on_enter_post(self):
-        self.post = core.BaseClass.MpcController.POST.start(minimal=self.post)
+        self.post = core.BaseClass.MpcController.POST.start(minimal=True)
         if self.post:
             self.logger.info('POST finished successfully')
         else:
@@ -51,6 +54,9 @@ class OpModeMachine(core.BaseClass):
     
     def on_enter_test(self):
         pass
+    
+    def on_enter_upgrade(self):
+        self.HardwareController.update_mcu('')
     
     def on_enter_normal(self):
         core.BaseClass.HardwareController.monitor()

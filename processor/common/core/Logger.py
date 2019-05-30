@@ -12,10 +12,10 @@ BOLD_SEQ = "\033[1m"
 
 COLORS = {
     'WARNING': YELLOW,
-    'INFO': WHITE,
+    'INFO': GREEN,
     'DEBUG': BLUE,
-    'CRITICAL': YELLOW,
-    'ERROR': RED
+    'CRITICAL': RED,
+    'ERROR': WHITE
 }
 
 class ColoredFormatter(logging.Formatter):

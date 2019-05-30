@@ -11,6 +11,8 @@ Includes the ability to update and flash the chip from serial USB
 
 LINKS:
 https://github.com/araffin/arduino-robust-serial
+http://www.raspberryvi.org/stories/arduino-cli.html
+https://www.avrfreaks.net/forum/avrdude-reset-command
 '''
 
 class serial:
@@ -18,33 +20,57 @@ class serial:
         def __init__(self, port, baudrate, timeout, writeTimeout):
             core.BaseClass.__init__(self)
             self.logger.info('Starting simulated serial object')
+            self.is_open = True
             
         def close(self):
             self.logger.info('Closing serial simulator')
+            self.is_open = False
 
 class McuClass(core.BaseClass):
-    def __init__(self):
+    def __init__(self, port):
         core.BaseClass.__init__(self)
-        self.test = common.CDS.get('testmode')
         self.serial = None
-    
-    def open_serial(self, port, baudrate=115200, timeout=0, write_timeout=0):
-        if not self.test:
+        self.port = port
+        
+        if not common.testmode:
             import serial
-        self.serial = serial.Serial(port=port, baudrate=baudrate, timeout=timeout, writeTimeout=write_timeout)
+            
+        self.serial = serial.Serial()
+        self.serialReadThread = self.addThread('serialRead', self.serialRead, loop=True, sleep=0.1)
+    
+    def open_serial(self, baudrate=115200, timeout=0, write_timeout=0):
+        try:
+            self.serial.port = self.port
+            self.serial.baudrate = baudrate
+            self.serial.timeout = timeout
+            self.serial.write_timeout = write_timeout
+            self.serial.open()
+            self.serialReadThread.start()
+        except:
+            self.logger.critical('MCU not detected on {}'.format(self.port))
+    
+    @staticmethod
+    def serialRead(self, threadSelf):
+        if self.serial.is_open:
+            buffer = self.serial.readline()
+            if buffer != b'':
+                self.logger.info(buffer)
         
     def close_serial(self):
-        if self.serial != None:
+        self.serialReadThread.lock.acquire()
+        if self.serial.is_open:
             self.serial.close()
-            self.serial = None
 
     def upload(self, hexFile):
+        self.close_serial()
         if self.fileExists(hexFile):
-            if self.systemCall(['']):
-                return True
-        return False
-        
-
+            cmd = r'/usr/share/arduino/hardware/tools/avr/../avrdude -q -V -p atmega2560 -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf -D -c wiring -b 115200 -P {0} -U flash:w:{1}:i'.format(self.port, hexFile)
+            if not self.systemCall(cmd.split(' ')):
+                raise Exception('ArduinoError')
+    
+    def reset(self):
+        self.close_serial()
+        self.open_serial()
 
 class MsgClass(Enum):
     HELLO = 0
