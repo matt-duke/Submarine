@@ -62,7 +62,6 @@ if __name__ == '__main__':
             tmp = common.OpMode.next()
         except MachineError as e:
             logger.error(e)
-            
         while common.OpMode.state == curr_state:
             pass
         

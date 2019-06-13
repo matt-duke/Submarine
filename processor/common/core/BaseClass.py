@@ -1,4 +1,4 @@
-from threading import Thread, Event, Lock
+from threading import Thread, Event, RLock
 from queue import Queue
 import subprocess
 from subprocess import PIPE
@@ -11,39 +11,52 @@ import time
 import common
 
 
+
 class BaseThread(Thread):
-    def __init__(self, BaseClassSelf, name, fnc, args, sleep, loop):
+    def __init__(self, BaseSelf, name, fnc, args):
         Thread.__init__(self)
         self.name = name
         self.fnc = fnc
         self.args = args
-        self.logger = BaseClassSelf.logger
-        self.BaseClassSelf = BaseClassSelf
-        self.sleep = sleep
+        self.logger = BaseSelf.logger
+        self.BaseSelf = BaseSelf
         self.kill_event = Event()
-        self.output_queue = Queue(maxsize=1)
-        self.loop = loop
-        self.lock = Lock()
+        self.output = Queue(maxsize=1)
     
-    def kill(self):
+    def kill(self, block=True):
         self.kill_event.set()
+        if block:
+            self.wait()
     
-    def start(self):
-        Thread.start(self)
-        return self
+    def wait(self, timeout=10):
+        self.kill_event.wait(timeout)
+        while self.isAlive():
+            pass
+    
+    def setup(self):
+        #overwite function to add setup actions
+        self.logger.info('Starting thread '+self.name)
+    
+    def start(self, sleep=0, loop=False):
+        self.loop = loop
+        self.sleep = sleep
+        try:
+            self.setup()
+            Thread.start(self)
+        except Exception as e:
+            self.logger.critical('Exception starting thread {}: {}'.format(self.name, e))
     
     def run(self):
-        self.logger.info('Starting thread '+self.name)
-        output = None
+        out = None
         while True:
             if self.kill_event.is_set():
                 self.logger.warning('Killing thread '+self.name)
                 break
             else:
                 try:
-                    self.lock.acquire()
-                    output = self.fnc(*(self.BaseClassSelf, self)+self.args)
-                    self.lock.release()
+                    self.BaseSelf.lock.acquire()
+                    out = self.fnc(*(self.BaseSelf, self)+self.args)
+                    self.BaseSelf.lock.release()
                 except Exception as e:
                     self.logger.critical('Thread {} crash: {}'.format(self.name, e))
                     self.kill_event.set()
@@ -51,53 +64,40 @@ class BaseThread(Thread):
             if not self.loop:
                 break
             time.sleep(self.sleep)
-        self.output_queue.put(output)
+            
+        self.output.put(out)
+        self.logger.debug('Thread ending '+self.name)
 
 
 class BaseClass:
+    class ThreadManager(dict):
+        def __init__(self, BaseSelf):
+            dict.__init__(self)
+            self.BaseSelf=BaseSelf
+        
+        def add(self, name, fnc, args=()):
+            thread = BaseThread(self.BaseSelf, name=name, fnc=fnc, args=args)
+            i = 0
+            for key in self.keys():
+                if name == key:
+                    i+=1
+            if i > 0:
+                name = '{}_{}'.format(name, i)
+            self[name] = thread
+            return thread
+    
+        def killAll(self, block=True):  
+            for key, thread in self.items():
+                thread.kill()
+                if block:
+                    thread.wait()
+                
     def __init__(self):
         self.threads = dict()
         self.name = self.__class__.__name__
         self.logger = logging.getLogger(self.name)
-        
-    def addThread(self, name, fnc, args=(), loop=False, sleep=1):
-        thread = BaseThread(self, name=name, fnc=fnc, args=args, loop=loop, sleep=sleep)
-        i = 0
-        for key in self.threads.keys():
-            if name == key:
-                i+=1
-        if i > 0:
-            name = '{}_{}'.format(name, i)
-        self.threads[name] = thread
-        return thread
-        
-    def closeThread(self, key, block=True):
-        if key in self.threads.keys():
-            self.thread[key].kill()
-            while self.thread[key].isAlive():
-                pass
-            del self.thread[key]
-            self.logger.info('Thread killed: '+key)
-        else:
-            self.logger.error('Thread '+key+' not found')
-            
-    def waitForThread(self, thread, timeout=60):
-        if type(thread) == str:
-            if thread in self.threads.key():
-                thread = self.threads[thread]
-            else:
-                self.logger.error('Thread "{}" does not exist')
-                return
-        elif type(thread) != BaseThread:
-            output = self.logger.error('Thread type must be BaseThread')
-            return
-            
-        while thread.is_alive():
-            pass
-            
-        output = thread.output_queue.get(block=True, timeout=None)
-        del self.threads[thread.name]
-        return output
+        self.lock = RLock()
+        self.threads = self.ThreadManager(self)
         
     def fileExists(self, path):
         if not os.path.exists(path):
@@ -105,13 +105,10 @@ class BaseClass:
             return False
         return True
     
-    def closeAllThreads(self, block=True):
-        for key, thread in self.threads.items():
-            self.closeThread(block)
             
-    def systemCall(self, cmd, blocking=True):
+    def systemCall(self, cmd, block=True):
         # non-blocking runs in thread
-        
+
         self.logger.debug('Running command: '+ ''.join(cmd))
         def __run(self, threadSelf):
             CmpPr = subprocess.run(cmd, stdout=PIPE, stderr=PIPE)
@@ -123,6 +120,9 @@ class BaseClass:
                 
             return CmpPr.returncode
         
-        thread = self.addThread('nb_systemCall', __run).start()
-        if blocking:
-            return self.waitForThread(thread)
+        thread = self.threads.add('nb_systemCall', __run)
+        thread.start()
+        if block:
+            thread.wait()
+        return thread.output.get()
+        

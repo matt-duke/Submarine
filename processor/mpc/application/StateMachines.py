@@ -21,6 +21,7 @@ class OpModeMachine(core.BaseClass):
         self.machine = Machine(self, states=OpModeMachine.states, queued=True)
         
         self.machine.add_transition('toCritical', source='*', dest='critical')
+        self.machine.add_transition('toUpgrade', source='normal', dest='upgrade')
         
         self.machine.add_transition('next', source='initial', dest='setup', conditions=['setup_test'])
         self.machine.add_transition('next', source='setup', dest='post')
@@ -28,24 +29,24 @@ class OpModeMachine(core.BaseClass):
         self.machine.add_transition('next', source='test', dest='normal', conditions=['boot_complete'])
     
         import MpcController
-        core.BaseClass.MpcController = MpcController.main()
+        common.MpcController = MpcController.main()
         import NetController
-        core.BaseClass.NetController = NetController.main()
+        common.NetController = NetController.main()
         import HardwareController
-        core.BaseClass.HardwareController = HardwareController.main()
+        common.HardwareController = HardwareController.main()
         import MotionController
-        core.BaseClass.MotionController = MotionController.main()
+        common.MotionController = MotionController.main()
     
     def boot_complete(self): return self.post and self.calibrated
     
-    def setup_test(self): return core.BaseClass.MpcController.POST.start(minimal=True)
+    def setup_test(self): return common.MpcController.POST.start(minimal=True)
     
     def on_enter_setup(self):
-        core.BaseClass.MpcController.setup()
-        core.BaseClass.HardwareController.Mcu.open_serial()
+        common.MpcController.setup()
+        common.HardwareController.Mcu.connect()
     
     def on_enter_post(self):
-        self.post = core.BaseClass.MpcController.POST.start(minimal=True)
+        self.post = common.MpcController.POST.start(minimal=True)
         if self.post:
             self.logger.info('POST finished successfully')
         else:
@@ -59,7 +60,7 @@ class OpModeMachine(core.BaseClass):
         self.HardwareController.update_mcu('')
     
     def on_enter_normal(self):
-        core.BaseClass.HardwareController.monitor()
+        common.HardwareController.monitor()
         common.CDS.start_logging()
     
     def on_enter_critical(self):
