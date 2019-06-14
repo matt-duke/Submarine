@@ -1,4 +1,5 @@
 from transitions import Machine, State
+from threading import Event
 
 import common
 import core
@@ -14,14 +15,17 @@ class OpModeMachine(core.BaseClass):
     
     calibrated = False
     post = False
+    ready = Event()
     
     def __init__(self):
         core.BaseClass.__init__(self)
     
-        self.machine = Machine(self, states=OpModeMachine.states, queued=True)
+        self.machine = Machine(self, states=OpModeMachine.states, queued=True, 
+                               before_state_change=self.ready.clear(),
+                               after_state_change=self.ready.set())
         
-        self.machine.add_transition('toCritical', source='*', dest='critical')
-        self.machine.add_transition('toUpgrade', source='normal', dest='upgrade')
+        self.machine.add_transition('to_critical', source='*', dest='critical')
+        self.machine.add_transition('to_upgrade', source='normal', dest='upgrade')
         
         self.machine.add_transition('next', source='initial', dest='setup', conditions=['setup_test'])
         self.machine.add_transition('next', source='setup', dest='post')
@@ -37,7 +41,11 @@ class OpModeMachine(core.BaseClass):
         import MotionController
         common.MotionController = MotionController.main()
     
-    def boot_complete(self): return self.post and self.calibrated
+    def boot_complete(self):
+        resp = self.post and self.calibrated
+        if not resp:
+            self.ready.clear()
+        return resp
     
     def setup_test(self): return common.MpcController.POST.start(minimal=True)
     
@@ -47,17 +55,22 @@ class OpModeMachine(core.BaseClass):
     
     def on_enter_post(self):
         self.post = common.MpcController.POST.start(minimal=True)
+        self.post &= common.HardwareController.mcu_test()
         if self.post:
             self.logger.info('POST finished successfully')
         else:
             self.logger.critical('POST failed.')
-            self.toCritical()
+            self.to_critical()
     
     def on_enter_test(self):
         pass
     
+    def on_exit_test(self):
+        self.machine.to_upgrade()
+    
     def on_enter_upgrade(self):
-        self.HardwareController.update_mcu('')
+        self.MpcController.os_update()
+        #self.HardwareController.update_mcu('')
     
     def on_enter_normal(self):
         common.HardwareController.monitor()

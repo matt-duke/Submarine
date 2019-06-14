@@ -56,12 +56,10 @@ if __name__ == '__main__':
     common.Active = StateMachines.ActiveMachine()
     
     while not common.OpMode.is_normal() and not common.OpMode.is_critical():
-        curr_state = common.OpMode.state
         try:
             logger.info('requesting transition')
-            tmp = common.OpMode.next()
+            common.OpMode.next()
         except MachineError as e:
             logger.error(e)
-        while common.OpMode.state == curr_state:
-            pass
+        common.OpMode.ready.wait()
         

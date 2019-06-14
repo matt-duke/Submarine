@@ -5,11 +5,12 @@ from subprocess import PIPE
 import platform
 import logging
 import os
+import types
+import traceback
 
 
 import time
 import common
-
 
 
 class BaseThread(Thread):
@@ -18,6 +19,8 @@ class BaseThread(Thread):
         self.name = name
         self.fnc = fnc
         self.args = args
+        #change later?
+        self.daemon = True
         self.logger = BaseSelf.logger
         self.BaseSelf = BaseSelf
         self.kill_event = Event()
@@ -45,6 +48,7 @@ class BaseThread(Thread):
             Thread.start(self)
         except Exception as e:
             self.logger.critical('Exception starting thread {}: {}'.format(self.name, e))
+            traceback.print_exc()
     
     def run(self):
         out = None
@@ -59,6 +63,7 @@ class BaseThread(Thread):
                     self.BaseSelf.lock.release()
                 except Exception as e:
                     self.logger.critical('Thread {} crash: {}'.format(self.name, e))
+                    traceback.print_exc()
                     self.kill_event.set()
             #quit loop if loop is not set
             if not self.loop:
@@ -68,8 +73,23 @@ class BaseThread(Thread):
         self.output.put(out)
         self.logger.debug('Thread ending '+self.name)
 
-
 class BaseClass:
+    class CustomLock:
+        def __init__(self):
+            self._lock = RLock()
+
+        def acquire(self, timeout=5):
+            self._lock.acquire(timeout)
+
+        def release(self):
+            self._lock.release()
+            
+        def __enter__(self):
+            self.acquire()
+            
+        def __exit__(self, type, value, traceback):
+            self.release()
+    
     class ThreadManager(dict):
         def __init__(self, BaseSelf):
             dict.__init__(self)
@@ -96,7 +116,7 @@ class BaseClass:
         self.threads = dict()
         self.name = self.__class__.__name__
         self.logger = logging.getLogger(self.name)
-        self.lock = RLock()
+        self.lock = self.CustomLock()
         self.threads = self.ThreadManager(self)
         
     def fileExists(self, path):
@@ -105,7 +125,15 @@ class BaseClass:
             return False
         return True
     
-            
+    def wait(self, condition, timeout=5):
+        timeout=-1 if timeout == None else timeout
+        end_time = time.time()+timeout
+        while condition() == False:
+            if time.time() > end_time and timeout>0:
+                self.logger.error('Wait timed out')
+                return False
+        return True
+    
     def systemCall(self, cmd, block=True):
         # non-blocking runs in thread
 

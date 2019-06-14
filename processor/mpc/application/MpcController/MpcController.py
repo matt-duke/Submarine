@@ -50,5 +50,7 @@ class MpcController(core.BaseClass):
         
     def update(self, file):
         pass
+        
     def os_update(self):
-        pass
+        self.systemCall('sudo apt update')
+        self.systemCall('sudo apt upgrade')
