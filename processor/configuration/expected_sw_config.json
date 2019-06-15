@@ -1,0 +1,24 @@
+{
+  "MCU": {
+    "idle": {
+      "crc": ""
+    },
+    "runtime": {
+      "crc": ""
+    }
+  },
+  "MPC": {
+    "image": {
+      "version": 0.1,
+      "crc": ""
+    },
+    "uboot": {
+      "version": 0.1,
+      "crc": ""
+    },
+    "server": {
+      "version": 0.1,
+      "crc": ""
+    }
+  }
+}
