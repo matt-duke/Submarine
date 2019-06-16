@@ -23,7 +23,13 @@ cp -r ./processor/common/* ./working/image/
 
 cp ./processor/mpc/scripts/uboot ./working/uboot
 
-image_crc=`cksum ./working/image | grep -o '^[[:digit:]]* '`
+tar -zf ./working/image.tar ./working/image
+if [$? == 0]
+then
+  rm -r ./working/image
+fi
+
+image_crc=`cksum ./working/image.tar | grep -o '^[[:digit:]]* '`
 uboot_crc=`cksum ./working/uboot | grep -o '^[[:digit:]]* '`
 mcu_update_crc = `cksum ./working/firmware/update.hex | grep -o '^[[:digit:]]* '`
 
