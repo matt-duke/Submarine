@@ -10,7 +10,7 @@ fi
 
 crc=`jq '.SBC.image.crc' /configuration/version.json | tr --delete \"`
 crc=$(( 16#$crc ))
-crc_1=`cksum /dev/mmcblk0p5 | grep -o '^[[:digit:]]* '`
+crc_1=`cksum /dev/mmcblk0p5 | grep -o '^[[:digit:]]*'`
 
 if [ $crc == $crc_1 ];then
   echo "Partiton 1 CRC check passed: $crc_1"
@@ -20,7 +20,7 @@ else
   crc_1_valid=0
 fi
 
-crc_2=`cksum /dev/mmcblk0p6 | grep -o '^[[:digit:]]* '`
+crc_2=`cksum /dev/mmcblk0p6 | grep -o '^[[:digit:]]*'`
 
 if [ $crc == $crc_2 ];then
   echo "Partiton 2 CRC check passed: $crc_2"
