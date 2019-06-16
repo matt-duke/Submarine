@@ -23,20 +23,18 @@ cp -r ./processor/common/* ./working/image/
 
 cp ./processor/mpc/scripts/uboot ./working/uboot
 
-tar -cf ./working/image.tar ./working/image/*
-if [ $? == 0 ]
-then
-  rm -r ./working/image
-fi
+tar -cf ./working/image.tar ./working/image
+cd ./working/image && tar -zcf ../image.tar . && cd - 
+cp image.tar ./working/image.tar
 
 image_crc=`cksum ./working/image.tar | grep -o '^[[:digit:]]*'`
 uboot_crc=`cksum ./working/uboot | grep -o '^[[:digit:]]*'`
 mcu_update_crc=`cksum ./working/firmware/update.hex | grep -o '^[[:digit:]]*'`
 
-jq -n 'env.pat' $sw_config > working/expected_sw_config.json
-
 pat=".MCU.update.crc=$mcu_update_crc | \
 .MPC.image.crc=$image_crc | \
 .MPC.uboot.crc=$uboot_crc"
 
-tar -czf build_$BUILD_NUMBER.tgz ./working/*
+jq -n 'env.pat' $sw_config > working/expected_sw_config.json
+
+cd ./working/ && tar -zcf ../build_$BUILD_NUMBER.tgz . && cd - 
