@@ -8,7 +8,7 @@ mkdir $WORKSPACE/working
 mkdir working/image
 mkdir working/firmware
 
-venv = $WORKSPACE/working/image/venv
+venv=$WORKSPACE/working/image/venv
 
 python3 -m pip install virtualenv 
 python3 -m virtualenv $venv
@@ -29,14 +29,17 @@ then
   rm -r ./working/image
 fi
 
-image_crc=`cksum ./working/image.tar | grep -o '^[[:digit:]]* '`
-uboot_crc=`cksum ./working/uboot | grep -o '^[[:digit:]]* '`
-mcu_update_crc = `cksum ./working/firmware/update.hex | grep -o '^[[:digit:]]* '`
+image_crc=`cksum ./working/image.tar | grep -o '^[[:digit:]]*'`
+uboot_crc=`cksum ./working/uboot | grep -o '^[[:digit:]]*'`
+mcu_update_crc=`cksum ./working/firmware/update.hex | grep -o '^[[:digit:]]*'`
 
-jq -M '. + {.MCU.update.crc:"$mcu_update_crc"'\
-   '.MPC.image.crc:"$image_crc"'\
-   '.MPC.uboot.crc:"$uboot_crc"}'\
-   $sw_config > working/expected_sw_config.json
+jq --arg image_crc "$image_crc" \
+   --arg uboot_crc "$uboot_crc" \
+   --arg mcu_update_crc "$mcu_update_crc" \
+   '.MCU.update.crc=$mcu_update_crc | \
+   .MPC.image.crc=$image_crc | \
+   .MPC.uboot.crc=$uboot_crc' \
+   $sw_config > working/expected_sw_config.json /
 
 
 tar -czf build_$BUILD_NUMBER.tar.gz ./working/*
