@@ -18,8 +18,8 @@ $venv/bin/pip install -r ./tools/build/requirements.txt
 make -C ./firmware/update
 cp ./firmware/update/build-mega2560/update.hex ./working/firmware/update.hex
 
-cp ./processor/mpc/application/* ./working/image/*
-cp ./processor/common/* ./working/image/*
+cp -r ./processor/mpc/application/* ./working/image/
+cp -r ./processor/common/* ./working/image/
 
 cp ./processor/mpc/scripts/uboot ./working/uboot
 
