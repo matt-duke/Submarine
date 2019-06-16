@@ -23,7 +23,7 @@ cp -r ./processor/common/* ./working/image/
 
 cp ./processor/mpc/scripts/uboot ./working/uboot
 
-tar -zf ./working/image.tar ./working/image
+tar -cf ./working/image.tar ./working/image/*
 if [$? == 0]
 then
   rm -r ./working/image
@@ -42,4 +42,4 @@ jq --arg image_crc "$image_crc" \
    $sw_config > working/expected_sw_config.json /
 
 
-tar -czf build_$BUILD_NUMBER.tar.gz ./working/*
+tar -czf build_$BUILD_NUMBER.tgz ./working/*
