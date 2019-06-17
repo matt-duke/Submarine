@@ -53,12 +53,12 @@ class McuClass(core.BaseClass):
     def write(self, msg):
         with self.lock:
             #if type(msg)==bytes:
-            self.logger.debug('Writing message: {}'.format(msg))
+            self.logger.debug('Writing message: {}'.format(repr(msg)))
             self.serial.write(msg)
             self.wait(self.__serial_wait_cond)
             buffer = self.serial.readline()
             filtered_buffer = bytes(buffer[0:-2])
-            self.logger.debug('Received msg: {} ({})'.format(buffer, filtered_buffer))
+            self.logger.debug('Received msg: {} ({})'.format(repr(buffer), filtered_buffer))
             return filtered_buffer
             #else:
              #   self.logger.error('Invalid message {}'.format(msg))
@@ -85,12 +85,12 @@ class McuClass(core.BaseClass):
         self.serial.close()
         self.lock.release()
 
-    def upload(self, hexFile):
+    def __upload(self, hexFile):
         self._close_serial()
         if self.fileExists(hexFile):
             self.logger.debug('Flashing atmega2560...')
             cmd = r'/usr/share/arduino/hardware/tools/avr/../avrdude -q -V -p atmega2560 -C /usr/share/arduino/hardware/tools/avr/../avrdude.conf -D -c wiring -b 115200 -P {0} -U flash:w:{1}:i'.format(self.port, hexFile)
-            if not self.systemCall(cmd.split(' ')):
+            if not self.systemCall(cmd):
                 raise Exception('ArduinoError')
     
     def reset(self):

@@ -15,10 +15,10 @@ class HardwareController(core.BaseClass):
         self.Mcu = Mcu.McuClass('/dev/ttyACM0')
     
     def monitor(self):
-        def __run():
+        def __run(self, thredSelf):
             pass
 
-        #self.threads.add('hwctrl_monitor',__run, sleep=2, loop=True).start()
+        self.threads.add('hwctrl_monitor',__run).start(loop=True, sleep=1)
         
     def update_sensors(self):
         def __run():
@@ -30,12 +30,13 @@ class HardwareController(core.BaseClass):
         if common.testmode:
             logger.warning('Unable to flash MCU in testmode')
             return
-            
-        dir='/tmp/update/build-mega2560'
-        self.Mcu.upload(os.path.join(dir, 'update.hex'))
+        if self.pathExists(dir):
+            self.Mcu.__upload(os.path.join(dir, 'update.hex'))
+        else:
+            self.logger.error('Upload failed')
         
     def mcu_test(self):
         self.Mcu.connect()
-        msg = b'\x00\x00\x00\x00'
+        msg = b'\1'
         resp = self.Mcu.write(msg)
-        return resp == msg
+        return resp == b'1'

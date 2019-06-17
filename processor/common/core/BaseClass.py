@@ -1,17 +1,33 @@
 from threading import Thread, Event, RLock
 from queue import Queue
-import subprocess
-from subprocess import PIPE
 import platform
 import logging
 import os
 import types
 import traceback
-
+import subprocess
 
 import time
 import common
 
+from . import ProxyServer
+        
+        
+class CustomLock:
+    def __init__(self):
+        self._lock = RLock()
+
+    def acquire(self, timeout=5):
+        self._lock.acquire(timeout)
+
+    def release(self):
+        self._lock.release()
+        
+    def __enter__(self):
+        self.acquire()
+        
+    def __exit__(self, type, value, traceback):
+        self.release()
 
 class BaseThread(Thread):
     def __init__(self, BaseSelf, name, fnc, args):
@@ -21,6 +37,7 @@ class BaseThread(Thread):
         self.args = args
         #change later?
         self.daemon = True
+        #print(type(BaseSelf.logger))
         self.logger = BaseSelf.logger
         self.BaseSelf = BaseSelf
         self.kill_event = Event()
@@ -40,9 +57,10 @@ class BaseThread(Thread):
         #overwite function to add setup actions
         self.logger.info('Starting thread '+self.name)
     
-    def start(self, sleep=0, loop=False):
+    def start(self, sleep=0, loop=False, timeout=100):
         self.loop = loop
         self.sleep = sleep
+        self.timeout = timeout+time.time()
         try:
             self.setup()
             Thread.start(self)
@@ -65,7 +83,7 @@ class BaseThread(Thread):
                     self.logger.critical('Thread {} crash: {}'.format(self.name, e))
                     traceback.print_exc()
                     self.kill_event.set()
-            #quit loop if loop is not set
+            #quit loop if loop flag is not set
             if not self.loop:
                 break
             time.sleep(self.sleep)
@@ -73,57 +91,46 @@ class BaseThread(Thread):
         self.output.put(out)
         self.logger.debug('Thread ending '+self.name)
 
+class ThreadManager(dict):
+    def __init__(self, BaseSelf):
+        if 'name' not in dir(BaseSelf):
+            BaseSelf.name = 'undefined_thread_mgr'
+        dict.__init__(self)
+        self.BaseSelf=BaseSelf
+ 
+    def add(self, name, fnc, args=()):
+        thread = BaseThread(self.BaseSelf, name=name, fnc=fnc, args=args)
+        i = 0
+        for key in self.keys():
+            if name == key:
+                i+=1
+        if i > 0:
+            name = '{}_{}'.format(name, i)
+        self[name] = thread
+        return thread
+
+    def killAll(self, block=True):  
+        for key, thread in self.items():
+            thread.kill()
+            if block:
+                thread.wait()
+
 class BaseClass:
-    class CustomLock:
-        def __init__(self):
-            self._lock = RLock()
-
-        def acquire(self, timeout=5):
-            self._lock.acquire(timeout)
-
-        def release(self):
-            self._lock.release()
-            
-        def __enter__(self):
-            self.acquire()
-            
-        def __exit__(self, type, value, traceback):
-            self.release()
-    
-    class ThreadManager(dict):
-        def __init__(self, BaseSelf):
-            dict.__init__(self)
-            self.BaseSelf=BaseSelf
-        
-        def add(self, name, fnc, args=()):
-            thread = BaseThread(self.BaseSelf, name=name, fnc=fnc, args=args)
-            i = 0
-            for key in self.keys():
-                if name == key:
-                    i+=1
-            if i > 0:
-                name = '{}_{}'.format(name, i)
-            self[name] = thread
-            return thread
-    
-        def killAll(self, block=True):  
-            for key, thread in self.items():
-                thread.kill()
-                if block:
-                    thread.wait()
-                
     def __init__(self):
         self.threads = dict()
         self.name = self.__class__.__name__
         self.logger = logging.getLogger(self.name)
-        self.lock = self.CustomLock()
-        self.threads = self.ThreadManager(self)
+        self.lock = CustomLock()
+        self.threads = ThreadManager(self)
         
     def fileExists(self, path):
         if not os.path.exists(path):
             self.logger('File does not exist: {}'.format(path))
             return False
         return True
+    
+    def wan(self):
+        return self.systemCall('ping 8.8.8.8 -c 1') == 0
     
     def wait(self, condition, timeout=5):
         timeout=-1 if timeout == None else timeout
@@ -138,8 +145,10 @@ class BaseClass:
         # non-blocking runs in thread
 
         self.logger.debug('Running command: '+ ''.join(cmd))
-        def __run(self, threadSelf):
-            CmpPr = subprocess.run(cmd, stdout=PIPE, stderr=PIPE)
+        if type(cmd) == str:
+            cmd = cmd.split(' ')
+        def __run(self, threadSelf, cmd):
+            CmpPr = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             self.logger.debug(CmpPr.stdout)
             if CmpPr.returncode == 0:
                 self.logger.debug(CmpPr.stderr)
@@ -148,9 +157,8 @@ class BaseClass:
                 
             return CmpPr.returncode
         
-        thread = self.threads.add('nb_systemCall', __run)
+        thread = self.threads.add('nb_systemCall', __run, (cmd,))
         thread.start()
         if block:
             thread.wait()
         return thread.output.get()
-        

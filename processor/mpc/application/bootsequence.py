@@ -26,16 +26,19 @@ def add_paths():
         volatile = '/tmp'
         config = '/configuration'
         common.Paths['DATABASE'] = '/media/data.db'
+        base = '/'
         
     else:
         volatile = root
         config = os.path.abspath(join(os.getcwd(),'../..','configuration'))
         common.Paths['DATABASE'] = join(root,'data.db')
+        base = root
    
     common.Paths['DEBUG_LOG'] = join(volatile,'debug.log')
     common.Paths.critical('CONFIG',join(config, 'config.ini'))
     common.Paths.critical('CONFIG_SCHEMA',join(config, 'schema.ini'))
-    common.Paths.critical('VERSION',join(config, 'version.json'))
+    common.Paths.critical('VERSION',join(config, 'expected_sw_config.json'))
+    common.Paths.critical('UBOOT',join(base, 'uboot'))
     common.Paths.critical('VOLATILE',volatile)
     
 
@@ -43,14 +46,17 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     logger=logging.getLogger('bootsequence')
         
-    common.CDS = common.CommonDataStructure()
-    common.CDS.write('platform', platform.system())
+    common.CvtManager = common.CvtManager()
+    common.CVT = common.CvtManager.cvt
+    common.CVT.platform = platform.system()
     common.platform = platform.system()
-    common.CDS.write('testmode', {'Linux':False, 'Windows':True}[common.CDS.read('platform')])
-    common.testmode = common.CDS.read('testmode')
+    common.CVT.testmode = {'Linux':False, 'Windows':True}[common.CVT.platform]
+    common.testmode = common.CVT.testmode
     
     common.Paths = common.Paths()
     add_paths()
+    
+    #common.ModuleServer = common.ModuleServer()
     
     common.OpMode = StateMachines.OpModeMachine()
     common.Active = StateMachines.ActiveMachine()
@@ -62,4 +68,7 @@ if __name__ == '__main__':
         except MachineError as e:
             logger.error(e)
         common.OpMode.ready.wait()
+        
+    while True:
+        pass
         

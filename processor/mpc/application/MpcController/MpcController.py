@@ -3,6 +3,9 @@ import os
 from os.path import join
 import logging
 from logging.handlers import RotatingFileHandler
+import tarfile
+
+import multiprocessing
 
 import common
 import core
@@ -47,10 +50,22 @@ class MpcController(core.BaseClass):
     
         __import_config()
         __configureRootLogger()
-        
+    
     def update(self, file):
-        pass
+        if not self.fileExists(file):
+            self.logger.warning('Update failed')
+            return False
+        try:
+            tarfile.TarFile.open(file)
+            tarfile.extract('expected_sw_config.json', common.Paths['VERSION'])
+            tarfile.extract('uboot', common.Paths['UBOOT'])
+        except Exception as e:
+            self.logger.error(e)
         
     def os_update(self):
-        self.systemCall('sudo apt update')
-        self.systemCall('sudo apt upgrade')
+        if self.wan(): 
+            self.systemCall('sudo apt update -y')
+            self.systemCall('sudo apt upgrade -y')
+            self.systemCall('sudo apt autoremove -y')
+        else:
+            self.logger.error('WAN not connected')
