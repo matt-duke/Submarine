@@ -7,18 +7,19 @@ sw_config=$WORKSPACE/processor/configuration/expected_sw_config.json
 mkdir $WORKSPACE/image
 mkdir $WORKSPACE/firmware
 
-venv=$WORKSPACE/image/venv
+image=$WORKSPACE/image/image.pex
 
-python3 -m pip install virtualenv 
-python3 -m virtualenv $venv
-$venv/bin/pip install -r ./tools/build/requirements.txt
+python3 -m pip install pex
 
 #make -C ./firmware/runtime/runtime.ino
 make -C ./firmware/update
 cp ./firmware/update/build-mega2560/update.hex ./firmware/update.hex
 
-cp -r ./processor/mpc/application/* ./image/
-cp -r ./processor/common/* ./image/
+#cp -r ./processor/mpc/application/* ./image/
+#cp -r ./processor/common/* ./image/
+
+#https://pex.readthedocs.io/en/stable/buildingpex.html#buildingpex
+pex --python=python3.5 -r ./tools/build/requirements.txt -c ./processor/mpc/application/bootsequence.py -o $python
 
 cp ./processor/mpc/scripts/uboot ./uboot
 
@@ -35,4 +36,4 @@ pat=".MCU.update.crc=$mcu_update_crc | \
 
 jq -n 'env.pat' $sw_config > expected_sw_config.json
 
-tar -zcf ./build_$BUILD_NUMBER.tgz image.tar expected_sw_config.json uboot ./firmware/update.hex
+tar -zcf ./build_$BUILD_NUMBER.tgz image.pex expected_sw_config.json uboot ./firmware/update.hex

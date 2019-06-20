@@ -24,7 +24,7 @@ void setup()
   int8_t i=sizeof(CRC.bytes)-1;
   while (i>=0) {
     if (Serial.available() > 0) {
-      CRC.bytes[i]=Serial.read();
+      CRC.bytes[i]=Serial.readBytes();
       if (DEBUG) {
         printBin(CRC.bytes[i]);
         Serial.println(i);

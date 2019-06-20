@@ -9,8 +9,6 @@ import subprocess
 
 import time
 import common
-
-from . import ProxyServer
         
         
 class CustomLock:
@@ -155,10 +153,12 @@ class BaseClass:
             else:
                 self.logger.error('Non-zero return code in systemCall. stderr: "{}"'.format(CmpPr.stderr))
                 
-            return CmpPr.returncode
+            return (CmpPr.returncode
         
         thread = self.threads.add('nb_systemCall', __run, (cmd,))
         thread.start()
         if block:
             thread.wait()
-        return thread.output.get()
+            return thread.output.get()
+        else:
+            return
