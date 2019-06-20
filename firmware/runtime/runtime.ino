@@ -1,67 +1,46 @@
 #include <EventManager.h>
 #include <EEPROM.h>
 
-struct pins {
-    byte M1 = 1;
-    byte M2 = 2;
-    byte L1 = 3;
-}
+#define PIN_M1 1
+#define PIN_M2 2
 
-struct data {
-    string name;
-    float val = 0;
-}
 
-enum states {
-    init,
-    test,
-    normal,
-    critical
-}
+EventManager gEM;
+EventManager::EventType kSerialMsg;
 
-union addrByte32{
-    uint32_t val;
-    uint8_t data[4];
-}
+union SerialBuffer{
+  struct
+  {
+    uint8_t req;
+    uint8_t obj;
+    int val;
+  }data;
+  byte whole[4];
+};
 
-addrByte32 CRC;
-const pin Pins;
-currState states = init
-EventManager eventMgr;
-data dataTbl[];
-
-bool addData(string name) {
-    dataTbl[sizeof(dataTbl)+1].name=name;
-}
-
-bool test() {
-    bool result = True
-    return result;
+void processMsg (int eventCode, int eventParam)
+{
+  Serial.print(eventParam, HEX);
 }
 
 void setup()
-{   
-    pinMode(pin.M1, OUTPUT);
-    pinMode(pin.M2, OUTPUT);
-    pinMode(pin.L2, OUTPUT);
-    
-    addData("current")
-    
-    for (i=0;i<sizeof(CRC.array);i++;) {
-        crc.array[i] = EEPROM.read(i)
-    }
-    currState = test;
+{
+  Serial.begin(115200);
+  gEM.addListener( kSerialMsg, processMsg );
 }
 
 void loop()
 {
-    if (currState == test) {
-        result=test()
-        if (!result) {
-            currState = critical;
-        }
-        else {
-            currState = normal;
-        }
-    }
+  union SerialBuffer test;
+  gEM.processEvent();
+}
+
+void serialEvent()
+{
+  Serial.println("serial event");
+  if (Serial.available() >= 32) {
+    union SerialBuffer msg;
+    msg.whole = byte(Serial.read(msg.whole));
+    gEM.queueEvent( kSerialMsg, msg.data.val );
+  }
 }
