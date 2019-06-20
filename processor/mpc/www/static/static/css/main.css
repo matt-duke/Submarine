@@ -1,0 +1,27 @@
+#stream {
+    border-radius: 20px;
+    background-color: black;
+    margin: 1em;
+    padding: 15px;
+    width: 85%;
+    height: 25em;
+    position: relative;
+}
+
+#dashboard {
+    margin: 2em 0;
+    width: 75%;
+}
+
+#map {
+    height: 40em;
+    padding: 0 2em;
+    margin: 2em 0;
+}
+
+#footer {
+    border-top: dashed;
+    border-color: grey;
+    height: 2em;
+    margin: 1em;
+}
