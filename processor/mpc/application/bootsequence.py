@@ -25,26 +25,25 @@ def add_paths():
     if common.platform == 'Linux':
         volatile = '/tmp'
         config = '/configuration'
-        common.Paths['DATABASE'] = '/media/data.db'
+        database = '/db'
         base = '/'
         
     else:
         volatile = root
         config = os.path.abspath(join(os.getcwd(),'../..','configuration'))
-        common.Paths['DATABASE'] = join(root,'data.db')
+        database = root
         base = root
    
     common.Paths['DEBUG_LOG'] = join(volatile,'debug.log')
     common.Paths.critical('CONFIG',join(config, 'config.ini'))
-    common.Paths.critical('CONFIG_SCHEMA',join(config, 'schema.ini'))
+    common.Paths.critical('CONFIG_SCHEMA',join(db, 'schema.ini'))
     common.Paths.critical('VERSION',join(config, 'expected_sw_config.json'))
     common.Paths.critical('UBOOT',join(base, 'uboot'))
     common.Paths.critical('VOLATILE',volatile)
     
 
 if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
-    logger=logging.getLogger('bootsequence')
+    logging.setLoggerClass(common.CustomLogger)
         
     common.CvtManager = common.CvtManager()
     common.CVT = common.CvtManager.cvt

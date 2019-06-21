@@ -13,6 +13,8 @@ class PostClass(core.BaseClass):
         result &= self._file_check()
         return result
         
+    def _verify_config()
+    
     def _disk_test(self):
         if not common.platform == 'Linux':
             self.logger.warning('Disk test: platform not supported')

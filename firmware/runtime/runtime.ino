@@ -20,7 +20,9 @@ union SerialBuffer{
 
 void processMsg (int eventCode, int eventParam)
 {
-  Serial.print(eventParam, HEX);
+  union SerialBuffer msg;
+  msg.whole = eventParam;
+  Serial.print(msg.whole, HEX);
 }
 
 void setup()
@@ -38,9 +40,7 @@ void loop()
 void serialEvent()
 {
   Serial.println("serial event");
-  if (Serial.available() >= 32) {
-    union SerialBuffer msg;
-    msg.whole = byte(Serial.read(msg.whole));
-    gEM.queueEvent( kSerialMsg, msg.data.val );
+  while (Serial.available()) {
+    gEM.queueEvent( kSerialMsg, Serial.read() );
   }
 }

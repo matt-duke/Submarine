@@ -18,6 +18,9 @@ COLORS = {
     'ERROR': YELLOW
 }
 
+FORMAT_STR = '[%(msecs)04d]:%(levelname)s:[%(name)s:%(lineno)d]:%(message)s'
+
+
 class ColoredFormatter(logging.Formatter):
     def __init__(self, format):
         self.noColour = common.platform == 'Windows'
@@ -33,3 +36,22 @@ class ColoredFormatter(logging.Formatter):
             levelname_color = COLOR_SEQ % (30 + COLORS[levelname]) + levelname + RESET_SEQ
             record.levelname = levelname_color
         return logging.Formatter.format(self, record)
+        
+class CustomLogger(logging.Logger):
+    def __init__(self, name='', level=logging.NOTSET):
+        super().__init__(name, level)
+        
+        logFormatter = logging.Formatter(FORMAT_STR)
+
+        fileHandler = RotatingFileHandler('test.log', maxBytes=10*1024*1024, backupCount=2)
+                                      
+        fileHandler.setLevel(logging.DEBUG)
+        fileHandler.setFormatter(logFormatter)
+        fileHandler.setLevel(logging.DEBUG)
+
+        consoleHandler = logging.StreamHandler()
+        consoleHandler.setFormatter(core.Logger.ColoredFormatter(FORMAT_STR))
+        consoleHandler.setLevel(logging.DEBUG)
+        
+        self.addHandler(fileHandler)
+        self.addHandler(consoleHandler)

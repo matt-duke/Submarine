@@ -121,6 +121,25 @@ class BaseClass:
         self.lock = CustomLock()
         self.threads = ThreadManager(self)
         
+        self.__fn_queue = Queue()
+    
+    def function_processor(self):
+        def __run(self, ThreadSelf):
+            fn_t = self.__fn_queue.get()
+            self.lock.acquire()
+            fn_t[0](*fn_t[1])
+            self.lock.release
+        self.threads.add(__run).start(loop=True)
+    
+    def register(self, fn):
+        try:
+            fn = gettattr(self, fn.__name__)
+        except AttributeError:
+            self.logger.error("Function not found: {}".format(fn.__name__))
+        def __fn(*args):
+            self.__fn_queue.add((fn, (*args)))
+        
+        
     def fileExists(self, path):
         if not os.path.exists(path):
             self.logger('File does not exist: {}'.format(path))
@@ -155,7 +174,7 @@ class BaseClass:
                 
             return (CmpPr.returncode
         
-        thread = self.threads.add('nb_systemCall', __run, (cmd,))
+        thread = self.threads.add('systemCall', __run, (cmd,))
         thread.start()
         if block:
             thread.wait()

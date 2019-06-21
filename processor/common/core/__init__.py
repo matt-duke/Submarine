@@ -1,5 +1,5 @@
 from .Multiprocess import ProxyServer
-from . import Logger
+from .Logger import CustomLogger
 
 from .BaseClass import ThreadManager
 from .BaseClass import BaseClass
