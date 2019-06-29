@@ -14,7 +14,7 @@ class Paths(dict):
     def critical(self, key, val):
         self.add(key, val, True)
     
-    def add(self, key, val, critical=False):
+    def add(self, key, val, critical=True):
         val = (val, critical)
         dict.__setitem__(self, key, val)
 

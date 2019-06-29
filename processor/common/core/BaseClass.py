@@ -172,7 +172,7 @@ class BaseClass:
             else:
                 self.logger.error('Non-zero return code in systemCall. stderr: "{}"'.format(CmpPr.stderr))
                 
-            return (CmpPr.returncode
+            return CmpPr
         
         thread = self.threads.add('systemCall', __run, (cmd,))
         thread.start()

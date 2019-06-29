@@ -1,0 +1,60 @@
+{
+    "network": {
+        "internal": {
+            "vlan": 10,
+            "mpc_ip": "192.168.1.1/24",
+            "router_ip": "192.168.1.1/24"
+        },
+        "public": {
+            "vlan": 20,
+            "mpc_ip": "192.168.2.1/24",
+            "router_ip": "192.168.2.1/24"
+        },
+        "wifi_ap": {
+            "dhcp": true,
+            "dhcp_clients": 10,
+            "network": "public"
+        },
+        "webgui": {
+            "internal_port": 8080,
+            "external_port": 80,
+            "network": "internal"
+        },
+        "cvt": {
+            "port": 5000,
+            "network": "internal"
+        }
+    },
+    "folders": {
+        "ROOT": "/image",
+        "VOLATILE": "/tmp",
+        "DATABASE": "/image/db",
+        "CONFIGURATION": "/persistent"
+    },
+    "paths": {
+        "DEBUG_LOG": {
+            "basename": "VOLATILE",
+            "filename": "debug.log"
+        },
+        "CONFIG": {
+            "basename": "CONFIGURATION",
+            "filename": "config.ini"
+        },
+        "DEFAULT_CONFIG": {
+            "basename": "DATABASE",
+            "filename": "config.ini"
+        },
+        "CONFIG_SCHEMA": {
+            "basename": "DATABASE",
+            "filename": "schema.ini"
+        },
+        "VERSION": {
+            "basename": "CONFIGURATION",
+            "filename": "expected_sw_config.json"
+        },
+        "UBOOT": {
+            "basename": "/",
+            "filename": "uboot.sh"
+        }
+    }
+}

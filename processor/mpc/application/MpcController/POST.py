@@ -5,7 +5,7 @@ import os
 from pathlib import Path
 
 
-class PostClass(core.BaseClass):
+class PostClass(core.PostClass):
     def start(self, minimal=False):
         result = True
         if not minimal:
@@ -13,9 +13,9 @@ class PostClass(core.BaseClass):
         result &= self._file_check()
         return result
         
-    def _verify_config()
+    def verify_config()
     
-    def _disk_test(self):
+    def disk_test(self):
         if not common.platform == 'Linux':
             self.logger.warning('Disk test: platform not supported')
             return True
@@ -42,7 +42,7 @@ class PostClass(core.BaseClass):
             self.logger.error('Unknown error code {}'.format(return_code))
         return False
         
-    def _file_check(self):
+    def file_check(self):
         result = True
         for key, item in common.Paths.items():
             if not os.path.exists(item[0]) and item[1]:
