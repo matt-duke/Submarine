@@ -1,9 +1,19 @@
 import json
+import logging
+
+logger = logging.getLogger(__name__)
+
+default = None
+default.is_valid = False
 
 def load(file = 'defaults.json'):
-    obj = json.load(open(file, 'r'))
-    obj.is_valid = verify(obj)
-    return obj
+    default = json.load(open(file, 'r'))
+    default.is_valid = verify(default)
     
-def verify(obj):
-    return True
+def get():
+    if default == None:
+        load()
+    if not default.is_valid:
+        logger.error("{} is not valid".format(file))
+        
+    return default
