@@ -1,18 +1,23 @@
 {
-    "network": {
+    "networks": {
         "internal": {
+            "dev": "eth0",
             "vlan": 10,
-            "mpc_ip": "192.168.1.1/24",
+            "mpc_ip": "192.168.1.2/24",
             "router_ip": "192.168.1.1/24"
-        },
+            },
         "public": {
+            "dev": "eth0",
             "vlan": 20,
-            "mpc_ip": "192.168.2.1/24",
+            "mpc_ip": "192.168.2.2/24",
             "router_ip": "192.168.2.1/24"
         },
+    },
+    "applications": {
         "wifi_ap": {
             "dhcp": true,
-            "dhcp_clients": 10,
+            "dhcp_start": "192.168.2.10",
+            "dhcp_end": "192.168.2.20",
             "network": "public"
         },
         "webgui": {
@@ -23,38 +28,6 @@
         "cvt": {
             "port": 5000,
             "network": "internal"
-        }
-    },
-    "folders": {
-        "ROOT": "/image",
-        "VOLATILE": "/tmp",
-        "DATABASE": "/image/db",
-        "CONFIGURATION": "/persistent"
-    },
-    "paths": {
-        "DEBUG_LOG": {
-            "basename": "VOLATILE",
-            "filename": "debug.log"
-        },
-        "CONFIG": {
-            "basename": "CONFIGURATION",
-            "filename": "config.ini"
-        },
-        "DEFAULT_CONFIG": {
-            "basename": "DATABASE",
-            "filename": "config.ini"
-        },
-        "CONFIG_SCHEMA": {
-            "basename": "DATABASE",
-            "filename": "schema.ini"
-        },
-        "VERSION": {
-            "basename": "CONFIGURATION",
-            "filename": "expected_sw_config.json"
-        },
-        "UBOOT": {
-            "basename": "/",
-            "filename": "uboot.sh"
         }
     }
 }

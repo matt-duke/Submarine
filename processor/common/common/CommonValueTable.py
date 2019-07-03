@@ -1,49 +1,46 @@
 import core
 
-import time
+from . import DataTypes
+
+import logging
 
 import sqlite3
 from datetime import datetime
 import os
 
 
-class SensorClass():
-    timeout = 30
-    def __init__(self, type):
-        self.value = None
-        self.type = type
-        self.valid = False
-        self.timestamp = 0
-        
-    def set(self, val):
-        self.value = self.type(val)
-        self.timestamp = time.time()
-        self.valid = True
-        
-    def get(self):           
-        if all([((time.time()-self.timestamp) > SensorClass.timeout)]):
-            self.valid = False
-        return self.value
-        
-    def is_valid(self):
-        return self.valid
-
-
-class CvtManager(core.BaseClass):    
-    def __init__(self):
-        core.BaseClass.__init__(self)
-    
+class CvtManager():    
+    def __init__(self):    
         self.cvt_server = core.ProxyServer()
-        self.cvt_server.register('Sensor', SensorClass)
+        self.cvt_server.register('Sensor', DataTypes.SensorClass)
+        self.cvt_server.register('Data', DataTypes.DataClass)
         self.cvt_server.start()
         self.logger.info('CVT server started')
         self.cvt = self.cvt_server.Namespace()
+        self.cvt.wifi = self.cvt_server.Namespace()
+        self.cvt.gui = self.cvt_server.Namespace()
         
-        self.cvt.batt_voltage = self.cvt_server.Sensor(int)
+        self.cvt.platform = self.cvt_server.Data(str)
+        self.cvt.testmode = self.cvt_server.Data(bool)
+        self.cvt.opmode = self.cvt_server.Data(int)
+        self.cvt.resolution_width = self.cvt_server.Data(int)
+        self.cvt.resolution_height = self.cvt_server.Data(int)
+        self.cvt.framerate = self.cvt_server.Data(int)
+        self.cvt.wifi.ssid = self.cvt_server.Data(str)
+        self.cvt.wifi.key = self.cvt_server.Data(str)
+        self.cvt.gui.enabled = self.cvt_server.Data(bool)
+        self.cvt.gui.refresh = self.cvt_server.Data(int)
         
-        self.cvt.platform = ''
-        self.cvt.testmode = False
-        self.cvt.opmode = 'initial'
+        self.cvt.batt_voltage = self.cvt_server.Sensor(float, 'V')
+        self.cvt.latitude = self.cvt_server.Sensor(float)
+        self.cvt.longitude = self.cvt_server.Sensor(float)
+        self.cvt.surface_temperature = self.cvt_server.Sensor(float, '\u00b0C')
+        self.cvt.water_temperature = self.cvt_server.Sensor(float, '\u00b0C')
+        self.cvt.air_temperature = self.cvt_server.Sensor(float, '\u00b0C')
+        self.cvt.current = self.cvt_server.Sensor(float, 'A')
+        self.cvt.m1_current = self.cvt_server.Sensor(float, 'A')
+        self.cvt.m2_current = self.cvt_server.Sensor(float, 'A')
+        self.cvt.pressure = self.cvt_server.Sensor(float, 'kPa')
     
     
     def start_logging(self, debug_file):

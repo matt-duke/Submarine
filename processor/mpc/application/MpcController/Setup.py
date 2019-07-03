@@ -7,9 +7,8 @@ class SetupClass(core.BaseClass):
     def __init__(self):
         core.BaseClass.__init__(self)
         
-        self.default = common.defaults.load()
-        if not self.is_valid():
-            self.logger.critical('Default file is not valid')
+        self.default = common.defaults.get()
+
     
     def run(self):
         self.__networking()

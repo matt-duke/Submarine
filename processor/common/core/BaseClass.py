@@ -160,7 +160,11 @@ class BaseClass:
     
     def systemCall(self, cmd, block=True):
         # non-blocking runs in thread
-
+        
+        if common.CVT.testmode:
+            self.logger.warning('Testmode: simulating command {}'.format(cmd))
+            return (0, 'simulated')
+        
         self.logger.debug('Running command: '+ ''.join(cmd))
         if type(cmd) == str:
             cmd = cmd.split(' ')

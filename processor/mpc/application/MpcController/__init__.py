@@ -1,4 +1,5 @@
-from . import POST
+from . import POST import PostClass
+from .SetupClass import SetupClass
 
 ## LAST IMPORT ##
 from .MpcController import MpcController as main

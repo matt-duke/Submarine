@@ -16,6 +16,7 @@ class MpcController(core.BaseClass):
     def __init__(self):
         core.BaseClass.__init__(self)
         self.POST = POST.PostClass()
+        self.setup = Setup.SetupClass()
           
     def import_config():
         common.config = configparser.ConfigParser()
