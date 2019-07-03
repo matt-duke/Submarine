@@ -1,0 +1,18 @@
+<style>
+    .thumbnail img{
+      padding: 1px;
+    }
+    
+</style>
+
+<div class="container">
+   <div class="row justify-content-center">
+    {% for image in images %}
+        <div class="col-lg-4 col-md-6 col-sm-12 thumbnail">
+            <a href="{{url_for('static', filename='')}}{{image}}" data-toggle="lightbox" data-gallery="{{id}}" data-title="{{title[loop.index0]}}" data-footer="{{footer[loop.index0]}}">
+                <img class="img-thumbnail img-fluid mx-auto" src="{{url_for('static', filename='')}}{{image}}">
+            </a>
+        </div>
+    {% endfor %}
+    </div>
+</div>
