@@ -1,5 +1,5 @@
 SW requirements:
-Java
+openjdk-8-jdk-headless
 Jenkins
 build-essential
 arduino
