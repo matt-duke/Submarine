@@ -4,7 +4,6 @@ pipeline {
     stages {
         stage('Build') {
             steps {
-                sh 'ls -l tools/build/pi-gen'
                 sh 'tools/build/pi-gen/build-docker.sh -c $PWD/tools/build/config'
             }
         }
