@@ -1,3 +1,4 @@
 [submodule "tools/build/pi-gen"]
 	path = tools/build/pi-gen
 	url = https://github.com/Matt-Duke/pi-gen.git
+	branch = master
