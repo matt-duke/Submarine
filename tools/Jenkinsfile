@@ -1,0 +1,34 @@
+pipeline {
+    agent none
+    stages {
+        stage('Compile') {
+            agent {
+                docker { 
+                    image 'python:3.7.4-alpine3.10'
+                    args '-v '}
+            }
+            steps {
+                echo 'Compiling....'
+                sh 'sudo make -C ${REPO}/firmware/runtime'
+                sh 'cp ${REPO}/firmware/runtime/build-mega2560/runtime.hex ${DEPLOY_DIR}/firmware/runtime.hex'
+                //sh 'pex --python=python3.5 -r {REPO}/tools/build/requirements.txt -c {REPO}/processor/mpc/application/bootsequence.py -o $python'
+
+            }
+        }
+        stage('Build image') {
+            steps {
+		echo 'Building image...'
+                //sh 'sudo echo "WORK_DIR=${WORK_DIR}" >> ${IMG_CONFIG}'
+                //sh 'sudo echo "DEPLOY_DIR=${DEPLOY_DIR}" >> ${IMG_CONFIG}'
+                sh 'sudo ${PI_GEN} -c ${IMG_CONFIG}'
+                //archiveArtifacts artifacts: '${WORK_DIR}/*.zip', fingerprint: true
+                //archiveArtifacts artifacts: '$config', fingerprint: true
+            }
+        }
+        stage('Test') {
+            steps {
+                echo 'Testing...'
+            }
+        }
+    }
+}

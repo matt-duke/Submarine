@@ -21,8 +21,8 @@ union SerialBuffer{
 void processMsg (int eventCode, int eventParam)
 {
   union SerialBuffer msg;
-  msg.whole = eventParam;
-  Serial.print(msg.whole, HEX);
+  //msg.whole = eventParam;
+  //Serial.print(msg.whole, HEX);
 }
 
 void setup()

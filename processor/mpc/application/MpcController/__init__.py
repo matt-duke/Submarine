@@ -1,4 +1,4 @@
-from . import POST import PostClass
+from . import PostClass
 from .SetupClass import SetupClass
 
 ## LAST IMPORT ##
