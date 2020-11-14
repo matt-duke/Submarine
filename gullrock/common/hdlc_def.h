@@ -1,0 +1,31 @@
+#ifndef HDLC_DEF_H
+#define HDLC_DEF_H
+
+/*
+  HDLC CONSTANTS
+*/
+
+#define PACKET_SIZE 6
+#define PORT_NAME "/dev/ttyACM0"
+
+enum HDLC_CMD {
+  COMMAND_STATUS = 0,
+  COMMAND_SET,
+  COMMAND_ERROR,
+  COMMAND_SENSOR
+};
+
+enum STATUS {
+  STATUS_NONE = 0,
+  STATUS_OK,
+  STATUS_FAULT
+};
+
+enum DEVICE_ID {
+  ID_MOTOR_L = 0,
+  ID_MOTOR_R,
+  ID_HEADLIGHT,
+  ID_BUILT_IN_LED
+};
+
+#endif

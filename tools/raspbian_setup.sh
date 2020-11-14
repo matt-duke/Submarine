@@ -1,1 +1,0 @@
-apt-get install libapache2-mod-wsgi arduino-core arduino-mk

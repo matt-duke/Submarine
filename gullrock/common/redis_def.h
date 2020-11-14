@@ -1,0 +1,28 @@
+#ifndef REDIS_DEF_H
+#define REDIS_DEF_H
+/*
+  REDIS CONSTANTS
+*/
+
+#define VALIDITY_TIMEOUT 10
+#define HEARTBEAT_RATE 5
+#define TIMEOUT_HEARTBEAT 5
+#define REDIS_PORT 6379
+
+
+enum channel_keys {
+  CHANNEL_ACCEL_X,
+  CHANNEL_ACCEL_Y,
+  CHANNEL_ACCEL_Z,
+  CHANNEL_BATT_VOLT,
+  CHANNEL_CURRENT,
+  CHANNEL_MOTOR_L_CURR,
+  CHANNEL_MOTOR_R_CURR,
+  CHANNEL_MCU_STATUS
+};
+
+extern const char* STATUS_NAME[];
+extern const char *REDIS_HOSTNAME;
+extern const char* CHANNEL_KEY[];
+
+#endif

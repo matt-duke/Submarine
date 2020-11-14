@@ -1,8 +1,1 @@
-*.pyc
-__pycache__/
-win_env/
-venv/
-build-mega2560/
-*.tar
-*.log
-
+*/__pycache__
