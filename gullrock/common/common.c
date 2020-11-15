@@ -38,25 +38,33 @@ int redis_fn_callback (void (*f)(), char *topic) {
 	return result;
 }
 
-void init_redis(redisContext **c, const char *hostname, const int port) {
+int init_redis(redisContext **c, const char *hostname, const int port) {
 
 	struct timeval timeout = { 1, 500000 };
 
   	redisReply *reply;
 	*c = redisConnectWithTimeout(hostname, port, timeout);
+	free(timeout);
 	if (c == NULL || (*c)->err) {
 		if (c) {
 				LOG_ERROR("Connection error: %s\n", (*c)->errstr);
 				redisFree(*c);
+				return REDIS_CONNECTION_ERROR;
 		} else {
 				LOG_ERROR("Connection error: can't allocate redis context\n");
+				redisFree(*c);
+				return REDIS_ALLOCARTION_FAULURE;
 		}
 	}
 	reply = redisCommand(*c,"PING");
 	if (strcmp(reply->str, "PONG")) {
 		LOG_ERROR("Failed to ping Redis server. Replied: %s\n", reply->str);
+		redisFree(*c);
+		return REDIS_PING_FAILURE;
 	}
 	freeReplyObject(reply);
+	redisFree(*c);
+	return 0;
 }
 
 void *heartbeatThread(void *state)

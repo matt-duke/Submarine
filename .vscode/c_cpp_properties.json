@@ -5,8 +5,8 @@
             "includePath": [
                 "C:\\Program Files (x86)\\Arduino\\tools\\**",
                 "C:\\Program Files (x86)\\Arduino\\hardware\\arduino\\avr\\**",
-                "${workspaceFolder}/gullrock/**",
-                "${workspaceFolder}/gullrock/libs/**"
+                "${workspaceFolder}\\gullrock\\**",
+                "${workspaceFolder}\\gullrock\\libs\\**"
             ],
             "defines": [
                 "_DEBUG",

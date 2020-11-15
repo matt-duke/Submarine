@@ -13,45 +13,15 @@
 #include <common.h>
 #include <definitions.h>
 
+/* Variables */
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
-pthread_mutex_t mutex;
+smAppClass_t state_machine;
 
-bool video_running = false;
-
-const char *stream_host = "192.168.10.168";
-int stream_port = 5000;
-int stream_fps = 26;
-int stream_bitrate = 2000000;
-int stream_w = 450;
-int stream_h = 600;
-
-
-int initStream() {
-  printf("Starting stream\n");
-  char cmd[248];
-  sprintf(cmd,
-    "gst-launch-1.0 -v rpicamsrc bitrate=%d ! h264parse ! rtph264pay config-interval=1 pt=96! gdppay ! tcpserversink host=%s port=%d &",
-    stream_bitrate,
-    stream_host,
-    stream_port);
-  int status = system(cmd);
-  if (status != 0) {
-    LOG_ERROR("Failed to start stream with exit code %d.\n", status / 256);
-  }
-  return(status/256);
-}
-
-
-int killStream() {
-  LOG_INFO("Ending stream\n");
-  int status = system("pkill gst-launch*");
-  if (status != 0) {
-    LOG_ERROR("Failed to kill stream with exit code %d.\n", status / 256);
-  }
-  return(status/256);
-}
+/* Functions */
+void do_to_init(smAppClass_t *app);
+void do_to_running(smAppClass_t *app);
 
 int main() {
   init_logging();
@@ -68,3 +38,5 @@ int main() {
     sleep(1);
   }
 }
+
+
