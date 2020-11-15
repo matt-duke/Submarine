@@ -10,7 +10,8 @@
 #include <logger/logger.h>
 
 #include <common.h>
-#include <definitions.h>
+#include <baseapp.h>
+#include <redis_def.h>
 
 #define MAX_FAILURES 2
 
@@ -19,6 +20,8 @@ extern const char *__progname;
 redisContext *c;
 redisReply *reply;
 int failure_count;
+
+smAppClass_t state_machine;
 
 char* appPaths[] = {"./camera_controller", "./mcu_manager", "./motion_controller"};
 char* appNames[] = {"camera_controller", "mcu_manager", "motion_controller"};
@@ -41,7 +44,7 @@ int main() {
 }
 
 void do_to_init(smAppClass_t *app) {
-	if (app->curr_state == APP_STATE_INIT) {
+	if (app->state == APP_STATE_INIT) {
 	  pthread_t thread_id;
 		pthread_create(&thread_id, NULL, heartbeatThread, (void*) &state_machine);
 		

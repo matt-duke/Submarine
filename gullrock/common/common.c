@@ -14,7 +14,15 @@
 #include "baseapp.h"
 #include "common.h"
 
+/* Variables */
 extern const char *__progname;
+
+/* Functions */
+int redis_fn_callback (void (*f)(), char *topic);
+int init_redis(redisContext **c, const char *hostname, const int port);
+void *heartbeatThread(void *state);
+void init_logging();
+
 
 int redis_fn_callback (void (*f)(), char *topic) {
     signal(SIGPIPE, SIG_IGN);
@@ -39,12 +47,11 @@ int redis_fn_callback (void (*f)(), char *topic) {
 }
 
 int init_redis(redisContext **c, const char *hostname, const int port) {
-
 	struct timeval timeout = { 1, 500000 };
 
   	redisReply *reply;
 	*c = redisConnectWithTimeout(hostname, port, timeout);
-	free(timeout);
+	free(&timeout);
 	if (c == NULL || (*c)->err) {
 		if (c) {
 				LOG_ERROR("Connection error: %s\n", (*c)->errstr);
@@ -67,8 +74,7 @@ int init_redis(redisContext **c, const char *hostname, const int port) {
 	return 0;
 }
 
-void *heartbeatThread(void *state)
-{
+void *heartbeatThread(void *state) {
 	smAppClass_t *sm = (smAppClass_t*)state;
 
 	LOG_INFO("Starting heartbeat: %s\n", __progname);
