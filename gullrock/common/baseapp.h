@@ -5,7 +5,10 @@
 
 typedef enum {
     APP_STATE_INIT,
+<<<<<<< HEAD
     APP_STATE_POST,
+=======
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
     APP_STATE_RUNNING,
     APP_STATE_FAULT,
     APP_NUM_STATES } app_state_t;
@@ -15,7 +18,11 @@ typedef struct smAppClass {
     void (*transition)(struct smAppClass *self, app_state_t new_state);
     void (*run_table)(struct smAppClass *self);
     pthread_mutex_t mutex;
+<<<<<<< HEAD
     app_state_t state;
+=======
+    app_state_t curr_state;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 } smAppClass_t;
 
 typedef void app_transition_func_t(smAppClass_t *app);

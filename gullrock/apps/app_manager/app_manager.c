@@ -14,60 +14,53 @@
 
 #define MAX_FAILURES 2
 
+/* Variables */
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
-pthread_mutex_t mutex = PTHREAD_MUTEX_INITIALIZER;
+int failure_count;
 
-/*
-TODO: Change app paths
-*/
 char* appPaths[] = {"./camera_controller", "./mcu_manager", "./motion_controller"};
 char* appNames[] = {"camera_controller", "mcu_manager", "motion_controller"};
 
-
-int startApp(char* app_path) {
-  LOG_INFO("Starting app %s\n", app_path);
-  char cmd[128];
-  sprintf(cmd, "%s &", app_path);
-  int status = system(cmd);
-  if (status != 0) {
-    LOG_ERROR("Failed to start %s with exit code %d.\n", app_path, status / 256);
-  }
-  return(status/256);
-}
-
-int killApp(char* app_name) {
-  LOG_INFO("Killing processes with name %s\n", app_name);
-  char cmd[128];
-  sprintf(cmd, "killall %s", app_name);
-  int status = system(cmd);
-  if (status != 0) {
-    LOG_ERROR("Failed to kill %s with exit code %d.\n", app_name, status / 256);
-  }
-  return (status/256);
-}
-
+/* Functions */
+void do_to_init(smAppClass_t *app);
+void do_running(smAppClass_t *app);
+int startApp(char* app_path);
+int killApp(char* app_path);
 
 int main() {
   init_logging();
 
-  killApp("redis-server");
-  startApp("redis-server");
-
-  sleep(1);
-
-  mutex = init_redis(&c, REDIS_HOSTNAME, REDIS_PORT);
-
-  for (int i=0; i<sizeof(appPaths)/sizeof(appPaths[0]); i++ ) {
-    startApp(appPaths[i]);
-  }
-
-  sleep(1);
-
-  int failure_count = 0;
+  app_transition_table[APP_STATE_INIT][APP_STATE_INIT] = do_to_init;
+  app_run_table[APP_STATE_RUNNING] = do_running;
 
   while (1) {
+    state_machine.run(&state_machine);
+  }
+}
+
+void do_to_init(smAppClass_t *app) {
+	if (app->curr_state == APP_STATE_INIT) {
+	  pthread_t thread_id;
+		pthread_create(&thread_id, NULL, heartbeatThread, (void*) &state_machine);
+		
+    failure_count = 0;
+
+    int err = init_redis(&c, REDIS_HOSTNAME, REDIS_PORT);
+		if (err != 0) {
+      LOG_FATAL("Failed to init redis with error %d", err);
+      abort();
+    }
+    for (int i=0;i<sizeof(appPaths)/sizeof(appPaths[0]); i++) {
+      startApp(appPaths[i]);
+    }
+	}
+  sleep(1);
+  app.transition(&state_machine, APP_STATE_RUNNING);
+}
+
+void do_running(smAppClass_t *app) {
     for (int i = 0; i < sizeof(appNames)/sizeof(appNames[0]); i++) {
       reply = redisCommand(c,"TTL %s", appNames[i]);
 
@@ -98,5 +91,26 @@ int main() {
       abort();
     }
     sleep(HEARTBEAT_RATE);
+}
+
+int startApp(char* app_path) {
+  LOG_INFO("Starting app %s\n", app_path);
+  char cmd[128];
+  sprintf(cmd, "%s &", app_path);
+  int status = system(cmd);
+  if (status != 0) {
+    LOG_ERROR("Failed to start %s with exit code %d.\n", app_path, status / 256);
   }
+  return(status/256);
+}
+
+int killApp(char* app_name) {
+  LOG_INFO("Killing processes with name %s\n", app_name);
+  char cmd[128];
+  sprintf(cmd, "killall %s", app_name);
+  int status = system(cmd);
+  if (status != 0) {
+    LOG_ERROR("Failed to kill %s with exit code %d.\n", app_name, status / 256);
+  }
+  return (status/256);
 }

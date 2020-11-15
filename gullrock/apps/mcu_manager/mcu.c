@@ -9,7 +9,11 @@
 #include <logger/logger.h>
 
 #include <common.h>
+<<<<<<< HEAD
 #include <redis_def.h>
+=======
+#include <redis.h>
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 #include <hdlc_def.h>
 #include "mcu.h"
 
@@ -54,27 +58,52 @@ transition_func_t * const transition_table[ MCU_NUM_STATES ][ MCU_NUM_STATES ] =
 };
 
 run_func_t * const run_table[ MCU_NUM_STATES ] = {
+<<<<<<< HEAD
     do_init, do_post, do_ready, do_fault
 };
 
 void do_to_init(McuClass_t *mcu) {
     LOG_INFO("Entering state INIT");
     mcu->state = MCU_STATE_INIT;
+=======
+    do_init, do_post, do_ready, do_fault;
+};
+
+void do_nothing(McuClass_t *mcu) {
+
+}
+
+void do_to_init(McuClass_t *mcu) {
+    LOG_INFO("Entering state INIT");
+    mcu->curr_state = MCU_STATE_INIT;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_to_ready(McuClass_t *mcu) {
     LOG_INFO("Entering state READY");
+<<<<<<< HEAD
     mcu->state = MCU_STATE_READY;
+=======
+    mcu->curr_state = MCU_STATE_READY;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_to_post(McuClass_t *mcu) {
     LOG_INFO("Entering state POST");
+<<<<<<< HEAD
     mcu->state = MCU_STATE_POST;
+=======
+    mcu->curr_state = MCU_STATE_POST;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_to_fault(McuClass_t *mcu) {
     LOG_INFO("Entering state FAULT");
+<<<<<<< HEAD
     mcu->state = MCU_STATE_FAULT;
+=======
+    mcu->curr_state = MCU_STATE_FAULT;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_init(McuClass_t *mcu) {
@@ -98,17 +127,28 @@ int mcuInit (McuClass_t *mcu) {
     mcu->transition = &mcuTransition;
     mcu->get = &mcuGet;
     mcu->set = &mcuSet;
+<<<<<<< HEAD
     mcu->state = MCU_STATE_INIT;
+=======
+    mcu->curr_state = MCU_STATE_INIT;
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
     mcu->transition(MCU_STATE_INIT);
     return 0;
 }
 
 int mcuTransition(McuClass_t *mcu, mcu_state_t new_state) {
     transition_func_t *transition_fn = 
+<<<<<<< HEAD
         transition_table[ mcu->state ][ new_state ];
     
     transition_fn(mcu);
     if (mcu->state != new_state) {
+=======
+        transition_table[ mcu->curr_state ][ new_state ];
+    
+    transition_fn(mcu);
+    if (mcu->curr_state != new_state) {
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
         LOG_ERROR("Transition blocked");
         return 1;
     }
@@ -116,7 +156,11 @@ int mcuTransition(McuClass_t *mcu, mcu_state_t new_state) {
 }
 
 void mcuRunState(McuClass_t *mcu) {
+<<<<<<< HEAD
     run_func_t *run_fn = run_table[ mcu->state ];
+=======
+    run_func_t *run_fn = run_table[ mcu->curr_state ];
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 
     run_fn(mcu);
 }
@@ -175,8 +219,13 @@ void hdlc_status() {
 
 void initSerial() {
 	/* Open and configure each port. */
+<<<<<<< HEAD
 	LOG_DEBUG("Looking for port %s.\n", PORT_NAME);
 	check(sp_get_port_by_name(PORT_NAME, &port));
+=======
+	LOG_DEBUG("Looking for port %s.\n", port_name);
+	check(sp_get_port_by_name(port_name, &port));
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 
 	LOG_INFO("Opening port.\n");
 	check(sp_open(port, SP_MODE_READ_WRITE));

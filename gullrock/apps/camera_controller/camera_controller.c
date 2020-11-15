@@ -11,12 +11,17 @@
 #include <logger/logger.h>
 
 #include <common.h>
+<<<<<<< HEAD
 #include <redis_def.h>
+=======
+#include <definitions.h>
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 
 /* Variables */
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
+<<<<<<< HEAD
 pthread_mutex_t mutex;
 
 /* Functions */
@@ -45,6 +50,13 @@ int killStream() {
   }
   return(status/256);
 }
+=======
+smAppClass_t state_machine;
+
+/* Functions */
+void do_to_init(smAppClass_t *app);
+void do_to_running(smAppClass_t *app);
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 
 int main() {
   init_logging();
@@ -61,3 +73,8 @@ int main() {
     sleep(1);
   }
 }
+<<<<<<< HEAD
+=======
+
+
+>>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
