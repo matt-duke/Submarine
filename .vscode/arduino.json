@@ -1,0 +1,5 @@
+{
+    "sketch": "MCU testing\\controller_testing\\controller_testing.ino",
+    "board": "arduino:avr:mega",
+    "configuration": "cpu=atmega2560"
+}

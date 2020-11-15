@@ -1,0 +1,6 @@
+{
+    "files.associations": {
+        "linux_glue.h": "c",
+        "functional": "c"
+    }
+}
