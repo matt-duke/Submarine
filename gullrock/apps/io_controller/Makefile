@@ -1,17 +1,18 @@
 CC = gcc
 CFLAGS = -Wall
-SRC = io_controller.c
+SRCDIR = src
+SRC = $(wildcard $(SRCDIR)/*.c)
 ROOTDIR = $(shell readlink --canonicalize ../..)
 CMN = $(wildcard $(ROOTDIR)/common/*.c)
 BINDIR = $(ROOTDIR)/bin
-INCLUDES = -I$(CURDIR) -I$(ROOTDIR)/libs -I$(ROOTDIR)/common -I$(ROOTDIR)/libs/linux-mpu9150/eMPL
-LIBDIR = -L$(ROOTDIR)/libs/logger
-LIBS  = -lhiredis_vip -levent -lpthread -llogger
+INCLUDES = -I$(CURDIR) -I$(ROOTDIR)/libs -I$(ROOTDIR)/common
+LIBDIR = -L$(ROOTDIR)/libs/logger -L$(ROOTDIR)/libs/minihdlc
+LIBS  = -lhiredis_vip -levent -lpthread -llogger -lminihdlc
 EXE = $(BINDIR)/$(patsubst %.c,%,$(notdir $(CURDIR)).c)
 
 all:
 	$(CC) $(CFLAGS) $(INCLUDES) $(SRC) $(CMN) -o $(EXE) $(LIBS) $(LIBDIR)
 
-
-# TODO #
-# Make factory calibration app
+libs: $(LOGGER) $(MINIHDLC)
+	cd $(LOGGER) && make
+	cd $(MINIHDLC) && make

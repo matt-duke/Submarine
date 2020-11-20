@@ -1,6 +1,7 @@
 CC = gcc
 CFLAGS = -Wall
-SRC = $(wildcard *.c)
+SRCDIR = src
+SRC = $(wildcard $(SRCDIR)/*.c)
 ROOTDIR = $(shell readlink --canonicalize ../..)
 CMN = $(wildcard $(ROOTDIR)/common/*.c)
 BINDIR = $(ROOTDIR)/bin
