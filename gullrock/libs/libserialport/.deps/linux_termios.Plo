@@ -1,0 +1,99 @@
+linux_termios.lo: linux_termios.c /usr/include/stdc-predef.h config.h \
+ /usr/include/stdlib.h \
+ /usr/include/arm-linux-gnueabihf/bits/libc-header-start.h \
+ /usr/include/features.h /usr/include/arm-linux-gnueabihf/sys/cdefs.h \
+ /usr/include/arm-linux-gnueabihf/bits/wordsize.h \
+ /usr/include/arm-linux-gnueabihf/bits/long-double.h \
+ /usr/include/arm-linux-gnueabihf/gnu/stubs.h \
+ /usr/include/arm-linux-gnueabihf/gnu/stubs-hard.h \
+ /usr/lib/gcc/arm-linux-gnueabihf/8/include/stddef.h \
+ /usr/include/arm-linux-gnueabihf/bits/floatn.h \
+ /usr/include/arm-linux-gnueabihf/bits/floatn-common.h \
+ /usr/include/arm-linux-gnueabihf/bits/stdlib-bsearch.h \
+ /usr/include/arm-linux-gnueabihf/bits/stdlib-float.h \
+ /usr/include/linux/termios.h /usr/include/linux/types.h \
+ /usr/include/arm-linux-gnueabihf/asm/types.h \
+ /usr/include/asm-generic/int-ll64.h \
+ /usr/include/arm-linux-gnueabihf/asm/bitsperlong.h \
+ /usr/include/asm-generic/bitsperlong.h /usr/include/linux/posix_types.h \
+ /usr/include/linux/stddef.h \
+ /usr/include/arm-linux-gnueabihf/asm/posix_types.h \
+ /usr/include/asm-generic/posix_types.h \
+ /usr/include/arm-linux-gnueabihf/asm/termios.h \
+ /usr/include/asm-generic/termios.h \
+ /usr/include/arm-linux-gnueabihf/asm/termbits.h \
+ /usr/include/asm-generic/termbits.h \
+ /usr/include/arm-linux-gnueabihf/asm/ioctls.h \
+ /usr/include/asm-generic/ioctls.h /usr/include/linux/ioctl.h \
+ /usr/include/arm-linux-gnueabihf/asm/ioctl.h \
+ /usr/include/asm-generic/ioctl.h linux_termios.h
+
+/usr/include/stdc-predef.h:
+
+config.h:
+
+/usr/include/stdlib.h:
+
+/usr/include/arm-linux-gnueabihf/bits/libc-header-start.h:
+
+/usr/include/features.h:
+
+/usr/include/arm-linux-gnueabihf/sys/cdefs.h:
+
+/usr/include/arm-linux-gnueabihf/bits/wordsize.h:
+
+/usr/include/arm-linux-gnueabihf/bits/long-double.h:
+
+/usr/include/arm-linux-gnueabihf/gnu/stubs.h:
+
+/usr/include/arm-linux-gnueabihf/gnu/stubs-hard.h:
+
+/usr/lib/gcc/arm-linux-gnueabihf/8/include/stddef.h:
+
+/usr/include/arm-linux-gnueabihf/bits/floatn.h:
+
+/usr/include/arm-linux-gnueabihf/bits/floatn-common.h:
+
+/usr/include/arm-linux-gnueabihf/bits/stdlib-bsearch.h:
+
+/usr/include/arm-linux-gnueabihf/bits/stdlib-float.h:
+
+/usr/include/linux/termios.h:
+
+/usr/include/linux/types.h:
+
+/usr/include/arm-linux-gnueabihf/asm/types.h:
+
+/usr/include/asm-generic/int-ll64.h:
+
+/usr/include/arm-linux-gnueabihf/asm/bitsperlong.h:
+
+/usr/include/asm-generic/bitsperlong.h:
+
+/usr/include/linux/posix_types.h:
+
+/usr/include/linux/stddef.h:
+
+/usr/include/arm-linux-gnueabihf/asm/posix_types.h:
+
+/usr/include/asm-generic/posix_types.h:
+
+/usr/include/arm-linux-gnueabihf/asm/termios.h:
+
+/usr/include/asm-generic/termios.h:
+
+/usr/include/arm-linux-gnueabihf/asm/termbits.h:
+
+/usr/include/asm-generic/termbits.h:
+
+/usr/include/arm-linux-gnueabihf/asm/ioctls.h:
+
+/usr/include/asm-generic/ioctls.h:
+
+/usr/include/linux/ioctl.h:
+
+/usr/include/arm-linux-gnueabihf/asm/ioctl.h:
+
+/usr/include/asm-generic/ioctl.h:
+
+linux_termios.h:
