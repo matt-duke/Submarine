@@ -12,7 +12,7 @@ typedef enum {
 typedef struct sCameraClass {
     void (*run)(struct sCameraClass *self);
     void (*transition)(struct sCameraClass *self, camera_state_t new_state);
-    camera_state_t curr_state;
+    camera_state_t state;
     char *stream_host;
     int stream_port;
     int stream_fps;

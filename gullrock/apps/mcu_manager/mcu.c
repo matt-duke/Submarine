@@ -1,5 +1,7 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
 
 #include <hiredis-vip/hiredis.h>
 #include <hiredis-vip/async.h>
@@ -9,11 +11,7 @@
 #include <logger/logger.h>
 
 #include <common.h>
-<<<<<<< HEAD
 #include <redis_def.h>
-=======
-#include <redis.h>
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 #include <hdlc_def.h>
 #include "mcu.h"
 
@@ -22,33 +20,38 @@ extern const char *__progname;
 redisContext *c;
 redisReply *reply;
 
-struct sp_port *port;
+uint8_t msg_count;
+buffer_t* global_buffer;
 
-/* Functions */
 typedef void transition_func_t(McuClass_t *mcu);
 typedef void run_func_t(McuClass_t *mcu);
 
-int mcuTransition(McuClass_t *mcu, mcu_state_t new_state);
-void mcuRunState(McuClass_t *mcu);
+struct sp_port *port;
 
-void do_nothing(McuClass_t *mcu);
+/* Functions */
+static int transition(McuClass_t *mcu, mcu_state_t new_state);
+static void runState(McuClass_t *mcu);
 
-void do_to_ready(McuClass_t *mcu);
-void do_to_init(McuClass_t *mcu);
-void do_to_post(McuClass_t *mcu);
-void do_to_fault(McuClass_t *mcu);
+static void do_nothing(McuClass_t *mcu);
 
-void do_init(McuClass_t *mcu);
-void do_post(McuClass_t *mcu);
-void do_running(McuClass_t *mcu);
-void do_fault(McuClass_t *mcu);
+static void do_to_ready(McuClass_t *mcu);
+static void do_to_init(McuClass_t *mcu);
+static void do_to_post(McuClass_t *mcu);
+static void do_to_fault(McuClass_t *mcu);
 
-void hdlc_frame_handler(const uint8_t *buffer, uint16_t length);
-void hdlc_send_char(uint8_t data);
-int check(enum sp_return result);
-void read_hdlc();
-void hdlc_status();
-void initSerial();
+static void do_init(McuClass_t *mcu);
+static void do_post(McuClass_t *mcu);
+static void do_ready(McuClass_t *mcu);
+static void do_fault(McuClass_t *mcu);
+
+static int mcuSet(McuClass_t *mcu, uint8_t key, data_t data);
+static int mcuGet(McuClass_t *mcu, uint8_t key);
+
+static void hdlc_frame_handler(const uint8_t *buffer, uint16_t length);
+static void hdlc_send_char(uint8_t data);
+static void hdlc_read();
+static int send_frame(packet_t *packet);
+static int check(enum sp_return result);
 
 transition_func_t * const transition_table[ MCU_NUM_STATES ][ MCU_NUM_STATES ] = {
     { do_to_init, do_to_post, do_nothing,  do_to_fault },
@@ -58,52 +61,45 @@ transition_func_t * const transition_table[ MCU_NUM_STATES ][ MCU_NUM_STATES ] =
 };
 
 run_func_t * const run_table[ MCU_NUM_STATES ] = {
-<<<<<<< HEAD
     do_init, do_post, do_ready, do_fault
 };
 
 void do_to_init(McuClass_t *mcu) {
     LOG_INFO("Entering state INIT");
     mcu->state = MCU_STATE_INIT;
-=======
-    do_init, do_post, do_ready, do_fault;
-};
 
-void do_nothing(McuClass_t *mcu) {
+	/* Open and configure each port. */
+	LOG_DEBUG("Looking for port %s.\n", PORT_NAME);
+	check(sp_get_port_by_name(PORT_NAME, &port));
 
-}
+	LOG_INFO("Opening port.\n");
+	check(sp_open(port, SP_MODE_READ_WRITE));
 
-void do_to_init(McuClass_t *mcu) {
-    LOG_INFO("Entering state INIT");
-    mcu->curr_state = MCU_STATE_INIT;
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
+	LOG_DEBUG("Setting port to 9600 8N1, no flow control.\n");
+	check(sp_set_baudrate(port, 9600));
+	check(sp_set_bits(port, 8));
+	check(sp_set_parity(port, SP_PARITY_NONE));
+	check(sp_set_stopbits(port, 1));
+	check(sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE));
+
+	sleep(1);
+
+	minihdlc_init(hdlc_send_char, hdlc_frame_handler);
 }
 
 void do_to_ready(McuClass_t *mcu) {
     LOG_INFO("Entering state READY");
-<<<<<<< HEAD
     mcu->state = MCU_STATE_READY;
-=======
-    mcu->curr_state = MCU_STATE_READY;
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_to_post(McuClass_t *mcu) {
     LOG_INFO("Entering state POST");
-<<<<<<< HEAD
     mcu->state = MCU_STATE_POST;
-=======
-    mcu->curr_state = MCU_STATE_POST;
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_to_fault(McuClass_t *mcu) {
     LOG_INFO("Entering state FAULT");
-<<<<<<< HEAD
     mcu->state = MCU_STATE_FAULT;
-=======
-    mcu->curr_state = MCU_STATE_FAULT;
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
 }
 
 void do_init(McuClass_t *mcu) {
@@ -123,67 +119,66 @@ void do_fault(McuClass_t *mcu) {
 }
 
 int mcuInit (McuClass_t *mcu) {
-    mcu->run = &mcuRunState;
-    mcu->transition = &mcuTransition;
+    mcu->run = &runState;
+    mcu->transition = &transition;
     mcu->get = &mcuGet;
     mcu->set = &mcuSet;
-<<<<<<< HEAD
     mcu->state = MCU_STATE_INIT;
-=======
-    mcu->curr_state = MCU_STATE_INIT;
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
-    mcu->transition(MCU_STATE_INIT);
+    mcu->transition(mcu, MCU_STATE_INIT);
     return 0;
 }
 
-int mcuTransition(McuClass_t *mcu, mcu_state_t new_state) {
+int transition(McuClass_t *mcu, mcu_state_t new_state) {
     transition_func_t *transition_fn = 
-<<<<<<< HEAD
         transition_table[ mcu->state ][ new_state ];
     
     transition_fn(mcu);
     if (mcu->state != new_state) {
-=======
-        transition_table[ mcu->curr_state ][ new_state ];
-    
-    transition_fn(mcu);
-    if (mcu->curr_state != new_state) {
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
         LOG_ERROR("Transition blocked");
         return 1;
     }
     return 0;
 }
 
-void mcuRunState(McuClass_t *mcu) {
-<<<<<<< HEAD
+void runState(McuClass_t *mcu) {
     run_func_t *run_fn = run_table[ mcu->state ];
-=======
-    run_func_t *run_fn = run_table[ mcu->curr_state ];
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
-
     run_fn(mcu);
 }
 
-int mcuSet(McuClass_t *mcu, int key, int data) {
-
+int mcuGet(McuClass_t *mcu, uint8_t key) {
+	packet_t *packet;
+	packet = malloc(PACKET_SIZE);
+	packet->type = HDLC_SET;
+	packet->key = key;
+	//packet->data = data;
+	if (send_frame(packet) == 0) {
+		free(packet);
+		//do stuff with global_buffer
+	};
+	return 0;
 }
 
-int mcuGet(McuClass_t *mcu, int key, int data) {
-
+int send_frame(packet_t *packet) {
+	packet->id = msg_count;
+	buffer_t *buffer;
+	buffer->packet = *packet;
+	minihdlc_send_frame(buffer->bytes, PACKET_SIZE);
+	msg_count++;
+	hdlc_read();
+	if (packet->id != global_buffer->packet.id) {
+		LOG_ERROR("TX RX ID out of sync.");
+		return 1;
+	}
+	free(buffer);
+	return 0;
 }
 
 void hdlc_frame_handler(const uint8_t *buffer, uint16_t length) {
-	switch (buffer[0]) {
-		case COMMAND_STATUS:
-			mcu_status = buffer[1];
-			LOG_DEBUG("STATUS received: %d\n", mcu_status);
-			break;
-		case COMMAND_SENSOR:
-			set_sensor(buffer);
-		default:
-			LOG_DEBUG("Msg received of type: %d\n", buffer[0]);
+	if (length != PACKET_SIZE) {
+		LOG_ERROR("HDLC frame dropped, bad length: %d.", length);
+		abort();
 	}
+	global_buffer = *buffer;
 }
 
 void hdlc_send_char(uint8_t data) {
@@ -191,54 +186,11 @@ void hdlc_send_char(uint8_t data) {
 	check(sp_blocking_write(port, &data, 1, 100));
 }
 
-void read_hdlc() {
+void hdlc_read() {
 	while (sp_input_waiting(port) > 0) {
 		uint8_t rx;
 		LOG_DEBUG("Received: %d", rx);
 		check(sp_blocking_read(port, &rx, 1, 100));
 		minihdlc_char_receiver(rx);
 	}
-}
-
-void hdlc_status() {
-	// test connection
-	uint8_t data_buffer[PACKET_SIZE] = {COMMAND_STATUS,0,0,0,0,0};
-	minihdlc_send_frame(data_buffer, PACKET_SIZE);
-	read_hdlc();
-	while (mcu_status == STATUS_NONE) {
-		read_hdlc();
-	}
-	/* Set a key */
-	pthread_mutex_lock(&mutex);
-	redisAppendCommand(c,"SET %s %s", CHANNEL_KEY[CHANNEL_MCU_STATUS], STATUS_NAME[mcu_status]);
-	redisAppendCommand(c,"EXPIRE %s %d", CHANNEL_KEY[CHANNEL_MCU_STATUS], VALIDITY_TIMEOUT);
-	LOG_DEBUG("SET: %s\n", reply->str);
-	freeReplyObject(reply);
-	pthread_mutex_unlock(&mutex);
-}
-
-void initSerial() {
-	/* Open and configure each port. */
-<<<<<<< HEAD
-	LOG_DEBUG("Looking for port %s.\n", PORT_NAME);
-	check(sp_get_port_by_name(PORT_NAME, &port));
-=======
-	LOG_DEBUG("Looking for port %s.\n", port_name);
-	check(sp_get_port_by_name(port_name, &port));
->>>>>>> 60ea6c223e8ceaa2492ce50e09b239dee2632330
-
-	LOG_INFO("Opening port.\n");
-	check(sp_open(port, SP_MODE_READ_WRITE));
-
-	LOG_DEBUG("Setting port to 9600 8N1, no flow control.\n");
-	check(sp_set_baudrate(port, 9600));
-	check(sp_set_bits(port, 8));
-	check(sp_set_parity(port, SP_PARITY_NONE));
-	check(sp_set_stopbits(port, 1));
-	check(sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE));
-
-	sleep(1);
-
-	minihdlc_init(hdlc_send_char, hdlc_frame_handler);
-	hdlc_status();
 }

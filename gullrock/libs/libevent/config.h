@@ -133,7 +133,7 @@
 /* #undef HAVE_LIBWS2_32 */
 
 /* Define if the system has zlib */
-/* #undef HAVE_LIBZ */
+#define HAVE_LIBZ 1
 
 /* Define to 1 if you have the `mach_absolute_time' function. */
 /* #undef HAVE_MACH_ABSOLUTE_TIME */
@@ -143,6 +143,12 @@
 
 /* Define to 1 if you have the <mach/mach_time.h> header file. */
 /* #undef HAVE_MACH_MACH_TIME_H */
+
+/* Define if the system has mbedtls */
+/* #undef HAVE_MBEDTLS */
+
+/* Define to 1 if you have the <mbedtls/ssl.h> header file. */
+/* #undef HAVE_MBEDTLS_SSL_H */
 
 /* Define to 1 if you have the <memory.h> header file. */
 #define HAVE_MEMORY_H 1
@@ -166,10 +172,10 @@
 #define HAVE_NETINET_TCP_H 1
 
 /* Define if the system has openssl */
-/* #undef HAVE_OPENSSL */
+#define HAVE_OPENSSL 1
 
 /* Define to 1 if you have the <openssl/ssl.h> header file. */
-/* #undef HAVE_OPENSSL_SSL_H */
+#define HAVE_OPENSSL_SSL_H 1
 
 /* Define to 1 if you have the `pipe' function. */
 #define HAVE_PIPE 1
@@ -194,6 +200,9 @@
 
 /* Define if we have pthreads on this system */
 #define HAVE_PTHREADS 1
+
+/* Define to 1 if you have the `pthread_mutexattr_setprotocol' function. */
+#define HAVE_PTHREAD_MUTEXATTR_SETPROTOCOL 1
 
 /* Define to 1 if you have the `putenv' function. */
 #define HAVE_PUTENV 1
@@ -248,6 +257,9 @@
 
 /* Define to 1 if you have the `strsep' function. */
 #define HAVE_STRSEP 1
+
+/* Define to 1 if you have the `strsignal' function. */
+#define HAVE_STRSIGNAL 1
 
 /* Define to 1 if you have the `strtok_r' function. */
 #define HAVE_STRTOK_R 1
@@ -405,11 +417,14 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #define HAVE_VASPRINTF 1
 
+/* Define if your system supports the wepoll module */
+/* #undef HAVE_WEPOLL */
+
 /* Define if kqueue works correctly with pipes */
 /* #undef HAVE_WORKING_KQUEUE */
 
 /* Define to 1 if you have the <zlib.h> header file. */
-/* #undef HAVE_ZLIB_H */
+#define HAVE_ZLIB_H 1
 
 /* Define to 1 if you have the `_gmtime64' function. */
 /* #undef HAVE__GMTIME64 */
@@ -427,7 +442,7 @@
 #define LT_OBJDIR ".libs/"
 
 /* Numeric representation of the version */
-#define NUMERIC_VERSION 0x02010c00
+#define NUMERIC_VERSION 0x02020001
 
 /* Name of package */
 #define PACKAGE "libevent"
@@ -439,7 +454,7 @@
 #define PACKAGE_NAME "libevent"
 
 /* Define to the full name and version of this package. */
-#define PACKAGE_STRING "libevent 2.1.12-stable"
+#define PACKAGE_STRING "libevent 2.2.0-alpha-dev"
 
 /* Define to the one symbol short name of this package. */
 #define PACKAGE_TARNAME "libevent"
@@ -448,7 +463,7 @@
 #define PACKAGE_URL ""
 
 /* Define to the version of this package. */
-#define PACKAGE_VERSION "2.1.12-stable"
+#define PACKAGE_VERSION "2.2.0-alpha-dev"
 
 /* Define to necessary symbol if this constant uses a non-standard name on
    your system. */
@@ -458,7 +473,7 @@
 #define SIZEOF_INT 4
 
 /* The size of `long', as computed by sizeof. */
-#define SIZEOF_LONG 8
+#define SIZEOF_LONG 4
 
 /* The size of `long long', as computed by sizeof. */
 #define SIZEOF_LONG_LONG 8
@@ -467,19 +482,19 @@
 #define SIZEOF_OFF_T 8
 
 /* The size of `pthread_t', as computed by sizeof. */
-#define SIZEOF_PTHREAD_T 8
+#define SIZEOF_PTHREAD_T 4
 
 /* The size of `short', as computed by sizeof. */
 #define SIZEOF_SHORT 2
 
 /* The size of `size_t', as computed by sizeof. */
-#define SIZEOF_SIZE_T 8
+#define SIZEOF_SIZE_T 4
 
 /* The size of `time_t', as computed by sizeof. */
-#define SIZEOF_TIME_T 8
+#define SIZEOF_TIME_T 4
 
 /* The size of `void *', as computed by sizeof. */
-#define SIZEOF_VOID_P 8
+#define SIZEOF_VOID_P 4
 
 /* Define to 1 if you have the ANSI C header files. */
 #define STDC_HEADERS 1
@@ -510,7 +525,7 @@
 
 
 /* Version number of package */
-#define VERSION "2.1.12-stable"
+#define VERSION "2.2.0-alpha-dev"
 
 /* Enable large inode numbers on Mac OS X 10.5.  */
 #ifndef _DARWIN_USE_64_BIT_INODE
@@ -518,7 +533,7 @@
 #endif
 
 /* Number of bits in a file offset, on hosts where this is settable. */
-/* #undef _FILE_OFFSET_BITS */
+#define _FILE_OFFSET_BITS 64
 
 /* Define for large files, on AIX-style hosts. */
 /* #undef _LARGE_FILES */

@@ -4,23 +4,11 @@
 		{
 			"type": "shell",
 			"label": "C/C++: gcc build active file",
-			"command": "/usr/bin/gcc",
+			"command": "make",
 			"args": [
-				"-g",
-				"-I",
-				"${workspaceFolder}/Processor/include",
-				"-I",
-				"${workspaceFolder}/Processor/libs",
-				"${file}",
-				"${workspaceFolder}/Processor/libs/minihdlc/minihdlc.c",
-				"-o",
-				"${fileDirname}/${fileBasenameNoExtension}",
-				"-lhiredis_vip",
-				"-lpthread",
-				"-lserialport"
-				],
+			],
 			"options": {
-				"cwd": "${workspaceFolder}"
+				"cwd": "${workspaceFolder}/${relativeFileDirname}"
 			},
 			"problemMatcher": [
 				"$gcc"

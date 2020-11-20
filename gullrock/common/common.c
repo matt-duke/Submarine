@@ -51,7 +51,6 @@ int init_redis(redisContext **c, const char *hostname, const int port) {
 
   	redisReply *reply;
 	*c = redisConnectWithTimeout(hostname, port, timeout);
-	free(&timeout);
 	if (c == NULL || (*c)->err) {
 		if (c) {
 				LOG_ERROR("Connection error: %s\n", (*c)->errstr);

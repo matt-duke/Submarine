@@ -143,6 +143,12 @@
 /* Define to 1 if you have the <mach/mach_time.h> header file. */
 #undef HAVE_MACH_MACH_TIME_H
 
+/* Define if the system has mbedtls */
+#undef HAVE_MBEDTLS
+
+/* Define to 1 if you have the <mbedtls/ssl.h> header file. */
+#undef HAVE_MBEDTLS_SSL_H
+
 /* Define to 1 if you have the <memory.h> header file. */
 #undef HAVE_MEMORY_H
 
@@ -193,6 +199,9 @@
 
 /* Define if we have pthreads on this system */
 #undef HAVE_PTHREADS
+
+/* Define to 1 if you have the `pthread_mutexattr_setprotocol' function. */
+#undef HAVE_PTHREAD_MUTEXATTR_SETPROTOCOL
 
 /* Define to 1 if you have the `putenv' function. */
 #undef HAVE_PUTENV
@@ -247,6 +256,9 @@
 
 /* Define to 1 if you have the `strsep' function. */
 #undef HAVE_STRSEP
+
+/* Define to 1 if you have the `strsignal' function. */
+#undef HAVE_STRSIGNAL
 
 /* Define to 1 if you have the `strtok_r' function. */
 #undef HAVE_STRTOK_R
@@ -403,6 +415,9 @@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #undef HAVE_VASPRINTF
+
+/* Define if your system supports the wepoll module */
+#undef HAVE_WEPOLL
 
 /* Define if kqueue works correctly with pipes */
 #undef HAVE_WORKING_KQUEUE

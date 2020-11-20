@@ -50,43 +50,43 @@ run_func_t * const run_table[ CAMERA_NUM_STATES ] = {
 
 void do_to_init(CameraClass_t *cam) {
     //test camera existance
-    cam->curr_state = CAMERA_STATE_IDLE;
+    cam->state = CAMERA_STATE_IDLE;
 }
 
 void do_to_stream(CameraClass_t *cam) {
-    initStream(CameraClass_t *cam);
-    cam->curr_state = CAMERA_STATE_STREAM;
+    initStream(cam);
+    cam->state = CAMERA_STATE_STREAM;
 }
 
-int cameraInit (CameraClass_t *app) {
-    app->run = &runState;
-    app->transition = &transition;
-    app->curr_state = APP_STATE_INIT;
-    char *stream_host = STREAM_HOST;
-    int stream_port = STREAM_PORT;
-    int stream_fps = STREAM_FPS;
-    int stream_bitrate = STREAM_BITRATE;
-    int stream_w = STREAM_W;
-    int stream_h = STREAM_H;
-    app->transition(&app, APP_STATE_INIT);
+int cameraInit (CameraClass_t *cam) {
+    cam->run = &runState;
+    cam->transition = &transition;
+    cam->state = CAMERA_STATE_INIT;
+    cam->stream_host = STREAM_HOST;
+    cam->stream_port = STREAM_PORT;
+    cam->stream_fps = STREAM_FPS;
+    cam->stream_bitrate = STREAM_BITRATE;
+    cam->stream_w = STREAM_W;
+    cam->stream_h = STREAM_H;
+    cam->transition(&cam, CAMERA_STATE_INIT);
     return 0;
 }
 
-void transition(AppClass_t *app, App_state_t new_state) {
+void transition(CameraClass_t *cam, camera_state_t new_state) {
     transition_func_t *transition_fn = 
-        transition_table[ app->curr_state ][ new_state ];
+        transition_table[ cam->state ][ new_state ];
 
-    transition_fn(&app);
+    transition_fn(&cam);
 }
 
-void runState(AppClass_t *app) {
-    run_func_t *run_fn = run_table[ app->curr_state ];
+void runState(CameraClass_t *app) {
+    run_func_t *run_fn = run_table[ app->state ];
 
     run_fn(&app);
 }
 
 int initStream(CameraClass_t *cam) {
-  printf("Starting stream\n");
+  LOG_INFO("Starting stream");
   char cmd[248];
   sprintf(cmd,
     "gst-launch-1.0 -v rpicamsrc bitrate=%d ! h264parse ! rtph264pay config-interval=1 pt=96! gdppay ! tcpserversink host=%s port=%d &",
@@ -95,7 +95,7 @@ int initStream(CameraClass_t *cam) {
     cam->stream_port);
   int status = system(cmd);
   if (status != 0) {
-    LOG_ERROR("Failed to start stream with exit code %d.\n", status / 256);
+    LOG_ERROR("Failed to start stream with exit code %d.", status / 256);
   }
   return(status/256);
 }

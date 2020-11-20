@@ -1,31 +1,49 @@
 #ifndef HDLC_DEF_H
 #define HDLC_DEF_H
 
+#include <stdint.h>
+
 /*
   HDLC CONSTANTS
 */
-
-#define PACKET_SIZE 6
+#define MAX_HDLC_FRAME_LENGTH 64
+#define PACKET_SIZE 7
 #define PORT_NAME "/dev/ttyACM0"
 
-enum HDLC_CMD {
-  COMMAND_STATUS = 0,
-  COMMAND_SET,
-  COMMAND_ERROR,
-  COMMAND_SENSOR
+enum HDLC_ID {
+  HDLC_GET = 0,
+  HDLC_SET
 };
 
-enum STATUS {
-  STATUS_NONE = 0,
-  STATUS_OK,
-  STATUS_FAULT
+enum HDLC_STATUS {
+  HDLC_STATUS_NONE = 0,
+  HDLC_STATUS_OK,
+  HDLC_STATUS_FAULT
 };
 
-enum DEVICE_ID {
-  ID_MOTOR_L = 0,
-  ID_MOTOR_R,
-  ID_HEADLIGHT,
-  ID_BUILT_IN_LED
+enum HDLC_TYPE {
+  HDLC_MCU_STATUS = 0,
+  HDLC_MOTOR_L,
+  HDLC_MOTOR_R,
+  HDLC_HEADLIGHT,
+  HDLC_BUILT_IN_LED
 };
+
+typedef union Data {
+  int32_t value;
+  uint8_t bytes[4];
+}data_t;
+
+typedef struct Packet {
+  uint8_t type;
+  uint8_t id;
+  uint8_t key;
+  data_t data;
+}packet_t;
+
+typedef union Buffer {
+  packet_t packet;
+  uint8_t bytes[PACKET_SIZE];
+}buffer_t;
 
 #endif

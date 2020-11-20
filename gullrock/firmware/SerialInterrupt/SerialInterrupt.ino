@@ -1,34 +1,15 @@
 #include <Arduino_FreeRTOS.h>
 #include <Arduhdlc.h>
-#include "hdlc.h"
-#include "redis.h"
-
-#define MAX_HDLC_FRAME_LENGTH 64
-#define PACKET_SIZE 6
+#include "hdlc_def.h"
+#include "redis_def.h"
 
 
 TaskHandle_t serialHandler;
 TaskHandle_t sensorHandler;
 
-byte status = STATUS_NONE;
-
-union Data {
-  uint32_t value;
-  uint8_t bytes[4];
-};
-
-struct Packet {
-  byte type;
-  byte id;
-  Data data;
-};
-
-union Buffer {
-  Packet packet;
-  uint8_t bytes[PACKET_SIZE];
-};
-
 Buffer dataBuffer;
+
+byte status = STATUS_NONE;
 
 bool LED_STATE = 0;
 

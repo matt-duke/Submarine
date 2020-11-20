@@ -7,14 +7,14 @@
 
 extern const char *__progname;
 
-void transition(smAppClass_t *app, app_state_t new_state);
-void runState(smAppClass_t *app);
+static void transition(smAppClass_t *app, app_state_t new_state);
+static void runState(smAppClass_t *app);
 
-void do_nothing(smAppClass_t *app) {};
-void do_to_init(smAppClass_t *app);
-void do_to_post(smAppClass_t *app);
-void do_to_running(smAppClass_t *app);
-void do_to_fault(smAppClass_t *app);
+static void do_nothing(smAppClass_t *app) {};
+static void do_to_init(smAppClass_t *app);
+static void do_to_post(smAppClass_t *app);
+static void do_to_running(smAppClass_t *app);
+static void do_to_fault(smAppClass_t *app);
 
 app_transition_func_t * app_transition_table[ APP_NUM_STATES ][ APP_NUM_STATES ] = {
     { do_to_init, do_to_post, do_nothing,    do_to_fault },
@@ -44,7 +44,7 @@ void transition(smAppClass_t *app, app_state_t new_state) {
     pthread_mutex_lock(&app->mutex);
     transition_fn(app);
     if (app->state == new_state) {
-        LOG_INFO("Transition to state %d", new_state)
+        LOG_INFO("Transition to state %d", new_state);
     } else {
         LOG_ERROR("Transition from state %d to state %d failed.", app->state, new_state);
     }

@@ -62,12 +62,13 @@ void do_to_fault(smAppClass_t *app) {
 
 void do_to_init(smAppClass_t *app) {
 	if (app->state == APP_STATE_INIT) {
-
 		pthread_t thread_id;
-		pthread_create(&thread_id, NULL, heartbeatThread, (void*)__progname);
+		pthread_create(&thread_id, NULL, heartbeatThread, (void*) &state_machine);
 		
-		init_redis(&c, REDIS_HOSTNAME, REDIS_PORT);
-
+		if (init_redis(&c, REDIS_HOSTNAME, REDIS_PORT) != 0) {
+    		LOG_FATAL("Failed to start.");
+    		abort();
+  		}
 		motorInit(&motor_l);
 		motorInit(&motor_r);
 	}

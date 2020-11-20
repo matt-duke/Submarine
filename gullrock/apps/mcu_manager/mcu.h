@@ -1,6 +1,8 @@
 #ifndef MCU_H
 #define MCU_H
 
+#include <hdlc_def.h>
+
 typedef enum { 
     MCU_STATE_INIT,
     MCU_STATE_POST,
@@ -11,11 +13,11 @@ typedef enum {
 typedef struct sMcuClass {
     void (*run)(struct sMcuClass *self);
     int (*transition)(struct sMcuClass *self, mcu_state_t new_state);
-    int (*get)(struct sMcuClass *self, int key, int data);
-    int (*set)(struct sMcuClass *self, int key, int data);
+    int (*get)(struct sMcuClass *self, uint8_t id);
+    int (*set)(struct sMcuClass *self, uint8_t id, data_t data);
     mcu_state_t state;
 } McuClass_t;
 
-int mcuInit (McuClass_t *Mcu);
+extern int mcuInit (McuClass_t *Mcu);
 
 #endif
