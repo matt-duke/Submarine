@@ -1,3 +1,36 @@
 [submodule "gullrock/libs/libgps"]
 	path = gullrock/libs/libgps
 	url = https://github.com/JCube001/libgps.git
+[submodule "gullrock/libs/Arduhdlc"]
+	path = gullrock/libs/Arduhdlc
+	url = https://github.com/jarkko-hautakorpi/Arduhdlc.git
+[submodule "gullrock/libs/cmocka"]
+	path = gullrock/libs/cmocka
+	url = https://github.com/clibs/cmocka.git
+[submodule "gullrock/libs/hiredis-vip"]
+	path = gullrock/libs/hiredis-vip
+	url = https://github.com/vipshop/hiredis-vip.git
+[submodule "gullrock/libs/libevent"]
+	path = gullrock/libs/libevent
+	url = https://github.com/libevent/libevent.git
+[submodule "gullrock/libs/libserialport"]
+	path = gullrock/libs/libserialport
+	url = https://github.com/sigrokproject/libserialport.git
+[submodule "gullrock/libs/linux-mpu9150"]
+	path = gullrock/libs/linux-mpu9150
+	url = https://github.com/mrbichel/linux-mpu9150.git
+[submodule "gullrock/libs/c-logger"]
+	path = gullrock/libs/c-logger
+	url = https://github.com/yksz/c-logger.git
+[submodule "gullrock/libs/minihdlc"]
+	path = gullrock/libs/minihdlc
+	url = https://github.com/mengguang/minihdlc.git
+[submodule "gullrock/libs/Servo"]
+	path = gullrock/libs/Servo
+	url = https://github.com/arduino-libraries/Servo.git
+[submodule "gullrock/libs/Arduino_FreeRTOS_Library"]
+	path = gullrock/libs/Arduino_FreeRTOS_Library
+	url = https://github.com/feilipu/Arduino_FreeRTOS_Library.git
+[submodule "gullrock/libs/Adafruit_Neopixel"]
+	path = gullrock/libs/Adafruit_Neopixel
+	url = https://github.com/adafruit/Adafruit_NeoPixel.git
