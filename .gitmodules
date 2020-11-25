@@ -1,0 +1,3 @@
+[submodule "gullrock/libs/libgps"]
+	path = gullrock/libs/libgps
+	url = https://github.com/JCube001/libgps.git
