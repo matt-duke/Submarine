@@ -5,7 +5,7 @@
 #include <signal.h>
 #include <pthread.h>
 
-#include <logger/logger.h>
+#include <c-logger/logger.h>
 #include <hiredis-vip/hiredis.h>
 #include <hiredis-vip/async.h>
 #include <hiredis-vip/adapters/libevent.h>

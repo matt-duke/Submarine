@@ -8,7 +8,7 @@
 #include <hiredis-vip/adapters/libevent.h>
 #include <libserialport/libserialport.h>
 #include <minihdlc/minihdlc.h>
-#include <logger/logger.h>
+#include <c-logger/logger.h>
 
 #include <common.h>
 #include <redis_def.h>

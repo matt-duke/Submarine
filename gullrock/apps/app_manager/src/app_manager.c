@@ -7,7 +7,7 @@
 #include <pthread.h>
 
 #include <hiredis-vip/hiredis.h>
-#include <logger/logger.h>
+#include <c-logger/logger.h>
 
 #include <common.h>
 #include <baseapp.h>

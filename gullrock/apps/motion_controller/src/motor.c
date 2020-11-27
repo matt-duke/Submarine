@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <logger/logger.h>
+#include <c-logger/logger.h>
 
 #include "motor.h"
 

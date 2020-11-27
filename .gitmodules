@@ -34,3 +34,6 @@
 [submodule "gullrock/libs/Adafruit_Neopixel"]
 	path = gullrock/libs/Adafruit_Neopixel
 	url = https://github.com/adafruit/Adafruit_NeoPixel.git
+[submodule "gullrock/libs/sqlite"]
+	path = gullrock/libs/sqlite
+	url = https://github.com/sqlite/sqlite.git
