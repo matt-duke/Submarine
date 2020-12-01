@@ -37,3 +37,18 @@
 [submodule "gullrock/libs/sqlite"]
 	path = gullrock/libs/sqlite
 	url = https://github.com/sqlite/sqlite.git
+[submodule "gullrock/thirdparty/c-logger"]
+	path = gullrock/thirdparty/c-logger
+	url = https://github.com/yksz/c-logger.git
+[submodule "gullrock/thirdparty/hiredis"]
+	path = gullrock/thirdparty/hiredis
+	url = https://github.com/redis/hiredis.git
+[submodule "gullrock/thirdparty/libgps"]
+	path = gullrock/thirdparty/libgps
+	url = https://github.com/JCube001/libgps.git
+[submodule "gullrock/thirdparty/libserialport"]
+	path = gullrock/thirdparty/libserialport
+	url = https://github.com/sigrokproject/libserialport.git
+[submodule "gullrock/thirdparty/jsmn"]
+	path = gullrock/thirdparty/jsmn
+	url = https://github.com/zserge/jsmn.git
