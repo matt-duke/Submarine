@@ -1,0 +1,14 @@
+{
+    "/etc/dhcpd.conf": {
+        "crc": "48B49A54",
+        "name": "dhcpd.conf"
+    },
+    "/redis.conf": {
+        "crc": "CE47FEC6",
+        "name": "redis.conf"
+    },
+    "/etc/network/interfaces.d/vlans": {
+        "crc": "7A5B11D6",
+        "name": "vlans"
+    }
+}

@@ -1,0 +1,39 @@
+GSTREAMER
+gir1.2-gst-plugins-base-1.0 -- for GstVideo (not needed?)
+
+gstreamer1.0-libav
+
+REDIS
+wget http://download.redis.io/redis-stable.tar.gz
+tar xvzf redis-stable.tar.gz
+cd redis-stable
+make
+
+git clone git://git.drogon.net/wiringPi
+$ cd wiringPi
+$ ./build
+
+
+REDIS C LIBRARY
+hiredis-vip
+make -> generates libhiredis_vip.so
+copy to /usr/lib
+update using sudo ldconfig
+check with sudo ldconfig -p | grep redis
+
+
+SERIAL LIBRARY
+git clone https://github.com/sigrokproject/libserialport.git
+install dh-autoreconf
+run autogen.sh, then configure.sh
+make install
+ldconfig
+
+GST_RPICAM
+#https://github.com/thaytan/gst-rpicamsrc/
+sudo apt install libgstreamer1.0-dev libgstreamer-plugins-base1.0-dev
+git clone https://github.com/thaytan/gst-rpicamsrc.git
+cd gst-rpicamsrc
+./autogen.sh
+make
+sudo make install

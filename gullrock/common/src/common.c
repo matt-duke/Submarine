@@ -4,11 +4,12 @@
 #include <unistd.h>
 #include <signal.h>
 #include <pthread.h>
+#include <stdbool.h>
 
-#include <c-logger/logger.h>
-#include <hiredis-vip/hiredis.h>
-#include <hiredis-vip/async.h>
-#include <hiredis-vip/adapters/libevent.h>
+#include <logger.h>
+#include <hiredis.h>
+#include <async.h>
+#include <adapters/libevent.h>
 
 #include "redis_def.h"
 #include "baseapp.h"
@@ -17,12 +18,13 @@
 /* Variables */
 extern const char *__progname;
 
-/* Functions */
-int redis_fn_callback (void (*f)(), char *topic);
-int init_redis(redisContext **c, const char *hostname, const int port);
-void *heartbeatThread(void *state);
-void init_logging();
-
+bool file_exists(char *fname) {
+	if(access( fname, F_OK ) != -1) {
+		return true;
+	} else {
+		return false;
+	}
+}
 
 int redis_fn_callback (void (*f)(), char *topic) {
     signal(SIGPIPE, SIG_IGN);

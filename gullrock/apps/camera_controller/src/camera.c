@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <c-logger/logger.h>
+#include <logger.h>
 
 #include "camera.h"
 
@@ -17,50 +17,85 @@ typedef void transition_func_t(CameraClass_t *cam);
 typedef void run_func_t(CameraClass_t *cam);
 
 /* Functions */
-void transition(CameraClass_t *cam, camera_state_t new_state);
-void runState(CameraClass_t *cam);
-int initStream();
-int killStream();
+static int transition(CameraClass_t *cam, camera_state_t new_state);
+static void runState(CameraClass_t *cam);
+static int take_photo(CameraClass_t *cam);
 
-void do_nothing(CameraClass_t *cam);
+static int initStream();
+static int killStream();
 
-void do_to_init(CameraClass_t *cam);
-void do_to_idle(CameraClass_t *cam);
-void do_to_stream(CameraClass_t *cam);
-void do_to_photo(CameraClass_t *cam);
-void do_to_fault(CameraClass_t *cam);
+static void do_nothing(CameraClass_t *cam);
 
-void do_init(CameraClass_t *cam);
-void do_idle(CameraClass_t *cam);
-void do_stream(CameraClass_t *cam);
-void do_photo(CameraClass_t *cam);
-void do_fault(CameraClass_t *cam);
+static void do_to_init(CameraClass_t *cam);
+static void do_to_post(CameraClass_t *cam);
+static void do_to_idle(CameraClass_t *cam);
+static void do_to_stream(CameraClass_t *cam);
+static void do_to_fault(CameraClass_t *cam);
+
+static void do_post(CameraClass_t *cam);
+static void do_idle(CameraClass_t *cam);
+static void do_stream(CameraClass_t *cam);
+static void do_fault(CameraClass_t *cam);
 
 transition_func_t * const transition_table[ CAMERA_NUM_STATES ][ CAMERA_NUM_STATES ] = {
-    { do_to_init, do_to_idle, do_nothing,   do_nothing,  do_to_fault },
-    { do_nothing, do_nothing, do_to_stream, do_to_photo, do_to_fault },
-    { do_nothing, do_nothing, do_nothing,   do_to_photo, do_to_fault },
-    { do_nothing, do_nothing, do_nothing,   do_nothing,  do_to_fault },
-    { do_nothing, do_to_idle, do_nothing,   do_nothing,  do_nothing  },
+    { do_to_init, do_to_post, do_to_idle,  do_nothing,   do_to_fault },
+    { do_nothing, do_nothing, do_to_idle,  do_nothing,   do_to_fault },
+    { do_nothing, do_nothing, do_nothing,  do_to_stream, do_to_fault },
+    { do_nothing, do_nothing, do_nothing,  do_nothing,   do_to_fault },
+    { do_nothing, do_to_idle, do_nothing,  do_nothing,   do_nothing  },
 };
 
 run_func_t * const run_table[ CAMERA_NUM_STATES ] = {
-    do_init, do_idle, do_stream, do_photo, do_fault
+    do_nothing, do_post, do_idle, do_stream, do_fault
 };
 
+void do_nothing(CameraClass_t *cam) {
+
+}
+
 void do_to_init(CameraClass_t *cam) {
+    //test camera existance
+    cam->state = CAMERA_STATE_INIT;
+    cam->transition(cam, CAMERA_STATE_POST);
+}
+
+void do_to_idle(CameraClass_t *cam) {
     //test camera existance
     cam->state = CAMERA_STATE_IDLE;
 }
 
+void do_to_post(CameraClass_t *cam) {
+    //test camera existance
+    cam->state = CAMERA_STATE_POST;
+}
+
 void do_to_stream(CameraClass_t *cam) {
-    initStream(cam);
+    //test camera existance
     cam->state = CAMERA_STATE_STREAM;
+}
+
+void do_to_fault(CameraClass_t *cam) {
+    initStream(cam);
+    cam->state = CAMERA_STATE_FAULT;
+}
+
+void do_post(CameraClass_t *cam) {
+
+}
+void do_idle(CameraClass_t *cam) {
+
+}
+void do_stream(CameraClass_t *cam) {
+
+}
+void do_fault(CameraClass_t *cam) {
+
 }
 
 int cameraInit (CameraClass_t *cam) {
     cam->run = &runState;
     cam->transition = &transition;
+    cam->take_photo = &take_photo;
     cam->state = CAMERA_STATE_INIT;
     cam->stream_host = STREAM_HOST;
     cam->stream_port = STREAM_PORT;
@@ -68,21 +103,28 @@ int cameraInit (CameraClass_t *cam) {
     cam->stream_bitrate = STREAM_BITRATE;
     cam->stream_w = STREAM_W;
     cam->stream_h = STREAM_H;
-    cam->transition(&cam, CAMERA_STATE_INIT);
+    cam->transition(cam, CAMERA_STATE_INIT);
     return 0;
 }
 
-void transition(CameraClass_t *cam, camera_state_t new_state) {
+int transition(CameraClass_t *cam, camera_state_t new_state) {
     transition_func_t *transition_fn = 
         transition_table[ cam->state ][ new_state ];
 
-    transition_fn(&cam);
+    transition_fn(cam);
+    if (cam->state != new_state) {
+      return 1;
+    }
 }
 
 void runState(CameraClass_t *app) {
     run_func_t *run_fn = run_table[ app->state ];
 
-    run_fn(&app);
+    run_fn(app);
+}
+
+int take_photo(CameraClass_t *cam) {
+
 }
 
 int initStream(CameraClass_t *cam) {

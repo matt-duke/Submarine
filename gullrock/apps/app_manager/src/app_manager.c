@@ -6,8 +6,8 @@
 #include <unistd.h>
 #include <pthread.h>
 
-#include <hiredis-vip/hiredis.h>
-#include <c-logger/logger.h>
+#include <hiredis.h>
+#include <logger.h>
 
 #include <common.h>
 #include <baseapp.h>

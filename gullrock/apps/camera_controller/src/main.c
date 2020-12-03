@@ -4,8 +4,8 @@
 #include <pthread.h>
 #include <unistd.h>
 
-#include <hiredis-vip/hiredis.h>
-#include <c-logger/logger.h>
+#include <hiredis.h>
+#include <logger.h>
 
 #include <common.h>
 #include <redis_def.h>

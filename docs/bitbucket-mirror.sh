@@ -1,0 +1,1 @@
+git push --mirror https://mduke6@bitbucket.org/mduke6/submarine.git

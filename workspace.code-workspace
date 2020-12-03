@@ -1,0 +1,22 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "gullrock/apps/camera_controller"
+		},
+		{
+			"path": "gullrock/apps/app_manager"
+		},
+		{
+			"path": "gullrock/apps/config_controller"
+		}
+	],
+	"settings": {
+		"files.associations": {
+			"linux_glue.h": "c",
+			"functional": "c"
+		}
+	}
+}
