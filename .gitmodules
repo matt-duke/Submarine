@@ -10,6 +10,9 @@
 [submodule "gullrock/thirdparty/libserialport"]
 	path = gullrock/thirdparty/libserialport
 	url = https://github.com/sigrokproject/libserialport.git
-[submodule "gullrock/thirdparty/jsmn"]
-	path = gullrock/thirdparty/jsmn
-	url = https://github.com/zserge/jsmn.git
+[submodule "gullrock/thirdparty/cJSON"]
+	path = gullrock/thirdparty/cJSON
+	url = https://github.com/DaveGamble/cJSON.git
+[submodule "gullrock/thirdparty/gst-rpicamsrc"]
+	path = gullrock/thirdparty/gst-rpicamsrc
+	url = https://github.com/thaytan/gst-rpicamsrc.git
