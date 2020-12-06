@@ -13,6 +13,3 @@
 [submodule "gullrock/thirdparty/cJSON"]
 	path = gullrock/thirdparty/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
-[submodule "gullrock/thirdparty/gst-rpicamsrc"]
-	path = gullrock/thirdparty/gst-rpicamsrc
-	url = https://github.com/thaytan/gst-rpicamsrc.git

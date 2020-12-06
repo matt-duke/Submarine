@@ -7,39 +7,41 @@
 
 #include <hiredis.h>
 #include <logger.h>
-
-#include <jsmn.h>
+#include <cJSON.h>
 
 #include <common.h>
 #include <redis_def.h>
 #include <baseapp.h>
 
 /* Variables */
-#define SCHEMA_DIR "/config/schema"
-#define DB_DIR "/config/db"
+#define EX_SW_CFG "/persistent/expected_sw_config.json"
+#define SKIP_POST "/persistent/skip_post"
 
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
-jsmn_parser parser;
-jsmntok_t tokens[10];
 
 smAppClass_t state_machine;
 
 /* Functions */
 static void do_to_init(smAppClass_t *app);
 static void do_to_post(smAppClass_t *app);
+static void do_to_fault(smAppClass_t *app);
 
 static void do_fault(smAppClass_t *app);
-static void do_running(smAppClass_t *app);
 
+static int verify_file_config(char *filename);
+static int verify_app_versions(char *filename);
 static int file_crc(int *crc, char *path);
+static int app_version(char *version, char *app);
 
-int main(int argc, char *argv[])
-{
+int main(int argc, char *argv[]) {
 	init_logging();
+
 	app_transition_table[APP_STATE_INIT][APP_STATE_INIT] = do_to_init;
-	app_run_table[APP_STATE_RUNNING] = do_running;
+	app_transition_table[APP_STATE_INIT][APP_STATE_POST] = do_to_post;
+	app_transition_table[APP_STATE_RUNNING][APP_STATE_POST] = do_to_post;
+	app_transition_table[APP_STATE_FAULT][APP_STATE_POST] = do_to_post;
 
 	appInit(&state_machine);
 
@@ -55,57 +57,114 @@ void do_to_init(smAppClass_t *app) {
 		
 		if (init_redis(&c, REDIS_HOSTNAME, REDIS_PORT) != 0) {
     		LOG_FATAL("Failed to start.");
-    		abort();
+    		exit(0);
   		}
 	}
   app->transition(app, APP_STATE_POST);
 }
 
-static void do_running(smAppClass_t *app) {
+void do_to_post(smAppClass_t *app) {
+	app->state = APP_STATE_POST;
 
+	if (!file_exists(SKIP_POST)) {
+		app->transition(app, APP_STATE_RUNNING);
+		return;
+	}
+
+	int result = 0;
+	result += verify_file_config(EX_SW_CFG);
+	result += verify_app_versions(EX_SW_CFG);
+	if (result != 0) {
+		LOG_ERROR("POST failure");
+		app->transition(app, APP_STATE_FAULT);
+	} else {
+		app->transition(app, APP_STATE_RUNNING);
+	}
 }
 
-/*static void do_to_post(smAppClass_t *app) {
-	LOG_INFO("Verifying files: FILE_PATHS");
-	bool criteria = true;
-	for (int i = 0; i < sizeof(FILE_PATHS); i++) {
-		char *file = basename(FILE_PATHS[i]);
-		int crc;
-		if (!exists(FILE_PATHS[i])) {
-			LOG_ERROR("File missing %s", file);
-			criteria = false;
-		}
-		else if (0 != get_file_crc(crc, FILE_PATHS[i])) {
-			LOG_ERROR("CRC validation failed for %s", file);
-			criteria = false;
-		}
-		if (!criteria) {
-			app->transition(app, APP_STATE_FAULT);
-		} else {
-			app->transition(app, APP_STATE_RUNNING);
-		}
-	}
-}*/
+void do_to_fault(smAppClass_t *app) {
+	app->state = APP_STATE_FAULT;
 
-int read_file_crc(char *filename) {
-	char * buffer = 0;
-	long length;
-	FILE * f = fopen (filename, "rb");
+	// Redis message
+}
 
-	if (f) {
-		fseek (f, 0, SEEK_END);
-		length = ftell (f);
-		fseek (f, 0, SEEK_SET);
-		buffer = malloc(length);
-		if (buffer) {
-			fread (buffer, 1, length, f);
-		}
-		fclose (f);
-	}
+void do_fault(smAppClass_t *app) {
+	app->state = APP_STATE_FAULT;
+
+	// Redis message
+}
+
+int verify_file_config(char *filename) {
+	char *buffer;
+	const cJSON *json = NULL;
+	const cJSON *files = NULL;
+	const cJSON *file = NULL;
+
+	int result = 0;
+
+	read_file(filename, &buffer);
+
 	if (buffer) {
-		jsmn_init(&parser);
-		jsmn_parse(&parser, buffer, strlen(buffer), tokens, 10);
+		cJSON *json = cJSON_Parse(buffer);
+		files = cJSON_GetObjectItemCaseSensitive(json, "files");
+		cJSON_ArrayForEach(file, files) {
+			cJSON *crc = cJSON_GetObjectItemCaseSensitive(file, "crc");
+			cJSON *path = cJSON_GetObjectItemCaseSensitive(file, "path");
+			int act_crc;
+			if (!file_exists(path->string)) {
+				LOG_ERROR("File does not exist %s: ", path->string);
+				result = 1;
+			}
+			else if (file_crc(&act_crc, path->string) != 0) {
+				LOG_ERROR("Error getting file crc %s: ", path->string);
+				result = 2;
+			}
+			if ((int)strtol(crc->string, NULL, 16) != act_crc) {
+				LOG_ERROR("Invalid crc: %s: ", path->string);
+				result = 3;
+			}
+		}
+		cJSON_Delete(json);
+	} else {
+		LOG_ERROR("Empty file buffer.");
+		result = 4;
 	}
+	free(buffer);
+	return(result);
+}
+
+int verify_app_versions(char *filename) {
+	char *buffer;
+	const cJSON *json = NULL;
+	const cJSON *apps = NULL;
+	const cJSON *app = NULL;
+
+	int result = 0;
+
+	read_file(filename, &buffer);
+
+	if (buffer) {
+		cJSON *json = cJSON_Parse(buffer);
+		apps = cJSON_GetObjectItemCaseSensitive(json, "apps");
+		cJSON_ArrayForEach(app, apps) {
+			cJSON *version = cJSON_GetObjectItemCaseSensitive(app, "version");
+			char *act_version;
+			if (app_version(act_version, app->string) != 0) {
+				LOG_ERROR("Error getting app version %s: ", app->string);
+				result = 2;
+			}
+			if (strcmp(act_version, version->string) != 0) {
+				LOG_ERROR("Versions do not match: %s: ", app->string);
+				result = 3;
+			}
+		}
+		cJSON_Delete(json);
+	} else {
+		LOG_ERROR("Empty file buffer.");
+		result = 4;
+	}
+	free(buffer);
+	return(result);
 }
 
 int file_crc(int *crc, char *path) {
@@ -113,12 +172,29 @@ int file_crc(int *crc, char *path) {
     char command[10+sizeof(path)];
 	sprintf(command, "crc32 %s", path);
 
-    if (0 == (fpipe = (FILE*)popen(command, "r")))
-    {
+    if (0 == (fpipe = (FILE*)popen(command, "r"))) {
         LOG_ERROR("popen() failed.");
 		return(1);
     }
 	fscanf(fpipe, "%x", crc);
+    pclose(fpipe);
+	return(0);
+}
+
+int app_version(char *version, char *app) {
+	FILE *fpipe;
+    char command[sizeof(app)+20];
+	sprintf(command, "dpkg -l | grep %s", app);
+
+    if (0 == (fpipe = (FILE*)popen(command, "r"))) {
+        LOG_ERROR("popen() failed.");
+		return(1);
+    }
+	char *version[100];
+	if (0 == fgets(version, sizeof(version), fpipe)) {
+		LOG_ERROR("Error reading result.");
+		return(1);
+	}
     pclose(fpipe);
 	return(0);
 }

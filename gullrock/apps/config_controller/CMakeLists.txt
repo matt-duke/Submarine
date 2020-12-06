@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(config_controller C)
 
+add_definitions(-DMCU)
+
 find_library(SQLITE3_LIBRARY NAMES sqlite3)
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 
@@ -13,6 +15,8 @@ get_filename_component(THIRDPARTY_DIR
 
 add_subdirectory(${THIRDPARTY_DIR}/c-logger ${CMAKE_CURRENT_BINARY_DIR}/c-logger)
 add_subdirectory(${THIRDPARTY_DIR}/hiredis ${CMAKE_CURRENT_BINARY_DIR}/hiredis)
+add_subdirectory(${THIRDPARTY_DIR}/cJSON ${CMAKE_CURRENT_BINARY_DIR}/cJSON)
+include_directories(${THIRDPARTY_DIR}/cJSON)
 
 file(GLOB COMMON "${COMMON_SOURCE_DIR}/src/*.c")
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
@@ -25,7 +29,6 @@ target_include_directories( ${PROJECT_NAME}
     PUBLIC 
         ${PROJECT_SOURCE_DIR}/include
         ${COMMON_SOURCE_DIR}/include
-        ${THIRDPARTY_DIR}/jsmn
 )
 
 target_link_libraries( ${PROJECT_NAME}
@@ -34,4 +37,5 @@ target_link_libraries( ${PROJECT_NAME}
         hiredis
         pthread
         event
+        cjson
 )

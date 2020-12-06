@@ -18,12 +18,68 @@
 /* Variables */
 extern const char *__progname;
 
+int run_cmd(char **cmd, char **output) {
+	FILE *fpipe;
+
+    if (0 == (fpipe = (FILE*)popen(*cmd, "r"))) {
+		LOG_ERROR("popen() failed.");
+		pclose(fpipe);
+		return(1);
+    }
+	if (0 == fgets(*output, sizeof(*output), fpipe)) {
+		LOG_ERROR("Error reading result.");
+		pclose(fpipe);
+		return(2);
+	}
+    pclose(fpipe);
+	return(0);
+}
+
+int read_file(char* filename, char **buffer) {
+	LOG_DEBUG("Reading %s", filename);
+	FILE *fp = fopen (filename, "rb");
+
+	if (fp != NULL) {
+		/* Go to the end of the file. */
+		if (fseek(fp, 0L, SEEK_END) == 0) {
+			/* Get the size of the file. */
+			long bufsize = ftell(fp);
+			if (bufsize == -1) { /* Error */ }
+
+			/* Allocate our buffer to that size. */
+			*buffer = malloc(sizeof(char) * (bufsize + 1));
+			/* Go back to the start of the file. */
+			if (fseek(fp, 0L, SEEK_SET) != 0) { /* Error */ }
+
+			/* Read the entire file into memory. */
+			size_t newLen = fread(*buffer, sizeof(char), bufsize, fp);
+			if ( ferror( fp ) != 0 ) {
+				LOG_ERROR("Error reading file");
+			} else {
+				(*buffer)[newLen++] = '\0'; /* Just to be safe. */
+			}
+		}
+		fclose(fp);
+	}
+}
+
 bool file_exists(char *fname) {
 	if(access( fname, F_OK ) != -1) {
 		return true;
 	} else {
 		return false;
 	}
+}
+
+char* concat(const char *s1, const char *s2) {
+    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
+    if (result == NULL) {
+		LOG_FATAL("Failed to malloc on concat");
+		exit(1);
+	}
+    strcpy(result, s1);
+    strcat(result, s2);
+    return result;
 }
 
 int redis_fn_callback (void (*f)(), char *topic) {
@@ -73,26 +129,6 @@ int init_redis(redisContext **c, const char *hostname, const int port) {
 	freeReplyObject(reply);
 	redisFree(*c);
 	return 0;
-}
-
-void *heartbeatThread(void *state) {
-	smAppClass_t *sm = (smAppClass_t*)state;
-
-	LOG_INFO("Starting heartbeat: %s\n", __progname);
-  	redisContext *c;
-  	init_redis(&c, REDIS_HOSTNAME, REDIS_PORT);
-
-	while (1) {
-    	redisReply *h_reply;
-		pthread_mutex_lock(&sm->mutex);
-		h_reply = redisCommand(c, "SET %s %d EX %d", __progname, sm->state, TIMEOUT_HEARTBEAT);
-		pthread_mutex_unlock(&sm->mutex);
-		freeReplyObject(h_reply);
-    if (!strcmp(h_reply->str, "OK")) {
-      LOG_ERROR("Failure setting value: %s\n", h_reply->str);
-    }
-		sleep(HEARTBEAT_RATE);
-	}
 }
 
 void init_logging() {

@@ -1,0 +1,19 @@
+{
+    "files": [
+        {
+            "crc": 1219795540,
+            "name": "dhcpd.conf",
+            "path": "/etc/dhcpd.conf"
+        },
+        {
+            "crc": 3460824774,
+            "name": "redis.conf",
+            "path": "/redis.conf"
+        },
+        {
+            "crc": 2052788694,
+            "name": "vlans",
+            "path": "/etc/network/interfaces.d/vlans"
+        }
+    ]
+}

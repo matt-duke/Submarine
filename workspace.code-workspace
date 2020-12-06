@@ -16,7 +16,8 @@
 	"settings": {
 		"files.associations": {
 			"linux_glue.h": "c",
-			"functional": "c"
+			"functional": "c",
+			"system_error": "c"
 		}
 	}
 }

@@ -1,9 +1,14 @@
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include <logger.h>
 #include <pthread.h>
+#include <hiredis.h>
 
 #include "baseapp.h"
+#include "redis_def.h"
+#include "common.h"
 
 extern const char *__progname;
 
@@ -29,6 +34,7 @@ app_run_func_t * app_run_table[ APP_NUM_STATES ] = {
 
 int appInit (smAppClass_t *app) {
     app->run = &runState;
+    app->name = __progname;
     app->transition = &transition;
     app->state = APP_STATE_INIT;
     if (pthread_mutex_init(&app->mutex, PTHREAD_MUTEX_NORMAL) != 0) {
@@ -47,6 +53,10 @@ void transition(smAppClass_t *app, app_state_t new_state) {
         LOG_INFO("Transition to state %d", new_state);
     } else {
         LOG_ERROR("Transition from state %d to state %d failed.", app->state, new_state);
+        if (new_state == APP_STATE_FAULT) {
+            LOG_FATAL("Failed to transition to fault state.");
+            exit(1);
+        }
     }
     pthread_mutex_unlock(&app->mutex);
 }
@@ -68,4 +78,24 @@ void do_to_running(smAppClass_t *app) {
 }
 void do_to_fault(smAppClass_t *app) {
     app->state = APP_STATE_FAULT;
+}
+
+void *heartbeatThread(void *state) {
+	smAppClass_t *sm = (smAppClass_t*)state;
+
+	LOG_INFO("Starting heartbeat: %s\n", __progname);
+  	redisContext *c;
+  	init_redis(&c, REDIS_HOSTNAME, REDIS_PORT);
+
+	while (1) {
+    	redisReply *h_reply;
+		pthread_mutex_lock(&sm->mutex);
+		h_reply = redisCommand(c, "SET %s %d EX %d", __progname, sm->state, TIMEOUT_HEARTBEAT);
+		pthread_mutex_unlock(&sm->mutex);
+		freeReplyObject(h_reply);
+    if (!strcmp(h_reply->str, "OK")) {
+      LOG_ERROR("Failure setting value: %s\n", h_reply->str);
+    }
+		sleep(HEARTBEAT_RATE);
+	}
 }

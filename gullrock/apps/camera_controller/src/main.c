@@ -23,6 +23,7 @@ CameraClass_t camera;
 
 /* Functions */
 static void do_to_init(smAppClass_t *app);
+static void do_post(smAppClass_t *app);
 static void do_running(smAppClass_t *app);
 
 int main(int argc, char *argv[])
@@ -46,12 +47,25 @@ void do_to_init(smAppClass_t *app) {
 		
 		if (init_redis(&c, REDIS_HOSTNAME, REDIS_PORT) != 0) {
     		LOG_FATAL("Failed to start.");
-    		abort();
+    		exit(1);
   		}
 	}
   app->transition(app, APP_STATE_RUNNING);
 }
 
+void do_post(smAppClass_t *app) {
+	if (camera.state == CAMERA_STATE_POST) {
+		return;
+	} else if (false) {
+		//mcu state post
+	} else {
+		app->transition(app, APP_STATE_RUNNING);
+	}
+}
+
+
 void do_running(smAppClass_t *app) {
-	//
+	if (camera.state == CAMERA_STATE_FAULT) {
+		app->transition(app, APP_STATE_FAULT);
+	}
 }

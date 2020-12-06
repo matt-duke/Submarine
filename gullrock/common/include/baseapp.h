@@ -16,6 +16,7 @@ typedef struct smAppClass {
     void (*run_table)(struct smAppClass *self);
     pthread_mutex_t mutex;
     app_state_t state;
+    char *name;
 } smAppClass_t;
 
 typedef void app_transition_func_t(smAppClass_t *app);
@@ -25,5 +26,6 @@ extern app_transition_func_t * app_transition_table[ APP_NUM_STATES ] [ APP_NUM_
 extern app_run_func_t * app_run_table[ APP_NUM_STATES ];
 
 int appInit (smAppClass_t *app);
+void *heartbeatThread(void *state);
 
 #endif
