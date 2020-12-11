@@ -13,3 +13,6 @@
 [submodule "gullrock/thirdparty/cJSON"]
 	path = gullrock/thirdparty/cJSON
 	url = https://github.com/DaveGamble/cJSON.git
+[submodule "gullrock/thirdparty/RedisTimeSeries"]
+	path = gullrock/thirdparty/RedisTimeSeries
+	url = https://github.com/RedisTimeSeries/RedisTimeSeries.git
