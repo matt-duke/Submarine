@@ -8,7 +8,7 @@
 #include <c-logger/logger.h>
 
 #include <common.h>
-#include <redis_def.h>
+#include <redis.h>
 #include <baseapp.h>
 #include "motor.h"
 

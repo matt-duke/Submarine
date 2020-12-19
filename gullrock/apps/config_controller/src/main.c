@@ -10,7 +10,7 @@
 #include <cJSON.h>
 
 #include <common.h>
-#include <redis_def.h>
+#include <redis.h>
 #include <baseapp.h>
 
 /* Variables */

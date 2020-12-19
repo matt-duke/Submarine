@@ -7,36 +7,45 @@
 
 #include "imu.h"
 
-uint64_t get_posix_clock_time();
-int set_cal(ImuClass_t *mpu, int mag, char *cal_file);
-int read(ImuClass_t *mpu);
+static uint64_t get_posix_clock_time();
+void ImuClassInit(ImuClass_t *imu);
+static int set_cal(ImuClass_t *imu, int mag, char *cal_file);
+static int read(ImuClass_t *imu);
+static int init(ImuClass_t *imu);
 
-void imuClassInit(ImuClass_t *mpu) {
-	mpu->set_cal = &set_cal;
-	mpu->read = &read;
+void ImuClassInit(ImuClass_t *imu) {
+	imu->set_cal = &set_cal;
+	imu->read = &read;
+	imu->init = &init;
 
-	mpu->i2c_bus = DEFAULT_I2C_BUS;
-	mpu->sample_rate_hz = DEFAULT_SAMPLE_RATE_HZ;
-	mpu->yaw_mix_factor = DEFAULT_YAW_MIX_FACTOR;
-	mpu->mag_cal_file = NULL;
-	mpu->accel_cal_file = NULL;
-	mpu->prev_clock_time_ms = 0;
-	memset(&mpu->mpudata, 0, sizeof(mpudata_t));
+	imu->i2c_bus = DEFAULT_I2C_BUS;
+	imu->sample_rate_hz = DEFAULT_SAMPLE_RATE_HZ;
+	imu->yaw_mix_factor = DEFAULT_YAW_MIX_FACTOR;
+	imu->mag_cal_file = NULL;
+	imu->accel_cal_file = NULL;
+	imu->prev_clock_time_ms = 0;
+	memset(&imu->mpudata, 0, sizeof(mpudata_t));
 }
 
-int read(ImuClass_t *mpu) {
-	memset(&mpu->mpudata, 0, sizeof(mpudata_t));
+int init(ImuClass_t *imu) {
+	mpu9150_set_debug(1);
+	int result = mpu9150_init(imu->i2c_bus, imu->sample_rate_hz, imu->yaw_mix_factor);
+	return result;
+}
+
+int read(ImuClass_t *imu) {
+	memset(&imu->mpudata, 0, sizeof(mpudata_t));
 	uint64_t curr_time_ms = get_posix_clock_time();
-	uint64_t sample_period_ms = 1000 / mpu->sample_rate_hz;
-	uint64_t timer_expiry_ms = mpu->prev_clock_time_ms + sample_period_ms;
+	uint64_t sample_period_ms = 1000 / imu->sample_rate_hz;
+	uint64_t timer_expiry_ms = imu->prev_clock_time_ms + sample_period_ms;
 	int result = 1;
 	if (curr_time_ms < timer_expiry_ms) {
-		result = mpu9150_read(&mpu->mpudata);
+		result = mpu9150_read(&imu->mpudata);
 	}
 	return result;
 }
 
-int set_cal(ImuClass_t *mpu, int mag, char *cal_file) {
+int set_cal(ImuClass_t *imu, int mag, char *cal_file) {
 	int i;
 	FILE *f;
 	char buff[32];

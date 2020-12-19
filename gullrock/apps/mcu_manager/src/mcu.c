@@ -11,7 +11,7 @@
 #include <c-logger/logger.h>
 
 #include <common.h>
-#include <redis_def.h>
+#include <redis.h>
 #include <hdlc_def.h>
 #include "mcu.h"
 

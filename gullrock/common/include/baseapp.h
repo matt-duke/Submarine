@@ -2,6 +2,9 @@
 #define BASEAPP_H
 
 #include <pthread.h>
+#include <hiredis.h>
+
+#define RUN_DELAY 2
 
 typedef enum {
     APP_STATE_INIT,
@@ -11,21 +14,27 @@ typedef enum {
     APP_NUM_STATES } app_state_t;
 
 typedef struct smAppClass {
-    void (*run)(struct smAppClass *self);
-    void (*transition)(struct smAppClass *self, app_state_t new_state);
-    void (*run_table)(struct smAppClass *self);
+    void (*run)();
+    void (*transition)(app_state_t new_state);
+    int (*lock)();
+    int (*unlock)();
+    void (*crash)();
+    redisContext *redis;
     pthread_mutex_t mutex;
     app_state_t state;
     char *name;
 } smAppClass_t;
 
-typedef void app_transition_func_t(smAppClass_t *app);
-typedef void app_run_func_t(smAppClass_t *app);
+typedef void app_transition_func_t();
+typedef void app_run_func_t();
 
 extern app_transition_func_t * app_transition_table[ APP_NUM_STATES ] [ APP_NUM_STATES ];
 extern app_run_func_t * app_run_table[ APP_NUM_STATES ];
 
-int appInit (smAppClass_t *app);
+int GlobalAppInit();
 void *heartbeatThread(void *state);
+
+smAppClass_t GlobalApp;
+redisContext *context;
 
 #endif

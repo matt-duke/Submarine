@@ -5,33 +5,31 @@
 #include <signal.h>
 #include <pthread.h>
 #include <stdbool.h>
-
 #include <logger.h>
-#include <hiredis.h>
-#include <async.h>
-#include <adapters/libevent.h>
 
-#include "redis_def.h"
+#include "redis.h"
 #include "baseapp.h"
 #include "common.h"
 
-/* Variables */
+#define BUFSIZE 128
+
+// Variables
 extern const char *__progname;
 
-int run_cmd(char **cmd, char **output) {
-	FILE *fpipe;
-
-    if (0 == (fpipe = (FILE*)popen(*cmd, "r"))) {
+int run_cmd(char *cmd, char *buffer) {
+	FILE *fp;
+	LOG_DEBUG("running command: %s", cmd);
+    fp = popen(cmd, "r");
+	if (fp != NULL) {
+		while (NULL != fgets(buffer, BUFSIZE, fp)) {
+			LOG_INFO("Cmd output: %s", buffer);
+		}
+    } else {
 		LOG_ERROR("popen() failed.");
-		pclose(fpipe);
-		return(1);
-    }
-	if (0 == fgets(*output, sizeof(*output), fpipe)) {
-		LOG_ERROR("Error reading result.");
-		pclose(fpipe);
-		return(2);
+		pclose(fp);
+		return(-1);
 	}
-    pclose(fpipe);
+    pclose(fp);
 	return(0);
 }
 
@@ -49,7 +47,9 @@ int read_file(char* filename, char **buffer) {
 			/* Allocate our buffer to that size. */
 			*buffer = malloc(sizeof(char) * (bufsize + 1));
 			/* Go back to the start of the file. */
-			if (fseek(fp, 0L, SEEK_SET) != 0) { /* Error */ }
+			if (fseek(fp, 0L, SEEK_SET) != 0) {
+				LOG_ERROR("Error returning to file start");
+			}
 
 			/* Read the entire file into memory. */
 			size_t newLen = fread(*buffer, sizeof(char), bufsize, fp);
@@ -69,66 +69,6 @@ bool file_exists(char *fname) {
 	} else {
 		return false;
 	}
-}
-
-char* concat(const char *s1, const char *s2) {
-    char *result = malloc(strlen(s1) + strlen(s2) + 1); // +1 for the null-terminator
-    if (result == NULL) {
-		LOG_FATAL("Failed to malloc on concat");
-		exit(1);
-	}
-    strcpy(result, s1);
-    strcat(result, s2);
-    return result;
-}
-
-int redis_fn_callback (void (*f)(), char *topic) {
-    signal(SIGPIPE, SIG_IGN);
-    struct event_base *base = event_base_new();
-
-    redisAsyncContext *c = redisAsyncConnect(REDIS_HOSTNAME, REDIS_PORT);
-    if (c->err) {
-        LOG_ERROR("error: %s\n", c->errstr);
-        return 1;
-    }
-
-    redisLibeventAttach(c, base);
-	char cmd[100];
-	if (strstr(topic, "*") != NULL) {
-		sprintf(cmd, "PSUBSCRIBE %s", topic);
-	} else {
-		sprintf(cmd, "SUBSCRIBE %s", topic);
-	}
-    int result = redisAsyncCommand(c, f, NULL, cmd);
-    event_base_dispatch(base);
-	return result;
-}
-
-int init_redis(redisContext **c, const char *hostname, const int port) {
-	struct timeval timeout = { 1, 500000 };
-
-  	redisReply *reply;
-	*c = redisConnectWithTimeout(hostname, port, timeout);
-	if (c == NULL || (*c)->err) {
-		if (c) {
-				LOG_ERROR("Connection error: %s\n", (*c)->errstr);
-				redisFree(*c);
-				return REDIS_CONNECTION_ERROR;
-		} else {
-				LOG_ERROR("Connection error: can't allocate redis context\n");
-				redisFree(*c);
-				return REDIS_ALLOCARTION_FAULURE;
-		}
-	}
-	reply = redisCommand(*c,"PING");
-	if (strcmp(reply->str, "PONG")) {
-		LOG_ERROR("Failed to ping Redis server. Replied: %s\n", reply->str);
-		redisFree(*c);
-		return REDIS_PING_FAILURE;
-	}
-	freeReplyObject(reply);
-	redisFree(*c);
-	return 0;
 }
 
 void init_logging() {

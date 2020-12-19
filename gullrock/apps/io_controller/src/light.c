@@ -1,8 +1,8 @@
 #include <stdint.h>
 #include <stdio.h>
-#include <c-logger/logger.h>
+#include <logger.h>
 
-#include "motor.h"
+#include "light.h"
 
 
 typedef void transition_func_t(MotorClass_t *motor);

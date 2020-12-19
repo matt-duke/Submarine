@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(camera_controller C)
 
-find_library(SQLITE3_LIBRARY NAMES sqlite3)
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 
 get_filename_component(COMMON_SOURCE_DIR

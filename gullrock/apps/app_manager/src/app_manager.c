@@ -11,7 +11,7 @@
 
 #include <common.h>
 #include <baseapp.h>
-#include <redis_def.h>
+#include <redis.h>
 
 #define MAX_FAILURES 2
 

@@ -11,6 +11,18 @@
 		},
 		{
 			"path": "gullrock/apps/config_controller"
+		},
+		{
+			"path": "gullrock/apps/io_controller"
+		},
+		{
+			"path": "gullrock/apps/mcu_manager"
+		},
+		{
+			"path": "../../apps"
+		},
+		{
+			"path": "../../persistent"
 		}
 	],
 	"settings": {

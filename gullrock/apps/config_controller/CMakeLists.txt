@@ -1,9 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(config_controller C)
 
-add_definitions(-DMCU)
-
-find_library(SQLITE3_LIBRARY NAMES sqlite3)
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 
 get_filename_component(COMMON_SOURCE_DIR
@@ -37,5 +34,14 @@ target_link_libraries( ${PROJECT_NAME}
         hiredis
         pthread
         event
+        event_pthreads
         cjson
 )
+
+if (CMAKE_BUILD_TYPE STREQUAL Debug)
+    add_custom_command(
+        TARGET ${PROJECT_NAME} 
+        POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} /apps/${PROJECT_NAME}
+    )
+endif()
