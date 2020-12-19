@@ -16,3 +16,9 @@
 [submodule "gullrock/thirdparty/RedisTimeSeries"]
 	path = gullrock/thirdparty/RedisTimeSeries
 	url = https://github.com/RedisTimeSeries/RedisTimeSeries.git
+[submodule "gullrock/thirdparty/linux-mpu9150"]
+	path = gullrock/thirdparty/linux-mpu9150
+	url = https://github.com/mrbichel/linux-mpu9150.git
+[submodule "gullrock/thirdparty/ansi-c-strmap"]
+	path = gullrock/thirdparty/ansi-c-strmap
+	url = https://github.com/CoolOppo/ansi-c-strmap.git
