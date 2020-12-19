@@ -4,11 +4,10 @@
 #include <string.h>
 #include <unistd.h>
 #include <pthread.h>
+#include <hiredis.h>
+#include <async.h>
+#include <logger.h>
 
-#include <hiredis-vip/hiredis.h>
-#include <hiredis-vip/async.h>
-#include <hiredis-vip/adapters/libevent.h>
-#include <c-logger/logger.h>
 #include <common.h>
 #include <redis.h>
 #include <baseapp.h>
@@ -16,20 +15,15 @@
 
 /* Variables */
 extern const char *__progname;
-redisContext *c;
-redisReply *reply;
 
 McuClass_t mcu;
-smAppClass_t state_machine;
 
 /* Functions */
-static void do_to_init(smAppClass_t *app);
-static void do_to_fault(smAppClass_t *app);
-static void do_to_post(smAppClass_t *app);
-static void do_to_running(smAppClass_t *app);
 
-static void do_fault(smAppClass_t *app);
-static void do_running(smAppClass_t *app);
+static void do_init();
+static void do_post();
+static void do_running();
+static void do_fault();
 
 static void pubsub_set(redisAsyncContext *c, void *reply, void *privdata);
 static void pubsub_get(redisAsyncContext *c, void *reply, void *privdata);
@@ -37,14 +31,14 @@ static void pubsub_get(redisAsyncContext *c, void *reply, void *privdata);
 int main(int argc, char *argv[])
 {
 	init_logging();
-	app_transition_table[APP_STATE_INIT][APP_STATE_INIT] = do_to_init;
-	app_transition_table[APP_STATE_INIT][APP_STATE_POST] = do_to_post;
-	app_transition_table[APP_STATE_POST][APP_STATE_FAULT] = do_to_fault;
+
 	app_transition_table[APP_STATE_POST][APP_STATE_RUNNING] = do_to_running;
+	app_run_table[APP_STATE_INIT] = do_init;
+	app_run_table[APP_STATE_POST] = do_post;
 	app_run_table[APP_STATE_RUNNING] = do_running;
 	app_run_table[APP_STATE_FAULT] = do_fault;
 
-	appInit(&state_machine);
+	GlobalAppInit();
 	mcuInit(&mcu);
 
 	while (1) {
@@ -53,23 +47,12 @@ int main(int argc, char *argv[])
 	}
 }
 
-void do_to_init(smAppClass_t *app) {
-	if (app->state == APP_STATE_INIT) {
-		pthread_t thread_id;
-		pthread_create(&thread_id, NULL, heartbeatThread, (void*) &state_machine);
-		
-		if (init_redis(&c, REDIS_HOSTNAME, REDIS_PORT) != 0) {
-    		LOG_FATAL("Failed to start.");
-    		abort();
-  		}
-		redis_fn_callback(*pubsub_set, "pubsub_set.*");
-		redis_fn_callback(*pubsub_get, "pubsub_get.*");
-	}
-	app.transition(&app, APP_STATE_POST);
+void do_init() {
+	GlobalApp.transition(APP_STATE_POST);
 	mcu.transition(&mcu, MCU_STATE_POST);
 }
 
-void do_to_post (smAppClass_t *app) {
+void do_to_post () {
 	bool criteria = true;
 	if (mcu.state(&mcu) != MCU_STATE_POST) {
 		criteria = false;
@@ -82,27 +65,19 @@ void do_to_post (smAppClass_t *app) {
 		}
 	}
 	if (!criteria) {
-		app.transition(&app, APP_STATE_FAULT)
+		GlobalApp.transition(APP_STATE_FAULT);
 	} else {
-		app.transition(&app, APP_STATE_RUNNING)
+		GlobalApp.transition(APP_STATE_RUNNING);
 	}
 }
 
-void do_to_fault(smAppClass_t *app) {
-
-}
-
-void do_fault(smAppClass_t *app) {
-
-}
-
-void do_running(smAppClass_t *app) {
+void do_running() {
 	if (mcu.state(&mcu) == MCU_STATE_FAULT) {
-		app.transition(&app, APP_STATE_FAULT);
+		GlobalApp.transition(APP_STATE_FAULT);
 	}
 }
 
-void do_fault(smAppClass_t *app) {
+void do_fault() {
 	if (mcu.state(&mcu) == MCU_STATE_FAULT) {
 		mcu.transition(&mcu, MCU_STATE_POST);
 	} else if (mcu.state(&mcu) == MCU_STATE_FAULT) {

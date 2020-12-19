@@ -19,7 +19,7 @@ typedef struct smAppClass {
     int (*lock)();
     int (*unlock)();
     void (*crash)();
-    redisContext *redis;
+    redisContext *context;
     pthread_mutex_t mutex;
     app_state_t state;
     char *name;

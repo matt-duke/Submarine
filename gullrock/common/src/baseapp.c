@@ -51,7 +51,7 @@ int GlobalAppInit() {
     GlobalApp.name = (char *)__progname;
     GlobalApp.transition = &transition;
     GlobalApp.state = APP_STATE_INIT;
-    GlobalApp.redis = context;
+    GlobalApp.context = context;
     GlobalApp.crash = &crash;
 
     pthread_mutexattr_t attr;

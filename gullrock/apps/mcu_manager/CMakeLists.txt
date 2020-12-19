@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(io_controller C)
+project(mcu_manager C)
 
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 
@@ -15,35 +15,6 @@ get_filename_component(DRIVER_DIR
 
 add_subdirectory(${THIRDPARTY_DIR}/c-logger ${CMAKE_CURRENT_BINARY_DIR}/c-logger)
 add_subdirectory(${THIRDPARTY_DIR}/hiredis ${CMAKE_CURRENT_BINARY_DIR}/hiredis)
-
-file(GLOB MPU9150_SRC
-    "${THIRDPARTY_DIR}/linux-mpu9150/mpu9150/*.c"
-    "${THIRDPARTY_DIR}/linux-mpu9150/eMPL/*.c"
-    "${THIRDPARTY_DIR}/linux-mpu9150/glue/*.c"
-)
-
-add_library(mpu9150 STATIC
-            ${MPU9150_SRC}
-)
-
-target_include_directories(mpu9150
-    PUBLIC
-        ${THIRDPARTY_DIR}/linux-mpu9150/mpu9150
-        ${THIRDPARTY_DIR}/linux-mpu9150/eMPL
-        ${THIRDPARTY_DIR}/linux-mpu9150/glue
-)
-
-target_link_libraries(mpu9150
-    PRIVATE 
-        m
-)
-
-target_compile_options(mpu9150 PRIVATE 
-                       -DEMPL_TARGET_LINUX
-                       -DMPU9150
-                       -DAK8975_SECONDARY
-                       -fsingle-precision-constant
-)
 
 file(GLOB SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 file(GLOB CMN_SRC "${COMMON_SOURCE_DIR}/src/*.c")
@@ -68,7 +39,6 @@ target_link_libraries( ${PROJECT_NAME}
         pthread
         event
         event_pthreads
-        mpu9150
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)

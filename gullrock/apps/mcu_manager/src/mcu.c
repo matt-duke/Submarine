@@ -3,15 +3,11 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-#include <hiredis-vip/hiredis.h>
-#include <hiredis-vip/async.h>
-#include <hiredis-vip/adapters/libevent.h>
-#include <libserialport/libserialport.h>
-#include <minihdlc/minihdlc.h>
-#include <c-logger/logger.h>
+#include <libserialport.h>
+#include <minihdlc.h>
+#include <logger.h>
 
 #include <common.h>
-#include <redis.h>
 #include <hdlc_def.h>
 #include "mcu.h"
 
