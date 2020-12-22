@@ -22,3 +22,9 @@
 [submodule "gullrock/thirdparty/ansi-c-strmap"]
 	path = gullrock/thirdparty/ansi-c-strmap
 	url = https://github.com/CoolOppo/ansi-c-strmap.git
+[submodule "gullrock/thirdparty/minihdlc"]
+	path = gullrock/thirdparty/minihdlc
+	url = https://github.com/mengguang/minihdlc.git
+[submodule "gullrock/thirdparty/ArduinoHDLC"]
+	path = gullrock/thirdparty/ArduinoHDLC
+	url = https://github.com/mengguang/ArduinoHDLC.git
