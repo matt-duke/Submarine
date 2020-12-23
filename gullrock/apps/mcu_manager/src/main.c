@@ -32,7 +32,6 @@ int main(int argc, char *argv[])
 {
 	init_logging();
 
-	app_transition_table[APP_STATE_POST][APP_STATE_RUNNING] = do_to_running;
 	app_run_table[APP_STATE_INIT] = do_init;
 	app_run_table[APP_STATE_POST] = do_post;
 	app_run_table[APP_STATE_RUNNING] = do_running;
@@ -42,8 +41,9 @@ int main(int argc, char *argv[])
 	mcuInit(&mcu);
 
 	while (1) {
-		state_machine.run(&state_machine);
+		GlobalApp.run();
 		mcu.run(&mcu);
+		sleep(2);
 	}
 }
 
@@ -52,13 +52,13 @@ void do_init() {
 	mcu.transition(&mcu, MCU_STATE_POST);
 }
 
-void do_to_post () {
+void do_post() {
 	bool criteria = true;
-	if (mcu.state(&mcu) != MCU_STATE_POST) {
+	if (mcu.state != MCU_STATE_POST) {
 		criteria = false;
 	}
 	time_t start = time(NULL);
-	while (mcu.state(&mcu) == MCU_STATE_POST) {
+	while (mcu.state == MCU_STATE_POST) {
 		if (time(NULL) - start > 30) {
 			criteria = false;
 			break;
@@ -72,15 +72,15 @@ void do_to_post () {
 }
 
 void do_running() {
-	if (mcu.state(&mcu) == MCU_STATE_FAULT) {
+	if (mcu.state == MCU_STATE_FAULT) {
 		GlobalApp.transition(APP_STATE_FAULT);
 	}
 }
 
 void do_fault() {
-	if (mcu.state(&mcu) == MCU_STATE_FAULT) {
+	if (mcu.state != MCU_STATE_FAULT) {
 		mcu.transition(&mcu, MCU_STATE_POST);
-	} else if (mcu.state(&mcu) == MCU_STATE_FAULT) {
+	}
 }
 
 void pubsub_set(redisAsyncContext *c, void *reply, void *privdata) {

@@ -1,0 +1,17 @@
+board_manager:
+  additional_urls: []
+daemon:
+  port: "50051"
+directories:
+  data: build/.arduino15
+  downloads: build/.arduino15/staging
+  user: build/Arduino
+library:
+  enable_unsafe_install: true
+logging:
+  file: ""
+  format: text
+  level: info
+telemetry:
+  addr: :9090
+  enabled: false

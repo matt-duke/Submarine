@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 3.5.0)
 project(mcu_manager C)
 
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
+include(ExternalProject)
 
 get_filename_component(COMMON_SOURCE_DIR
                        "${CMAKE_CURRENT_LIST_DIR}/../../common"
@@ -15,6 +16,43 @@ get_filename_component(DRIVER_DIR
 
 add_subdirectory(${THIRDPARTY_DIR}/c-logger ${CMAKE_CURRENT_BINARY_DIR}/c-logger)
 add_subdirectory(${THIRDPARTY_DIR}/hiredis ${CMAKE_CURRENT_BINARY_DIR}/hiredis)
+
+set(SERIALPORT_DIR ${THIRDPARTY_DIR}/libserialport)
+set(SERIALPORT_BIN ${CMAKE_CURRENT_BINARY_DIR}/libserialport)
+set(SERIALPORT_STATIC_LIB ${SERIALPORT_BIN}/lib/libserialport.a)
+set(SERIALPORT_INCLUDES ${SERIALPORT_BIN}/include)
+
+file(MAKE_DIRECTORY ${SERIALPORT_INCLUDES})
+
+ExternalProject_Add(
+    libmodbus
+    PREFIX ${SERIALPORT_BIN}
+    SOURCE_DIR ${SERIALPORT_DIR}
+    CONFIGURE_COMMAND ${SERIALPORT_DIR}/autogen.sh && ${SERIALPORT_DIR}/configure --srcdir=${SERIALPORT_DIR} --prefix=${SERIALPORT_BIN} --enable-static=yes --disable-shared
+    BUILD_COMMAND make
+    INSTALL_COMMAND make install
+    BUILD_BYPRODUCTS ${MODBUS_STATIC_LIB}
+)
+
+add_library(serialport STATIC IMPORTED GLOBAL)
+add_dependencies(serialport libmodbus)
+set_target_properties(serialport PROPERTIES IMPORTED_LOCATION ${SERIALPORT_STATIC_LIB})
+set_target_properties(serialport PROPERTIES INTERFACE_INCLUDE_DIRECTORIES ${SERIALPORT_INCLUDES})
+
+#set (SERIAL_DIR ${THIRDPARTY_DIR}/libserialport)
+#set(SERIAL_SRC 
+#    ${SERIAL_DIR}/serialport.c
+#    ${SERIAL_DIR}/libserialport_internal.h
+#    ${SERIAL_DIR}/libserialport.h
+#    ${SERIAL_DIR}/linux.c
+#    ${SERIAL_DIR}/linux_termios.c
+#    ${SERIAL_DIR}/linux_termios.h
+#)
+#add_library(libserialport STATIC ${SERIAL_SRC})
+
+file(GLOB HDLC_SRC "${THIRDPARTY_DIR}/minihdlc/*.c")
+add_library(minihdlc STATIC ${HDLC_SRC})
+target_include_directories(minihdlc PUBLIC ${THIRDPARTY_DIR}/minihdlc)
 
 file(GLOB SRC "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
 file(GLOB CMN_SRC "${COMMON_SOURCE_DIR}/src/*.c")
@@ -39,6 +77,8 @@ target_link_libraries( ${PROJECT_NAME}
         pthread
         event
         event_pthreads
+        serialport
+        minihdlc
 )
 
 if (${CMAKE_BUILD_TYPE} STREQUAL Debug)

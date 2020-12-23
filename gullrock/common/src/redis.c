@@ -14,9 +14,6 @@
 #include "common.h"
 #include "baseapp.h"
 
-const redis_key_t redis_key_default = {"null", 2000};
-redis_key_t REDIS_KEYS[] = {[0 ... REDIS_NUM_KEYS] = redis_key_default };
-
 static void *subscriberThread (void *args);
 
 void *subscriberThread(void *args) {
@@ -78,11 +75,6 @@ int redis_init_context(redisContext **c) {
 }
 
 int redis_create_keys() {
-	REDIS_KEYS[REDIS_KEY_ACCEL_X].name = "accel_x";
-	REDIS_KEYS[REDIS_KEY_ACCEL_Y].name = "accel_y";
-	REDIS_KEYS[REDIS_KEY_ACCEL_Z].name = "accel_z";
-	REDIS_KEYS[REDIS_KEY_CPU_TEMP].name = "cpu_temp";
-
 	redisContext *c;
 	redis_init_context(&c);
 	for (int i=0; i<REDIS_NUM_KEYS; i++) {
@@ -91,18 +83,17 @@ int redis_create_keys() {
 			REDIS_KEYS[i].name,
 			REDIS_KEYS[i].retention
 		);
-		LOG_INFO("%s", cmd);
-		exit(0);
-		redisReply *reply = redisCommand(c, "PING");
-		if (0 != strcmp(reply->str, "PONG")) {
-			LOG_ERROR("Failed to ping Redis server. Replied: %s", reply->str);
-			freeReplyObject(reply);
-			redisFree(c);
-			return REDIS_PING_FAILURE;
-		}
+		redisReply *reply = redisCommand(c, "cmd");
 		freeReplyObject(reply);
 	}
 	redisFree(c);
 	return 0;
+}
 
+int redis_add_sample(redisContext **c, char *key, double value) {
+	char cmd[128];
+	sprintf(cmd, "TS.ADD %s * %f", key, value);
+	
+	redisReply *reply = redisCommand(*c, "cmd");
+	freeReplyObject(reply);
 }

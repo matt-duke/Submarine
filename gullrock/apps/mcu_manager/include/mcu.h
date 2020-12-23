@@ -13,7 +13,7 @@ typedef enum {
 typedef struct sMcuClass {
     void (*run)(struct sMcuClass *self);
     int (*transition)(struct sMcuClass *self, mcu_state_t new_state);
-    int (*get)(struct sMcuClass *self, uint8_t id);
+    int (*get)(struct  sMcuClass *self, uint8_t id);
     int (*set)(struct sMcuClass *self, uint8_t id, data_t data);
     mcu_state_t state;
 } McuClass_t;

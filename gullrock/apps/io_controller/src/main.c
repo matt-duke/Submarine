@@ -9,7 +9,9 @@
 
 #include <common.h>
 #include <redis.h>
+#include <redis_def.h>
 #include <baseapp.h>
+#include <vcgencmd.h>
 
 //#include "light.h"
 #include "imu.h"
@@ -37,6 +39,7 @@ static status_t update_external_sensors();
 int main(int argc, char *argv[])
 {
 	init_logging();
+	InitKeys();
 
 	app_run_table[APP_STATE_RUNNING] = do_running;
 	app_run_table[APP_STATE_POST] = do_post;
@@ -74,6 +77,10 @@ void do_running() {
 }
 
 static status_t update_internal_sensors() {
+	throttled_t throttled = vcgencmd_throttled();
+
+	int temp = vcgencmd_measure_temp();
+	redis_add_sample(&GlobalApp.context, )
 	return STATUS_OK;
 }
 static status_t update_external_sensors() {

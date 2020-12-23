@@ -7,6 +7,7 @@
 
 #define CAMERA_REGEX "supported=([[:digit:]])[[:space:]]detected=([[:digit:]])"
 #define THROTTLED_REGEX "throttled=([x[:digit:]]*)"
+#define TEMP_REGEX "temp=([[:digit:].]*)'C"
 #define VCGENCMD "/opt/vc/bin/vcgencmd "
 
 #define BIT(hex, i) ((hex >> i) & 1)
@@ -84,6 +85,34 @@ throttled_t vcgencmd_throttled() {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
     }
+    return result;
+}
+
+int vcgencmd_measure_temp() {
+    char output[128];
+    char *pattern = TEMP_REGEX;
+
+    int result =-1;
+    regex_t regex;
+    regmatch_t pmatch[1];
+
+    if(run_cmd(VCGENCMD"measure_temp", output)) {
+        LOG_ERROR("Error running cmd");
+        return result;
+    }
+
+    if (regcomp(&regex, pattern, REG_EXTENDED) != 0)
+        LOG_ERROR("regcomp error");
+    int status = regexec(&regex, output, 1, pmatch, 0);
+    regfree(&regex);
+    if (!status) {
+        float temp = (float)atof(get_match(output, &pmatch[1]), NULL, 0);
+        result = int(temp*100);
+    } else {
+        LOG_ERROR("No match found: %s in %s", pattern, output);
+        return result;
+    }
+    return result;
 }
 
 char* get_match(char *output, regmatch_t *pmatch) {
