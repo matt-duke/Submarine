@@ -74,6 +74,8 @@ int redis_init_context(redisContext **c) {
 	return 0;
 }
 
+/* should be run in startup script on MPC */
+
 int redis_create_keys() {
 	redisContext *c;
 	redis_init_context(&c);

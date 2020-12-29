@@ -37,3 +37,7 @@ cd gst-rpicamsrc
 ./autogen.sh
 make
 sudo make install
+
+Disable BT to use UART (PL011)
+https://scribles.net/disabling-bluetooth-on-raspberry-pi/
+https://www.raspberrypi.org/documentation/configuration/uart.md

@@ -10,9 +10,8 @@ extern "C" {
   HDLC CONSTANTS
 */
 #define MAX_HDLC_FRAME_LENGTH 64
-#define PACKET_SIZE 12
-#define PORT_NAME "/dev/ttyACM0"
-#define PORT_SPEED 115200
+#define PACKET_SIZE 8
+#define PORT_SPEED 9600
 
 enum HDLC_TYPE {
   HDLC_TYPE_GET = 0,
@@ -39,7 +38,7 @@ typedef struct Packet {
   uint8_t type;
   uint16_t id;
   uint8_t key;
-  data32_t data[2];
+  data32_t data;
 }packet_t;
 
 typedef union Buffer {

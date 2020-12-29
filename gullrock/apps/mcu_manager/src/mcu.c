@@ -8,16 +8,20 @@
 #include <logger.h>
 
 #include <common.h>
+#include <redis_def.h>
 #include <hdlc_def.h>
 #include "mcu.h"
 
 /* Variables */
+//#define PORT_NAME "/dev/ttyAMA0"
+#define PORT_NAME "/dev/ttyACM0"
+
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
 
-uint8_t msg_count;
-buffer_t* global_buffer;
+uint16_t msg_count;
+buffer_t global_buffer;
 
 typedef void transition_func_t(McuClass_t *mcu);
 typedef void run_func_t(McuClass_t *mcu);
@@ -40,8 +44,8 @@ static void do_post(McuClass_t *mcu);
 static void do_ready(McuClass_t *mcu);
 static void do_fault(McuClass_t *mcu);
 
-static int set(McuClass_t *mcu, uint8_t key, data_t data);
-static int get(McuClass_t *mcu, uint8_t key);
+static int get(McuClass_t *mcu, uint8_t key, data32_t *data);
+static int set(McuClass_t *mcu, uint8_t key);
 
 static void hdlc_frame_handler(const uint8_t *buffer, uint16_t length);
 static void hdlc_send_char(uint8_t data);
@@ -60,7 +64,7 @@ run_func_t * const run_table[ MCU_NUM_STATES ] = {
     do_init, do_post, do_ready, do_fault
 };
 
-void do_nothing() {return;}
+void do_nothing(McuClass_t *mcu) {return;}
 
 void do_to_init(McuClass_t *mcu) {
     LOG_INFO("Entering state INIT");
@@ -85,14 +89,14 @@ void do_to_init(McuClass_t *mcu) {
 	minihdlc_init(hdlc_send_char, hdlc_frame_handler);
 }
 
-void do_to_ready(McuClass_t *mcu) {
-    LOG_INFO("Entering state READY");
-    mcu->state = MCU_STATE_READY;
-}
-
 void do_to_post(McuClass_t *mcu) {
     LOG_INFO("Entering state POST");
     mcu->state = MCU_STATE_POST;
+}
+
+void do_to_ready(McuClass_t *mcu) {
+    LOG_INFO("Entering state READY");
+    mcu->state = MCU_STATE_READY;
 }
 
 void do_to_fault(McuClass_t *mcu) {
@@ -105,7 +109,8 @@ void do_init(McuClass_t *mcu) {
 }
 
 void do_post(McuClass_t *mcu) {
-    
+	data32_t data;
+	mcu->get(mcu, KEY_MCU_STATUS, &data);
 }
 
 void do_ready(McuClass_t *mcu) {
@@ -119,8 +124,8 @@ void do_fault(McuClass_t *mcu) {
 int mcuInit (McuClass_t *mcu) {
     mcu->run = &runState;
     mcu->transition = &transition;
-    mcu->get = &mcuGet;
-    mcu->set = &mcuSet;
+    mcu->get = &get;
+    mcu->set = &set;
     mcu->state = MCU_STATE_INIT;
     mcu->transition(mcu, MCU_STATE_INIT);
     return 0;
@@ -148,17 +153,14 @@ void runState(McuClass_t *mcu) {
     run_fn(mcu);
 }
 
-int get(McuClass_t *mcu, uint8_t key) {
+int get(McuClass_t *mcu, uint8_t key, data32_t *data) {
 	if (mcu->state != MCU_STATE_READY) {
-		packet_t *packet;
-		packet = malloc(PACKET_SIZE);
-		packet->type = HDLC_GET;
-		packet->key = key;
-		//packet->data = data;
-		if (send_frame(packet) == 0) {
-			free(packet);
-			//do stuff with global_buffer
-		}
+		packet_t packet;
+		packet.type = HDLC_TYPE_GET;
+		packet.key = key;
+		send_frame(&packet);
+		hdlc_read();
+		
 	} else {
 		LOG_ERROR("MCU not ready for commands");
 		return -1;
@@ -166,11 +168,11 @@ int get(McuClass_t *mcu, uint8_t key) {
 	return 0;
 }
 
-int get(McuClass_t *mcu, uint8_t key) {
+int set(McuClass_t *mcu, uint8_t key) {
 	if (mcu->state != MCU_STATE_READY) {
 		packet_t *packet;
 		packet = malloc(PACKET_SIZE);
-		packet->type = HDLC_SET;
+		packet->type = HDLC_TYPE_SET;
 		packet->key = key;
 		//packet->data = data;
 		if (send_frame(packet) == 0) {
@@ -186,25 +188,20 @@ int get(McuClass_t *mcu, uint8_t key) {
 
 int send_frame(packet_t *packet) {
 	packet->id = msg_count;
-	buffer_t *buffer;
-	buffer->packet = *packet;
-	minihdlc_send_frame(buffer->bytes, PACKET_SIZE);
+	buffer_t buffer;
+	buffer.packet = *packet;
+	minihdlc_send_frame(buffer.bytes, PACKET_SIZE);
 	msg_count++;
-	hdlc_read();
-	if (packet->id != global_buffer->packet.id) {
-		LOG_ERROR("TX RX ID out of sync.");
-		return 1;
-	}
-	free(buffer);
 	return 0;
 }
 
 void hdlc_frame_handler(const uint8_t *buffer, uint16_t length) {
+	LOG_DEBUG("frame_handler");
 	if (length != PACKET_SIZE) {
 		LOG_ERROR("HDLC frame dropped, bad length: %d.", length);
-		abort();
+		exit(1);
 	}
-	global_buffer = *buffer;
+	memcpy(&global_buffer, buffer, sizeof(*buffer));
 }
 
 void hdlc_send_char(uint8_t data) {
@@ -213,12 +210,25 @@ void hdlc_send_char(uint8_t data) {
 }
 
 void hdlc_read() {
+	int timeout = 1 * 1000; //ms
+	int count = 0;
+	int delay = 1000; //ms
+	check(sp_input_waiting(port));
+	while(sp_input_waiting(port) == 0) {
+		if (count*delay > timeout) {
+			LOG_ERROR("Timeout reached.");
+			return;
+		}
+		count++;
+		sleep(delay/1000);
+	}
 	while (sp_input_waiting(port) > 0) {
 		uint8_t rx;
-		LOG_DEBUG("Received: %d", rx);
 		check(sp_blocking_read(port, &rx, 1, 100));
+		LOG_DEBUG("Received: %d", rx);
 		minihdlc_char_receiver(rx);
 	}
+	LOG_INFO("Done.");
 }
 
 int check(enum sp_return result) {
@@ -279,7 +289,7 @@ int check(enum sp_return result) {
 	default:
 		/* A return value of SP_OK, defined as zero, means that the
 		 * operation succeeded. */
-		LOG_INFO(("Operation succeeded.");
+		//LOG_INFO("Operation succeeded.");
 
 		/* Some fuctions can also return a value greater than zero to
 		 * indicate a numeric result, such as the number of bytes read by

@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 3.5.0)
 project(mcu_manager C)
 
-find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 include(ExternalProject)
 
 get_filename_component(COMMON_SOURCE_DIR
@@ -81,7 +80,7 @@ target_link_libraries( ${PROJECT_NAME}
         minihdlc
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL Debug)
+if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
     message("Copying to /apps")
     add_custom_command(
         TARGET ${PROJECT_NAME} 

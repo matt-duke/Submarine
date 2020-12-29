@@ -25,6 +25,7 @@ $ARDUNIO_CLI lib install FreeRTOS
 $ARDUNIO_CLI lib install DualMC33926MotorShield
 $ARDUNIO_CLI lib install --git-url https://github.com/mengguang/ArduinoHDLC.git
 $ARDUNIO_CLI lib install --git-url https://github.com/sparkfun/SparkFun_TB6612FNG_Arduino_Library.git
+$ARDUNIO_CLI lib install --git-url https://github.com/mpflaga/Arduino-MemoryFree.git
 $ARDUNIO_CLI lib install --zip-path $COMMON_ZIP
 
 if echo "arduino-cli core list" | grep -q "$CORE" ; then

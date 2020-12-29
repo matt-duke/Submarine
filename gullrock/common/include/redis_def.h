@@ -15,15 +15,17 @@ enum REDIS_KEY_ID {
 	KEY_ACCEL_X,
 	KEY_ACCEL_Y,
 	KEY_ACCEL_Z,
+  KEY_MCU_STATUS,
+  KEY_MCU_FREE_MEM,
   KEY_MPC_CPU_TEMP,
   KEY_MPC_UNDER_VOLT,
+  KEY_MPC_FREQ_CAP,
   KEY_MPC_THROTTLED,
   KEY_MPC_SOFT_TEMP_LIMIT,
-  KEY_MPC_THROTTLED,
 	REDIS_NUM_KEYS
 };
 
-typedef enum REDIS_INIT_FAILURES {
+typedef enum redis_init_failures_s {
   REDIS_CONNECTION_ERROR,
   REDIS_ALLOCATION_FAULURE,
   REDIS_PING_FAILURE
@@ -35,7 +37,6 @@ typedef struct redis_key_s{
 } redis_key_t;
 
 extern redis_key_t REDIS_KEYS[];
-
 void InitKeys();
 
 #ifdef __cplusplus

@@ -10,4 +10,4 @@ else
 fi
 
 $ARDUNIO_CLI compile --fqbn $FQBN runnning
-#$ARDUNIO_CLI upload -p $PORT --fqbn $FQBN running
+$ARDUNIO_CLI upload -p $PORT --fqbn $FQBN running

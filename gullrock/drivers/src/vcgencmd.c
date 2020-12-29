@@ -106,8 +106,8 @@ int vcgencmd_measure_temp() {
     int status = regexec(&regex, output, 1, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        float temp = (float)atof(get_match(output, &pmatch[1]), NULL, 0);
-        result = int(temp*100);
+        float temp = (float)atof(get_match(output, &pmatch[1]));
+        result = (int)(temp*100);
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
