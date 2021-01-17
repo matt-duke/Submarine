@@ -78,3 +78,12 @@ void init_logging() {
 	logger_initFileLogger(logfile, 10e6, 5);
 	logger_setLevel(LogLevel_DEBUG);
 }
+
+char* get_match(char *output, regmatch_t *pmatch) {
+	int size = pmatch->rm_eo - pmatch->rm_so;
+	char *substr = (char*)malloc(size+1);
+	if (substr == NULL) return NULL;
+	substr[size] = '\0';
+	strncpy(substr, &output[pmatch->rm_so], size);
+	return strdup(substr);
+}

@@ -12,7 +12,6 @@
 
 #define BIT(hex, i) ((hex >> i) & 1)
 
-char* get_match(char *output, regmatch_t *pmatch);
 cam_status_t vcgencmd_camera_status();
 throttled_t vcgencmd_throttled();
 
@@ -36,8 +35,8 @@ cam_status_t vcgencmd_camera_status() {
     int status = regexec(&regex, output, 2, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        result.supported = atoi(get_match(output, &pmatch[1]));
-        result.detected = atoi(get_match(output, &pmatch[2]));
+        //result.supported = atoi(get_match(output, &pmatch[1]));
+        //result.detected = atoi(get_match(output, &pmatch[2]));
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
@@ -72,7 +71,7 @@ throttled_t vcgencmd_throttled() {
     int status = regexec(&regex, output, 1, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        int hex = (int)strtol(get_match(output, &pmatch[1]), NULL, 0);
+        /*int hex = (int)strtol(get_match(output, &pmatch[1]), NULL, 0);
         result.under_volt = BIT(hex, 0);
         result.freq_cap = BIT(hex, 1);
         result.throttled = BIT(hex, 2);
@@ -80,7 +79,7 @@ throttled_t vcgencmd_throttled() {
         result.under_volt_oc = BIT(hex, 16);
         result.freq_cap_oc = BIT(hex, 17);
         result.throttled_oc = BIT(hex, 18);
-        result.soft_temp_limit_oc = BIT(hex, 19);
+        result.soft_temp_limit_oc = BIT(hex, 19);*/
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
@@ -106,18 +105,11 @@ int vcgencmd_measure_temp() {
     int status = regexec(&regex, output, 1, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        float temp = (float)atof(get_match(output, &pmatch[1]));
-        result = (int)(temp*100);
+        //float temp = (float)atof(get_match(output, &pmatch[1]));
+        //result = (int)(temp*100);
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
     }
     return result;
-}
-
-char* get_match(char *output, regmatch_t *pmatch) {
-    char *substr;
-    substr = (char*)malloc(pmatch->rm_eo - pmatch->rm_so);
-    strncpy(substr, &output[pmatch->rm_so], pmatch->rm_eo - pmatch->rm_so);
-    return substr;
 }

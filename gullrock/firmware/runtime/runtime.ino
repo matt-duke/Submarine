@@ -1,51 +1,19 @@
 #include <hdlc_def.h>
-#include <redis_def.h>
 #include <Arduhdlc.h>
-#include <DualMC33926MotorShield.h>
-#include <SparkFun_TB6612.h>
 #include <Arduino_FreeRTOS.h>
-#include <semphr.h>
+#include <Adafruit_NeoPixel.h>
 
-#include "sensors.h"
+#include "command_handler.h"
+#include "def.h"
 
-// Serial port defs
-#define SERIAL Serial
-#define SERIAL_DEBUG Serial1
+// Functions
+void send_character(uint8_t data);
+void hdlc_frame_handler(const uint8_t *data, uint16_t length);
 
-// Pin assignment
-#define M1DIR 7
-#define M1PWM 9 //changing this will use analog read instead of timer
-#define M1FB A0
-#define M2DIR 8
-#define M2PWM 10
-#define M2FB A1
-#define nD2 4
-#define nSF 12
+packet_t GlobalBuffer = {};
 
-#define AIN1 12
-#define BIN1 17
-#define AIN2 14
-#define BIN2 18
-#define PWMA 15
-#define PWMB 16
-#define STBY 19
-
-const int offsetA = 1;
-const int offsetB = 1;
-
-#define BTN_PIN 20
-
-//Variables
-TaskHandle_t TaskReadSerial_handler;
-TaskHandle_t TaskReadSensors_handler;
-
-SemaphoreHandle_t interruptSemaphore; // For button press
-
-DualMC33926MotorShield md(M1DIR, M1PWM, M1FB, M2DIR, M2PWM, M2FB, nD2, nSF);
-Motor LED(AIN1, AIN2, PWMA, offsetA, STBY);
-
-buffer_t GlobalBuffer;
-uint8_t GlobalState = HDLC_STATUS_OK;
+Adafruit_NeoPixel status(1, LED_STATUS, NEO_RGB + NEO_KHZ800);
+Arduhdlc hdlc(&send_character, &hdlc_frame_handler, MAX_HDLC_FRAME_LENGTH);
 
 // Function prototypes
 void send_character(uint8_t data);
@@ -53,84 +21,189 @@ void hdlc_frame_handler(const uint8_t *data, uint16_t length);
 
 void TaskReadSerial(void *pvParameters);
 void TaskReadSensors(void *pvParameters);
+void TaskStatus(void *pvParameters);
+void TaskNetwork(void *pvParameters);
+void TaskCamera(void *pvParameters);
+void TaskPOST(void *pvParameters);
+void TaskFaultMonitor(void *pvParameters);
 
-Arduhdlc hdlc(&send_character, &hdlc_frame_handler, MAX_HDLC_FRAME_LENGTH);
 void setup(){
-  //Internal
-  InitKeys();
+  GlobalState = MCU_STATUS_INIT;
 
-  //Pin def
+  //Turn off status LED
+  status.setPixelColor(0,0,0,0);
+  status.show();
+
+  //Pin modes
   pinMode(LED_BUILTIN, OUTPUT);
-
+  pinMode(LED_STATUS, OUTPUT);
+  //pinMode(LED_ETH, OUTPUT);
+  pinMode(CURR_PIN, INPUT);
   //Serial
   SERIAL_DEBUG.begin(9600);
+  SERIAL_DEBUG.println("Running setup.");
   SERIAL.begin(PORT_SPEED);
   while(!SERIAL); //Wait for serial to become available
 
-  //Motor driver
-  md.init();
+  status.setPixelColor(0, 0, 0, 0);
+  status.show();
+  setup_external();
   
   //FREE_RTOS
-  xTaskCreate(TaskReadSerial, "Read Serial", 128, NULL, 3, &TaskReadSerial_handler);
-  //xTaskCreate(TaskReadSensors, "Read Sensors", 128, NULL, 1, &TaskReadSensors_handler);
+  //xTaskCreate(TaskStatus, "Status LED", 128, NULL, 2, &TaskStatus_handle);
+  //xTaskCreate(TaskNetwork, "Network LED", 128, NULL, 2, &TaskNetwork_handle);
+  //xTaskCreate(TaskCamera, "Update camera", 128, NULL, 1, &TaskCamera_handle);
+  //xTaskCreate(TaskReadSensors, "Read sensors", 128, NULL, 3, &TaskReadSensors_handle);
+  //xTaskCreate(TaskPOST, "Startup test", 128, NULL, 2, &TaskPOST_handle);
+  xTaskCreate(TaskReadSerial, "Read serial", 128, NULL, 1, &TaskReadSerial_handle);
+  //xTaskCreate(TaskFaultMonitor, "Monitor errors", 128, NULL, 2, &TaskFaultMonitor_handle);
 
   interruptSemaphore = xSemaphoreCreateBinary();
- if (interruptSemaphore != NULL) {
+  if (interruptSemaphore != NULL) {
     //Attach interrupt for Arduino digital pin
     attachInterrupt(digitalPinToInterrupt(2), interruptHandler, HIGH);
   }
-  SERIAL_DEBUG.println("Booted up.");
+
+  //RUN POST
+  //xTaskNotifyGive(TaskPOST_handle);
+  vTaskStartScheduler();
 }
 
 void loop(){}
 
+void TaskPOST(void *pvParameters) {
+  static uint32_t thread_notification;
+
+  for (;;) {
+    thread_notification = ulTaskNotifyTake(pdTRUE, portMAX_DELAY);
+    if (thread_notification) {
+      if (test_mode()) {
+        GlobalState = MCU_STATUS_OK;
+      }
+    }
+  }
+}
+
+void TaskFaultMonitor(void *pvParameters) {
+  for (;;) {
+    bool fault = false;
+    if (MotorDriver.getM1Fault()) {
+      SERIAL_DEBUG.println("M1 Fault");
+    }
+    if (MotorDriver.getM2Fault()) {
+      SERIAL_DEBUG.println("M2 Fault");
+    }
+    if (fault) {
+      fault_handler();
+    }
+    vTaskDelay( 1000 / portTICK_PERIOD_MS ); 
+  }
+}
+
 void interruptHandler() {
   xSemaphoreGiveFromISR(interruptSemaphore, NULL);
+  portYIELD_FROM_ISR(); //?
 }
 
 void TaskReadSerial(void *pvParameters) {
   for (;;) {
+    //SERIAL_DEBUG.println("Checking buffer...");
     if (SERIAL.available()>0) {
-      SERIAL_DEBUG.println("Reading serial buffer...");
+      //SERIAL_DEBUG.println("Reading serial buffer...");
     } else {
       continue;
     }
     while(SERIAL.available()>0) {
-      char rx = SERIAL.read();
+      uint8_t rx = (uint8_t) SERIAL.read();
       SERIAL_DEBUG.print("Received: ");
-      SERIAL_DEBUG.println(rx, BIN);
+      SERIAL_DEBUG.println(rx, DEC);
       hdlc.charReceiver(rx);
     }
-    SERIAL_DEBUG.println("Done reading...");
+    //SERIAL_DEBUG.println("Done reading...");
     vTaskDelay(1); 
   }
 }
 
 void TaskReadSensors(void *pvParameters) {
   for(;;) {
-    SERIAL_DEBUG.println("Updating sensors");
-    unsigned int m1 = md.getM1CurrentMilliamps();
+    TotalCurrent.read();
+    M1Current.read();
+    M2Current.read();
+    //SERIAL_DEBUG.println(TotalCurrent.value);
     vTaskDelay( 1000 / portTICK_PERIOD_MS ); //delay 1000 ms
   }
 }
 
-void CommandHandler(Packet packet) {
-  SERIAL_DEBUG.println("received packet");
-  /*packet_t response;
-  response.id = packet.id;
-  response.type = packet.type;
+void TaskStatus(void *pvParameters) {
+  int strobe = 0;
+  bool add = true;
+  colour_t ColourProfiles[MCU_NUM_STATUS];
+  ColourProfiles[MCU_STATUS_INIT] = (colour_t){20,0,80,50};
+  ColourProfiles[MCU_STATUS_FAULT] = (colour_t){100,0,0,40};
+  ColourProfiles[MCU_STATUS_POST] = (colour_t){60,0,85,25};
+  ColourProfiles[MCU_STATUS_OK] = (colour_t){0,100,20,0}; 
 
-  if (packet.type == HDLC_TYPE_SET) {
-    
-  } else if (packet.type == HDLC_TYPE_GET) {
-    
-  } else {
-    GlobalState = HDLC_STATUS_FAULT;
+  for(;;) {
+    colour_t c = ColourProfiles[GlobalState];
+
+    if (c.rate != 0) {
+      float mult = float(strobe)/100;
+      status.setPixelColor(0, c.r*mult, c.g*mult, c.b*mult);
+      if (strobe >= 100) {
+        add = false;
+      } else if (strobe <= 0) {
+        add = true;
+      }
+      if (add) {
+        strobe += 1;
+      } else {
+        strobe -= 1;
+      }
+    } else {
+      status.setPixelColor(0, c.r, c.g, c.b);
+    }
+    status.show();
+    int rate = 1000;
+    if (c.rate < rate) {
+      rate = c.rate;
+    } 
+    vTaskDelay( rate / portTICK_PERIOD_MS ); 
   }
-  response.data.value = GlobalState;*/
-  buffer_t out_buffer;
-  out_buffer.packet.id = packet.id;
-  hdlc.sendFrame((uint8_t *)&out_buffer.bytes, sizeof(out_buffer.bytes));
+}
+
+void TaskNetwork(void *pvParameters) {
+  uint8_t i = 0;
+  bool add = true;
+  int rate = 1000;
+  for (;;) {
+    if (!NetworkStatus.layer1) {
+      i++;
+    }
+    else if (!NetworkStatus.apc) {
+      // strobe effect
+      if (i == 255 || i == 0) add = !add;
+      (add) ? i++ : i--;
+    }
+    else if (NetworkStatus.wan) {
+      i = 255;
+    }
+    analogWrite(LED_ETH, i);
+    vTaskDelay(rate / portTICK_PERIOD_MS); 
+  }
+}
+
+void TaskCamera(void *pvParameters) {
+  for (;;) {
+    if (!CamCtrl.on_target()) {
+      SERIAL_DEBUG.println("Updating camera...");
+      while (!CamCtrl.on_target()) {
+        CamCtrl.update();
+        vTaskDelay(1);
+      }
+      SERIAL_DEBUG.println("Finished updating camera.");
+    }
+    vTaskDelay( 10 / portTICK_PERIOD_MS); // delay 10 ms
+  }
 }
 
 //Function to send out one 8bit character
@@ -143,9 +216,18 @@ void send_character(uint8_t data)
 void hdlc_frame_handler(const uint8_t *data, uint16_t length)
 {
   SERIAL_DEBUG.println("frame_handler");
-  buffer_t buffer;
+
+  packet_t in_p = {};
+  packet_t out_p = {};
   for (int i=0; i < length; i++) {
-    buffer.bytes[i] = data[i];
+    in_p.bytes[i] = data[i];
   }
-  CommandHandler(buffer.packet);
+  out_p.s.id = in_p.s.id;
+
+  SERIAL_DEBUG.print("received packet id: ");
+  SERIAL_DEBUG.println(out_p.s.id);
+  if (0 != command_handler(&in_p, &in_p)) {
+    fault_handler();
+  }
+  hdlc.sendFrame((uint8_t *)&out_p.bytes, sizeof(out_p.bytes));
 }

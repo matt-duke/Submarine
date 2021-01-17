@@ -9,5 +9,5 @@ else
     ./setup.sh
 fi
 
-$ARDUNIO_CLI compile --fqbn $FQBN runnning
-$ARDUNIO_CLI upload -p $PORT --fqbn $FQBN running
+$ARDUNIO_CLI compile --fqbn $FQBN
+$ARDUNIO_CLI upload -p $PORT --fqbn $FQBN

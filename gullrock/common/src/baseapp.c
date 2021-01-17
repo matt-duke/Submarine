@@ -47,6 +47,9 @@ app_run_func_t * app_run_table[ APP_NUM_STATES ] = {
 };
 
 int GlobalAppInit() {
+    init_logging();
+    redis_init_keys();
+
     GlobalApp.run = &runState;
     GlobalApp.name = (char *)__progname;
     GlobalApp.transition = &transition;
@@ -69,7 +72,7 @@ int GlobalAppInit() {
     if (0 != redis_fn_callback(&transitionCallback, key, NULL)) {
         LOG_ERROR("Callback init failed.");
     }
-    if (redis_init_context(&context) != 0) {
+    if (redis_init_context(&GlobalApp.context) != 0) {
         LOG_FATAL("Failed to start.");
     }
     GlobalApp.transition(GlobalApp.state);

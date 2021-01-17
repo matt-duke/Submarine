@@ -3,6 +3,8 @@ project(mcu_manager C)
 
 include(ExternalProject)
 
+SET(CMAKE_CXX_FLAGS  "-g")
+
 get_filename_component(COMMON_SOURCE_DIR
                        "${CMAKE_CURRENT_LIST_DIR}/../../common"
                        ABSOLUTE)
@@ -69,6 +71,11 @@ target_include_directories( ${PROJECT_NAME}
         ${DRIVER_DIR}/include
 )
 
+add_custom_command(
+    TARGET ${PROJECT_NAME} POST_BUILD
+    COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} /apps/${PROJECT_NAME}
+)
+
 target_link_libraries( ${PROJECT_NAME}
     PRIVATE 
         logger
@@ -80,11 +87,8 @@ target_link_libraries( ${PROJECT_NAME}
         minihdlc
 )
 
-if (${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-    message("Copying to /apps")
-    add_custom_command(
-        TARGET ${PROJECT_NAME} 
-        POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} /apps/${PROJECT_NAME}
-    )
-endif()
+add_custom_command(
+    TARGET ${PROJECT_NAME} 
+    POST_BUILD
+    COMMAND echo 'Copying to /apps' && ${CMAKE_COMMAND} -E copy ${PROJECT_NAME} /apps/${PROJECT_NAME}
+)

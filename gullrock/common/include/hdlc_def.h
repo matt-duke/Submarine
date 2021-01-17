@@ -16,38 +16,56 @@ extern "C" {
 enum HDLC_TYPE {
   HDLC_TYPE_GET = 0,
   HDLC_TYPE_SET,
-  HDLC_TYPE_RESP
+  HDLC_TYPE_SUCCESS,
+  HDLC_TYPE_FAILURE,
+  HDLC_TYPE_NOT_IMPLEMENTED,
+  HDLC_TYPE_INVALID
 };
 
-enum HDLC_STATUS {
-  HDLC_STATUS_OK = 0,
-  HDLC_STATUS_FAULT
+enum MCU_STATUS {
+  MCU_STATUS_OK = 0,
+  MCU_STATUS_POST,
+  MCU_STATUS_INIT,
+  MCU_STATUS_FAULT,
+  MCU_NUM_STATUS
 };
 
-typedef union Data32 {
-  int32_t value;
-  uint8_t bytes[sizeof(int32_t)];
-}data32_t;
+enum HDLC_KEYS {
+  HDLC_NOT_IMPLEMENTED = 0,
+  HDLC_MOTOR_SPEED,    //{16,16} (M1, M2)
+  HDLC_MOTOR_CURR,     //{16,16} (M1, M2)
+  HDLC_STATUS,         //{8,8,8,8} (MCU, MOTOR, NET, BATTERY)
+  HDLC_FREE_MEM,       //{32}
+  HDLC_CAMERA,         //{16, 16} (yaw, pitch)
+  HDLC_LED,            //{32} (brightness)
+  HDLC_WATER_TEMP,     //{32} (water temp)
+  HDLC_TOTAL_CURR,     //{32} (current)
+	HDLC_NUM_KEYS
+};
 
 typedef union Data16 {
   int16_t value;
-  uint8_t bytes[sizeof(int16_t)];
+  uint8_t bytes[2];
 }data16_t;
 
-typedef struct Packet {
-  uint8_t type;
-  uint16_t id;
-  uint8_t key;
-  data32_t data;
-}packet_t;
+typedef union Data32 {
+  int32_t value;
+  data16_t data16[2];
+  uint8_t bytes[4];
+}data32_t;
 
-typedef union Buffer {
-  packet_t packet;
-  uint8_t bytes[sizeof(packet_t)];
-}buffer_t;
+typedef union {
+  struct {
+    uint8_t type;
+    uint8_t key;
+    uint16_t id;
+    data32_t data32;
+  } s;
+  uint8_t bytes[PACKET_SIZE];
+} packet_t;
 
 #ifdef __cplusplus
-}
+} 
 #endif
 
 #endif

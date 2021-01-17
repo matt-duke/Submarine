@@ -18,6 +18,6 @@ typedef struct sMcuClass {
     mcu_state_t state;
 } McuClass_t;
 
-extern int mcuInit (McuClass_t *Mcu);
+extern int mcuInit (McuClass_t *mcu);
 
 #endif

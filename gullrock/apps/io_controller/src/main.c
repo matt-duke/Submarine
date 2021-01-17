@@ -39,7 +39,6 @@ static status_t update_external_sensors();
 int main(int argc, char *argv[])
 {
 	init_logging();
-	InitKeys();
 
 	app_run_table[APP_STATE_RUNNING] = do_running;
 	app_run_table[APP_STATE_POST] = do_post;

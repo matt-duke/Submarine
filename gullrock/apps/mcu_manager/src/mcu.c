@@ -2,31 +2,34 @@
 #include <stdio.h>
 #include <unistd.h>
 #include <stdlib.h>
+#include <pthread.h>
 
 #include <libserialport.h>
 #include <minihdlc.h>
 #include <logger.h>
 
 #include <common.h>
-#include <redis_def.h>
 #include <hdlc_def.h>
 #include "mcu.h"
 
 /* Variables */
-//#define PORT_NAME "/dev/ttyAMA0"
-#define PORT_NAME "/dev/ttyACM0"
+//#define DEBUG_PORT "/dev/ttyAMA0"
+#define DEBUG_PORT "/dev/ttyUSB0"
+#define PORT "/dev/ttyACM0"
 
+static pthread_t mcu_log_thread;
 extern const char *__progname;
 redisContext *c;
 redisReply *reply;
 
-uint16_t msg_count;
-buffer_t global_buffer;
+uint16_t msg_count = 1;
+packet_t global_packet = {};
 
 typedef void transition_func_t(McuClass_t *mcu);
 typedef void run_func_t(McuClass_t *mcu);
 
 struct sp_port *port;
+struct sp_port *debug_port;
 
 /* Functions */
 static int transition(McuClass_t *mcu, mcu_state_t new_state);
@@ -47,11 +50,13 @@ static void do_fault(McuClass_t *mcu);
 static int get(McuClass_t *mcu, uint8_t key, data32_t *data);
 static int set(McuClass_t *mcu, uint8_t key);
 
-static void hdlc_frame_handler(const uint8_t *buffer, uint16_t length);
+static void hdlc_frame_handler(const uint8_t *packet, uint16_t length);
 static void hdlc_send_char(uint8_t data);
 static void hdlc_read();
 static int send_frame(packet_t *packet);
 static int check(enum sp_return result);
+
+static void *mcuLogThread(void *arg);
 
 transition_func_t * const transition_table[ MCU_NUM_STATES ][ MCU_NUM_STATES ] = {
     { do_to_init, do_to_post, do_nothing,  do_to_fault },
@@ -70,21 +75,23 @@ void do_to_init(McuClass_t *mcu) {
     LOG_INFO("Entering state INIT");
     mcu->state = MCU_STATE_INIT;
 
-	/* Open and configure each port. */
-	LOG_DEBUG("Looking for port %s.", PORT_NAME);
-	check(sp_get_port_by_name(PORT_NAME, &port));
+	//pthread_create(&mcu_log_thread, NULL, mcuLogThread, NULL);
 
+	/* Open and configure each port. */
+	LOG_DEBUG("Looking for port %s.", PORT);
+	check(sp_get_port_by_name(PORT, &port));
 	LOG_INFO("Opening port.");
 	check(sp_open(port, SP_MODE_READ_WRITE));
-
 	LOG_DEBUG("Setting port to 9600 8N1, no flow control.");
 	check(sp_set_baudrate(port, 9600));
 	check(sp_set_bits(port, 8));
 	check(sp_set_parity(port, SP_PARITY_NONE));
 	check(sp_set_stopbits(port, 1));
 	check(sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE));
-
+	check(sp_set_dtr(port, false));
 	sleep(1);
+	check(sp_set_dtr(port, true));
+	sleep(5);
 
 	minihdlc_init(hdlc_send_char, hdlc_frame_handler);
 }
@@ -92,6 +99,8 @@ void do_to_init(McuClass_t *mcu) {
 void do_to_post(McuClass_t *mcu) {
     LOG_INFO("Entering state POST");
     mcu->state = MCU_STATE_POST;
+
+	mcu->set();
 }
 
 void do_to_ready(McuClass_t *mcu) {
@@ -109,8 +118,9 @@ void do_init(McuClass_t *mcu) {
 }
 
 void do_post(McuClass_t *mcu) {
-	data32_t data;
-	mcu->get(mcu, KEY_MCU_STATUS, &data);
+	data32_t data = {};
+	mcu->get(mcu, HDLC_STATUS, &data);
+	LOG_INFO("MCU status: %d", data.bytes[0]);
 }
 
 void do_ready(McuClass_t *mcu) {
@@ -142,7 +152,7 @@ int transition(McuClass_t *mcu, mcu_state_t new_state) {
 			LOG_FATAL("Unexpected transition result.");
 			exit(1);
 		}
-		LOG_ERROR("Transition from %d to %d blocked.", mcu->state);
+		LOG_ERROR("Transition from %d to %d blocked.", mcu->state, new_state);
 		return 1;
     }
     return 0;
@@ -155,12 +165,25 @@ void runState(McuClass_t *mcu) {
 
 int get(McuClass_t *mcu, uint8_t key, data32_t *data) {
 	if (mcu->state != MCU_STATE_READY) {
-		packet_t packet;
-		packet.type = HDLC_TYPE_GET;
-		packet.key = key;
-		send_frame(&packet);
-		hdlc_read();
-		
+		packet_t packet = {};
+		packet.s.type = HDLC_TYPE_GET;
+		packet.s.key = key;
+
+		if (0 == send_frame(&packet)) {
+			hdlc_read();
+		} else {
+			LOG_ERROR("Error reading.");
+			return 1;
+		}
+		if (packet.s.id != global_packet.s.id) {
+			LOG_ERROR("Global packet ID mismatch: %d != %d", packet.s.id, global_packet.s.id);
+			return 2;
+		} else {
+			LOG_INFO("Received data: %d", global_packet.s.data32.value);
+			memcpy(data->bytes, global_packet.s.data32.bytes, 4);
+			return 0;
+		}
+
 	} else {
 		LOG_ERROR("MCU not ready for commands");
 		return -1;
@@ -170,14 +193,11 @@ int get(McuClass_t *mcu, uint8_t key, data32_t *data) {
 
 int set(McuClass_t *mcu, uint8_t key) {
 	if (mcu->state != MCU_STATE_READY) {
-		packet_t *packet;
-		packet = malloc(PACKET_SIZE);
-		packet->type = HDLC_TYPE_SET;
-		packet->key = key;
-		//packet->data = data;
-		if (send_frame(packet) == 0) {
-			free(packet);
-			//do stuff with global_buffer
+		packet_t packet;
+		packet.s.type = HDLC_TYPE_SET;
+		packet.s.key = key;
+		if (send_frame(&packet) == 0) {
+			//do stuff with global_packet
 		}
 	} else {
 		LOG_ERROR("MCU not ready for commands");
@@ -187,21 +207,21 @@ int set(McuClass_t *mcu, uint8_t key) {
 }
 
 int send_frame(packet_t *packet) {
-	packet->id = msg_count;
-	buffer_t buffer;
-	buffer.packet = *packet;
-	minihdlc_send_frame(buffer.bytes, PACKET_SIZE);
+	packet->s.id = msg_count;
+	/*for (int i=0;i<PACKET_SIZE;i++) {
+		LOG_INFO("packet[%d]=%d", i, packet->bytes[i]);
+	}*/
+	minihdlc_send_frame(packet->bytes, PACKET_SIZE);
 	msg_count++;
 	return 0;
 }
 
-void hdlc_frame_handler(const uint8_t *buffer, uint16_t length) {
-	LOG_DEBUG("frame_handler");
+void hdlc_frame_handler(const uint8_t *packet, uint16_t length) {
 	if (length != PACKET_SIZE) {
 		LOG_ERROR("HDLC frame dropped, bad length: %d.", length);
 		exit(1);
 	}
-	memcpy(&global_buffer, buffer, sizeof(*buffer));
+	memcpy(&global_packet, packet, PACKET_SIZE);
 }
 
 void hdlc_send_char(uint8_t data) {
@@ -228,7 +248,46 @@ void hdlc_read() {
 		LOG_DEBUG("Received: %d", rx);
 		minihdlc_char_receiver(rx);
 	}
-	LOG_INFO("Done.");
+}
+
+void *mcuLogThread(void *arg) {
+	const char *logfile = "/tmp/mcu.log";
+  	remove(logfile);
+	logger_initConsoleLogger(stderr);
+	logger_initFileLogger(logfile, 10e6, 5);
+	logger_setLevel(LogLevel_DEBUG);
+
+	/* Open and configure each port. */
+	check(sp_get_port_by_name(DEBUG_PORT, &debug_port));
+	LOG_INFO("Opening debug port.");
+	check(sp_open(debug_port, SP_MODE_READ_WRITE));
+	check(sp_set_baudrate(debug_port, 9600));
+	check(sp_set_bits(debug_port, 8));
+	check(sp_set_parity(debug_port, SP_PARITY_NONE));
+	check(sp_set_stopbits(debug_port, 1));
+	check(sp_set_flowcontrol(debug_port, SP_FLOWCONTROL_NONE));
+	LOG_DEBUG("Start logging MCU debug messages");
+	
+	while (true) {
+		int i = 0;
+		char *buffer= (char *) malloc(1);
+		while (true) {
+			char rx;
+			check(sp_blocking_read(debug_port, &rx, 1, 0));
+			if (rx == '\n') {
+				LOG_INFO("MCU MSG: %s", buffer);
+				break;
+			} else {
+				i++;
+				// quick and dirty. See https://stackoverflow.com/questions/29070705/realloc-an-array-but-do-not-lose-the-elements-in-it
+				char * new = (char *) realloc(buffer, i);
+				buffer = new;
+				buffer[i-1] = rx;
+			}
+		}
+		free(buffer);
+		sleep(0.5);
+	}
 }
 
 int check(enum sp_return result) {
