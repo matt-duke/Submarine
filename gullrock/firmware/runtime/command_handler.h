@@ -5,7 +5,7 @@
 
 #include "def.h"
 
-int command_handler(packet_t *in_p, packet_t *out_p);
+void command_handler(packet_t *in_p, packet_t *out_p);
 bool test_mode();
 void led_set(uint8_t pwm);
 void setup_external();

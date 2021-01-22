@@ -7,7 +7,7 @@
 #define RUN_DELAY 2
 
 typedef enum {
-    APP_STATE_INIT,
+    APP_STATE_INIT = 0,
     APP_STATE_POST,
     APP_STATE_RUNNING,
     APP_STATE_FAULT,

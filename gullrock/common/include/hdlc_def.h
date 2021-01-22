@@ -2,6 +2,7 @@
 #define HDLC_DEF_H
 
 #include <stdint.h>
+#include <stdbool.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -18,40 +19,44 @@ enum HDLC_TYPE {
   HDLC_TYPE_SET,
   HDLC_TYPE_SUCCESS,
   HDLC_TYPE_FAILURE,
-  HDLC_TYPE_NOT_IMPLEMENTED,
-  HDLC_TYPE_INVALID
+  HDLC_TYPE_NOT_IMPLEMENTED
 };
 
-enum MCU_STATUS {
-  MCU_STATUS_OK = 0,
-  MCU_STATUS_POST,
-  MCU_STATUS_INIT,
-  MCU_STATUS_FAULT,
-  MCU_NUM_STATUS
-};
+typedef enum { 
+    MCU_STATE_INIT = 0,
+    MCU_STATE_POST,
+    MCU_STATE_READY,
+    MCU_STATE_FAULT,
+    MCU_NUM_STATES } mcu_state_t;
 
 enum HDLC_KEYS {
   HDLC_NOT_IMPLEMENTED = 0,
-  HDLC_MOTOR_SPEED,    //{16,16} (M1, M2)
-  HDLC_MOTOR_CURR,     //{16,16} (M1, M2)
-  HDLC_STATUS,         //{8,8,8,8} (MCU, MOTOR, NET, BATTERY)
-  HDLC_FREE_MEM,       //{32}
-  HDLC_CAMERA,         //{16, 16} (yaw, pitch)
-  HDLC_LED,            //{32} (brightness)
-  HDLC_WATER_TEMP,     //{32} (water temp)
-  HDLC_TOTAL_CURR,     //{32} (current)
-	HDLC_NUM_KEYS
+  HDLC_M1_SPEED,
+  HDLC_M2_SPEED,
+  HDLC_M1_CURR,
+  HDLC_M2_CURR,
+  HDLC_STATE,
+  HDLC_NET_STATUS,
+  HDLC_TEST,
+  HDLC_FREE_MEM,
+  HDLC_YAW,
+  HDLC_PITCH,
+  HDLC_LED,
+  HDLC_WATER_TEMP,
+  HDLC_TOTAL_CURR,
+  HDLC_CRC,
+  HDLC_NUM_KEYS
 };
 
-typedef union Data16 {
-  int16_t value;
-  uint8_t bytes[2];
-}data16_t;
-
 typedef union Data32 {
-  int32_t value;
-  data16_t data16[2];
-  uint8_t bytes[4];
+  int32_t i32;
+  uint32_t ui32;
+  float f;
+  uint16_t ui16[2];
+  int16_t i16[2];
+  uint8_t ui8[4];
+  int8_t i8[4];
+  bool b[4*8];
 }data32_t;
 
 typedef union {
@@ -59,9 +64,9 @@ typedef union {
     uint8_t type;
     uint8_t key;
     uint16_t id;
-    data32_t data32;
+    data32_t d32;
   } s;
-  uint8_t bytes[PACKET_SIZE];
+  uint8_t ui8[PACKET_SIZE];
 } packet_t;
 
 #ifdef __cplusplus

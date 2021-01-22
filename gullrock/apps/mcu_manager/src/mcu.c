@@ -48,7 +48,9 @@ static void do_ready(McuClass_t *mcu);
 static void do_fault(McuClass_t *mcu);
 
 static int get(McuClass_t *mcu, uint8_t key, data32_t *data);
-static int set(McuClass_t *mcu, uint8_t key);
+static int set(McuClass_t *mcu, uint8_t key, data32_t *data);
+static void flush();
+static void reset();
 
 static void hdlc_frame_handler(const uint8_t *packet, uint16_t length);
 static void hdlc_send_char(uint8_t data);
@@ -77,21 +79,7 @@ void do_to_init(McuClass_t *mcu) {
 
 	//pthread_create(&mcu_log_thread, NULL, mcuLogThread, NULL);
 
-	/* Open and configure each port. */
-	LOG_DEBUG("Looking for port %s.", PORT);
-	check(sp_get_port_by_name(PORT, &port));
-	LOG_INFO("Opening port.");
-	check(sp_open(port, SP_MODE_READ_WRITE));
-	LOG_DEBUG("Setting port to 9600 8N1, no flow control.");
-	check(sp_set_baudrate(port, 9600));
-	check(sp_set_bits(port, 8));
-	check(sp_set_parity(port, SP_PARITY_NONE));
-	check(sp_set_stopbits(port, 1));
-	check(sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE));
-	check(sp_set_dtr(port, false));
-	sleep(1);
-	check(sp_set_dtr(port, true));
-	sleep(5);
+	mcu->reset();
 
 	minihdlc_init(hdlc_send_char, hdlc_frame_handler);
 }
@@ -99,8 +87,13 @@ void do_to_init(McuClass_t *mcu) {
 void do_to_post(McuClass_t *mcu) {
     LOG_INFO("Entering state POST");
     mcu->state = MCU_STATE_POST;
-
-	mcu->set();
+	data32_t tests = {1};
+	int reply = mcu->set(mcu, HDLC_TEST, &tests);
+	if (reply == HDLC_TYPE_FAILURE) {
+		LOG_ERROR("Error requesting MCU to enter POST");
+		mcu->transition(mcu, MCU_STATE_FAULT);
+		return;
+	}
 }
 
 void do_to_ready(McuClass_t *mcu) {
@@ -118,27 +111,48 @@ void do_init(McuClass_t *mcu) {
 }
 
 void do_post(McuClass_t *mcu) {
+
 	data32_t data = {};
-	mcu->get(mcu, HDLC_STATUS, &data);
-	LOG_INFO("MCU status: %d", data.bytes[0]);
+	if (HDLC_TYPE_SUCCESS == mcu->get(mcu, HDLC_STATE, &data)) {
+		LOG_INFO("MCU status: %d", data.ui8[0]);
+		if (data.ui8[0] == MCU_STATE_READY) {
+			mcu->transition(mcu, MCU_STATE_READY);
+		} else if (data.ui8[0] == MCU_STATE_FAULT) {
+			mcu->transition(mcu, MCU_STATE_FAULT);
+		}
+	} else {
+		LOG_INFO("Status request failed");
+	}
 }
 
 void do_ready(McuClass_t *mcu) {
-    
+	data32_t data = {};
+	if (HDLC_TYPE_SUCCESS == mcu->get(mcu, HDLC_STATE, &data)) {
+		LOG_INFO("MCU status: %d", data.ui8[0]);
+		if (data.ui8[0] == MCU_STATE_POST) {
+			mcu->transition(mcu, MCU_STATE_POST);
+		} else if (data.ui8[0] == MCU_STATE_FAULT) {
+			mcu->transition(mcu, MCU_STATE_FAULT);
+		}
+	} else {
+		LOG_INFO("Status request failed");
+	}
 }
 
 void do_fault(McuClass_t *mcu) {
     
 }
 
-int mcuInit (McuClass_t *mcu) {
+void mcuInit (McuClass_t *mcu) {
     mcu->run = &runState;
     mcu->transition = &transition;
     mcu->get = &get;
     mcu->set = &set;
-    mcu->state = MCU_STATE_INIT;
-    mcu->transition(mcu, MCU_STATE_INIT);
-    return 0;
+	mcu->flush = &flush;
+	mcu->reset = &reset;
+
+	mcu->state = MCU_STATE_INIT;
+	mcu->transition(mcu, MCU_STATE_INIT);
 }
 
 int transition(McuClass_t *mcu, mcu_state_t new_state) {
@@ -148,11 +162,7 @@ int transition(McuClass_t *mcu, mcu_state_t new_state) {
     
     transition_fn(mcu);
     if (mcu->state != new_state) {
-		if (mcu->state != old_state) {
-			LOG_FATAL("Unexpected transition result.");
-			exit(1);
-		}
-		LOG_ERROR("Transition from %d to %d blocked.", mcu->state, new_state);
+		LOG_ERROR("Transition from %d to %d blocked.", old_state, new_state);
 		return 1;
     }
     return 0;
@@ -164,54 +174,61 @@ void runState(McuClass_t *mcu) {
 }
 
 int get(McuClass_t *mcu, uint8_t key, data32_t *data) {
-	if (mcu->state != MCU_STATE_READY) {
-		packet_t packet = {};
-		packet.s.type = HDLC_TYPE_GET;
-		packet.s.key = key;
+	packet_t packet = {};
+	packet.s.type = HDLC_TYPE_GET;
+	packet.s.key = key;
 
-		if (0 == send_frame(&packet)) {
-			hdlc_read();
-		} else {
-			LOG_ERROR("Error reading.");
-			return 1;
-		}
-		if (packet.s.id != global_packet.s.id) {
-			LOG_ERROR("Global packet ID mismatch: %d != %d", packet.s.id, global_packet.s.id);
-			return 2;
-		} else {
-			LOG_INFO("Received data: %d", global_packet.s.data32.value);
-			memcpy(data->bytes, global_packet.s.data32.bytes, 4);
-			return 0;
-		}
-
+	if (0 == send_frame(&packet)) {
+		hdlc_read(); // will block until response
 	} else {
-		LOG_ERROR("MCU not ready for commands");
-		return -1;
+		LOG_ERROR("Error reading.");
+		return HDLC_TYPE_FAILURE;
 	}
-	return 0;
+	if (packet.s.id != global_packet.s.id) {
+		LOG_ERROR("Global packet ID mismatch: %d != %d", packet.s.id, global_packet.s.id);
+		mcu->flush();
+		return HDLC_TYPE_FAILURE;
+	} else if (packet.s.type == HDLC_TYPE_NOT_IMPLEMENTED) {
+		LOG_WARN("Not implemented");
+		return HDLC_TYPE_NOT_IMPLEMENTED;
+	} else {
+		//LOG_INFO("Received data: %d", global_packet.s.data32.value);
+		memcpy(data->ui8, global_packet.s.d32.ui8, 4);
+		return global_packet.s.type;
+	}
 }
 
-int set(McuClass_t *mcu, uint8_t key) {
-	if (mcu->state != MCU_STATE_READY) {
-		packet_t packet;
-		packet.s.type = HDLC_TYPE_SET;
-		packet.s.key = key;
-		if (send_frame(&packet) == 0) {
-			//do stuff with global_packet
-		}
+int set(McuClass_t *mcu, uint8_t key, data32_t *data) {
+	packet_t packet = {};
+	packet.s.type = HDLC_TYPE_SET;
+	packet.s.key = key;
+	memcpy(packet.s.d32.ui8, data->ui8, 4);
+
+	if (0 == send_frame(&packet)) {
+		hdlc_read(); // will block until response
 	} else {
-		LOG_ERROR("MCU not ready for commands");
-		return -1;
+		LOG_ERROR("Error reading.");
+		return HDLC_TYPE_FAILURE;
 	}
-	return 0;
+	if (packet.s.id != global_packet.s.id) {
+		LOG_ERROR("Global packet ID mismatch: %d != %d", packet.s.id, global_packet.s.id);
+		// Out of sync error, clear input buffer
+		mcu->flush();
+		return HDLC_TYPE_FAILURE;
+	} else if (packet.s.type == HDLC_TYPE_NOT_IMPLEMENTED) {
+		LOG_WARN("Not implemented");
+		return HDLC_TYPE_NOT_IMPLEMENTED;
+	} else {
+		return global_packet.s.type;
+	}
 }
 
 int send_frame(packet_t *packet) {
 	packet->s.id = msg_count;
 	/*for (int i=0;i<PACKET_SIZE;i++) {
-		LOG_INFO("packet[%d]=%d", i, packet->bytes[i]);
+		LOG_INFO("packet[%d]=%d", i, packet->ui8[i]);
 	}*/
-	minihdlc_send_frame(packet->bytes, PACKET_SIZE);
+	minihdlc_send_frame(packet->ui8, PACKET_SIZE);
 	msg_count++;
 	return 0;
 }
@@ -225,12 +242,12 @@ void hdlc_frame_handler(const uint8_t *packet, uint16_t length) {
 }
 
 void hdlc_send_char(uint8_t data) {
-	LOG_DEBUG("Sending: %d", data);
+	//LOG_DEBUG("Sending: %d", data);
 	check(sp_blocking_write(port, &data, 1, 100));
 }
 
 void hdlc_read() {
-	int timeout = 1 * 1000; //ms
+	int timeout = 5 * 1000; //ms
 	int count = 0;
 	int delay = 1000; //ms
 	check(sp_input_waiting(port));
@@ -245,9 +262,34 @@ void hdlc_read() {
 	while (sp_input_waiting(port) > 0) {
 		uint8_t rx;
 		check(sp_blocking_read(port, &rx, 1, 100));
-		LOG_DEBUG("Received: %d", rx);
+		//LOG_DEBUG("Received: %d", rx);
 		minihdlc_char_receiver(rx);
 	}
+}
+
+static void flush() {
+	check(sp_drain(port));
+	while (sp_input_waiting(port) > 0) {
+		uint8_t rx;
+		check(sp_blocking_read(port, &rx, 1, 100));
+	}
+}
+
+static void reset() {
+	LOG_DEBUG("Looking for port %s.", PORT);
+	check(sp_get_port_by_name(PORT, &port));
+	LOG_INFO("Opening port.");
+	check(sp_open(port, SP_MODE_READ_WRITE));
+	LOG_DEBUG("Setting port to 9600 8N1, no flow control.");
+	check(sp_set_baudrate(port, 9600));
+	check(sp_set_bits(port, 8));
+	check(sp_set_parity(port, SP_PARITY_NONE));
+	check(sp_set_stopbits(port, 1));
+	check(sp_set_flowcontrol(port, SP_FLOWCONTROL_NONE));
+	check(sp_set_dtr(port, false));
+	sleep(1);
+	check(sp_set_dtr(port, true));
+	sleep(1);
 }
 
 void *mcuLogThread(void *arg) {

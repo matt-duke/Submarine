@@ -19,7 +19,7 @@ Sensor::Sensor(float (*f)(), uint8_t wait) {
 // Public Methods //////////////////////////////////////////////////////////////
 float Sensor::read() {
   for (int i=0;i<_buffer.capacity;i++) {
-    float sample = _read();
+    float sample = (float)Sensor::_read();
     _buffer.push(sample);
   }
   float avg = 0;
@@ -28,4 +28,5 @@ float Sensor::read() {
   }
   avg = avg / _buffer.capacity;
   Sensor::value = avg;
+  return Sensor::value;
 }

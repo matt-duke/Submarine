@@ -90,7 +90,6 @@ bool MC33926Driver::_setSpeed(int16_t speed, int16_t *mSpeed, uint8_t PWM, uint8
 
   for (int16_t i=*mSpeed;i!=speed;i+=add) {
     analogWrite(PWM, abs(~i)); // map 400 to 255
-    Serial1.println(abs(~i));
     delay(M_DELAY);
   }
 

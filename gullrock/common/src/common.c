@@ -11,19 +11,24 @@
 #include "baseapp.h"
 #include "common.h"
 
-#define BUFSIZE 128
+#define BUFSIZE 500
 
 // Variables
 extern const char *__progname;
 
-int run_cmd(char *cmd, char *buffer) {
+int run_cmd(char *cmd, char *buffer, int size) {
 	FILE *fp;
 	LOG_DEBUG("running command: %s", cmd);
     fp = popen(cmd, "r");
 	if (fp != NULL) {
-		while (NULL != fgets(buffer, BUFSIZE, fp)) {
-			LOG_INFO("Cmd output: %s", buffer);
-		}
+		//while (NULL != fgets(buffer, BUFSIZE, fp)) {
+		//}
+		size_t newLen = fread(buffer, sizeof(char), size, fp);
+    	if ( ferror( fp ) != 0 ) {
+        	LOG_ERROR("Error reading file");
+    	} else {
+        	buffer[newLen++] = '\0'; /* Just to be safe. */
+   		}
     } else {
 		LOG_ERROR("popen() failed.");
 		pclose(fp);

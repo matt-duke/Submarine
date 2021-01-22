@@ -2,16 +2,17 @@
 #include <Arduino_FreeRTOS.h>
 //#include <SparkFun_TB6612.h>
 
+#include "crc.h"
 #include "command_handler.h"
 #include "def.h"
 
 // Functions
-int command_get(packet_t *in_p, packet_t *out_p);
-int command_set(packet_t *in_p, packet_t *out_p);
+void command_get(packet_t *in_p, packet_t *out_p);
+void command_set(packet_t *in_p, packet_t *out_p);
 
 void setup_external() {
-    CamCtrl.init();
-    MotorDriver.init();
+    //CamCtrl.init();
+    //MotorDriver.init();
 
     pinMode(AIN1, OUTPUT);
     pinMode(AIN2, OUTPUT);
@@ -20,25 +21,162 @@ void setup_external() {
     led_set(0);
 }
 
-int command_handler(packet_t *in_p, packet_t *out_p) {
+void command_handler(packet_t *in_p, packet_t *out_p) {
     if (in_p->s.type == HDLC_TYPE_SET) {
-        SERIAL_DEBUG.println("SET");
         command_set(in_p, out_p);
     } else if (in_p->s.type == HDLC_TYPE_GET) {
-        SERIAL_DEBUG.println("GET");
         command_get(in_p, out_p);
     } else {
-        fault_handler();
+        out_p->s.type = (uint8_t)HDLC_TYPE_NOT_IMPLEMENTED;
     }
 }
 
-bool test_mode() {
-    if (GlobalState == MCU_STATUS_FAULT) {
-        return false;
+void command_get(packet_t *in_p, packet_t *out_p) {
+    SERIAL_DEBUG.print("GET: ");
+    SERIAL_DEBUG.println(in_p->s.key);
+
+    out_p->s.type = (uint8_t)HDLC_TYPE_SUCCESS;
+    switch (in_p->s.key) {
+        case HDLC_M1_SPEED:
+            SERIAL_DEBUG.println("HDLC_M1_SPEED");
+            out_p->s.d32.ui8[0] = MotorDriver.m1Speed;
+        case HDLC_M2_SPEED:
+            SERIAL_DEBUG.println("HDLC_M2_SPEED");
+            out_p->s.d32.ui8[0] = MotorDriver.m2Speed;
+            break;
+        case HDLC_TEST:
+            SERIAL_DEBUG.println("HDLC_TEST");
+            out_p->s.d32 = last_post_result;
+            break;
+        case HDLC_M1_CURR:
+            SERIAL_DEBUG.println("HDLC_M1_CURR");
+            out_p->s.d32.f = M1Current.value;
+            break;
+        case HDLC_M2_CURR:
+            SERIAL_DEBUG.println("HDLC_M2_CURR");
+            out_p->s.d32.f = M2Current.value;
+            break;
+        case HDLC_STATE:
+            SERIAL_DEBUG.println("HDLC_STATE");
+            out_p->s.type = HDLC_TYPE_SUCCESS;
+            out_p->s.d32.ui8[0] = (uint8_t)GlobalState;
+            break;
+        case HDLC_FREE_MEM:
+            SERIAL_DEBUG.println("HDLC_FREE_MEM");
+            out_p->s.d32.ui32 = freeMemory();
+            break;
+        case HDLC_YAW:
+            SERIAL_DEBUG.println("HDLC_YAW");
+            out_p->s.d32.ui8[0] = (uint8_t)CamCtrl.read_yaw();
+            break;
+        case HDLC_PITCH:
+            SERIAL_DEBUG.println("HDLC_PITCH");
+            out_p->s.d32.ui8[0] = (uint8_t)CamCtrl.read_pitch();
+            break;
+        case HDLC_WATER_TEMP:
+            SERIAL_DEBUG.println("HDLC_WATER_TEMP");
+            out_p->s.type = HDLC_TYPE_NOT_IMPLEMENTED;
+            break;
+        case HDLC_TOTAL_CURR:
+            SERIAL_DEBUG.println("HDLC_TOTAL_CURR");
+             out_p->s.d32.f = TotalCurrent.value;
+            break;
+        case HDLC_CRC:
+            SERIAL_DEBUG.println("HDLC_TOTAL_CURR");
+             out_p->s.d32.ui32 = (uint32_t)CRC;
+            break;
+        default:
+            SERIAL_DEBUG.println("DEFAULT");
+            out_p->s.type = HDLC_TYPE_NOT_IMPLEMENTED;
+            break;
     }
+}
+
+void command_set(packet_t *in_p, packet_t *out_p) {
+    SERIAL_DEBUG.print("SET: ");
+    SERIAL_DEBUG.println(in_p->s.key);
+
+    out_p->s.type = (uint8_t)HDLC_TYPE_SUCCESS;
+    switch (in_p->s.key) {
+        case HDLC_TEST:
+            SERIAL_DEBUG.println("HDLC_TEST");
+            test_mode();
+            break;
+        case HDLC_M1_SPEED:
+            SERIAL_DEBUG.println("HDLC_M1_SPEED");
+            if (!MotorDriver.setM1Speed(in_p->s.d32.ui8[0])) {
+                out_p->s.type = HDLC_TYPE_FAILURE;
+            }
+            break;
+        case HDLC_M2_SPEED:
+            SERIAL_DEBUG.println("HDLC_M2_SPEED");
+            if (!MotorDriver.setM2Speed(in_p->s.d32.ui8[0])) {
+                out_p->s.type = HDLC_TYPE_FAILURE;
+            }
+            break;
+        case HDLC_YAW:
+            SERIAL_DEBUG.println("HDLC_YAW");
+            CamCtrl.yaw = in_p->s.d32.ui32;
+            break;
+        case HDLC_PITCH:
+            SERIAL_DEBUG.println("HDLC_PITCH");
+            CamCtrl.pitch = in_p->s.d32.ui32;
+            break;
+        case HDLC_LED:
+            SERIAL_DEBUG.println("HDLC_LED");
+            led_set(in_p->s.d32.ui32);
+            break;
+        case HDLC_NET_STATUS:
+            SERIAL_DEBUG.println("HDLC_NET_STATUS");
+            NetworkStatus.layer1 = in_p->s.d32.ui8[0];
+            NetworkStatus.apc = in_p->s.d32.ui8[1];
+            NetworkStatus.wan = in_p->s.d32.ui8[2];
+            out_p->s.type = HDLC_TYPE_SUCCESS;
+            break;
+        case HDLC_STATE:
+            SERIAL_DEBUG.println("HDLC_STATE");
+            out_p->s.type = HDLC_NOT_IMPLEMENTED;
+            if (in_p->s.d32.ui8[0] == MCU_STATE_FAULT) {
+                fault_handler();
+                out_p->s.type = HDLC_TYPE_SUCCESS;
+            }
+            break;
+        default:
+            SERIAL_DEBUG.println("DEFAULT");
+            out_p->s.type = HDLC_TYPE_NOT_IMPLEMENTED;
+            break;
+    }
+}
+
+void led_set(uint8_t pwm) {
+    if (GlobalState != MCU_STATE_FAULT) {
+        if (pwm == 0) {
+            // Turns off all pins - for preventing current leakage to +5V (fix in hw later)
+            digitalWrite(AIN1, LOW);
+            digitalWrite(AIN2, LOW);
+            digitalWrite(STBY, LOW);
+            analogWrite(PWMA, 0);
+        }
+        digitalWrite(AIN1, LOW);
+        digitalWrite(AIN2, HIGH);
+        digitalWrite(STBY, HIGH);
+        analogWrite(PWMA, pwm);
+    }
+}
+
+void fault_handler() {
+  SERIAL_DEBUG.println("Entering fault state");
+  GlobalState = MCU_STATE_FAULT;
+
+  digitalWrite(STBY, LOW);
+  CamCtrl.disable();
+  MotorDriver.disable();
+}
+
+bool test_mode() {
     SERIAL_DEBUG.println("TEST MODE STARTED");
-    GlobalState = MCU_STATUS_POST;
-    
+    GlobalState = MCU_STATE_POST;
+    /*
     SERIAL_DEBUG.println("Motor Test");
 
     MotorDriver.setM1Speed(254);
@@ -84,113 +222,11 @@ bool test_mode() {
         delay(1);
     }
     SERIAL_DEBUG.println("Servo Test Done");
+    */
+    last_post_result.ui8[0] = (uint8_t)HDLC_NOT_IMPLEMENTED;
+    last_post_result.ui8[1] = (uint8_t)HDLC_NOT_IMPLEMENTED;
+    last_post_result.ui8[2] = (uint8_t)HDLC_NOT_IMPLEMENTED;
+    GlobalState = MCU_STATE_READY;
     SERIAL_DEBUG.println("TEST MODE ENDED");
-    GlobalState = MCU_STATUS_OK;
     return true;
-}
-
-int command_get(packet_t *in_p, packet_t *out_p) {
-    switch (in_p->s.key) {
-        case HDLC_MOTOR_SPEED:
-            out_p->s.data32.data16[0].value = MotorDriver.m1Speed;
-            out_p->s.data32.data16[1].value = MotorDriver.m2Speed;
-            break;
-        case HDLC_MOTOR_SF:
-            out_p->s.data32.data16[0].value = MotorDriver.getM1Fault();
-            out_p->s.data32.data16[1].value = MotorDriver.getM2Fault();
-            break;
-        case HDLC_MOTOR_CURR:
-            out_p->s.data32.data16[0].value = MotorDriver.getM1Current();
-            out_p->s.data32.data16[1].value = MotorDriver.getM1Current();
-            break;
-        case HDLC_STATUS:
-            out_p->s.data32.bytes[0] = GlobalState;
-            out_p->s.data32.bytes[1] = MotorDriver.getM1Fault();
-            out_p->s.data32.bytes[2] = MotorDriver.getM2Fault();
-            break;
-        case HDLC_FREE_MEM:
-            out_p->s.data32.value = freeMemory();
-            break;
-        case HDLC_CAMERA:
-            out_p->s.data32.data16[0].value = CamCtrl.read_yaw();
-            out_p->s.data32.data16[1].value = CamCtrl.read_pitch();
-            break;
-        case HDLC_WATER_TEMP:
-            out_p->s.type = HDLC_TYPE_NOT_IMPLEMENTED;
-            break;
-        case HDLC_TOTAL_CURRENT:
-            out_p->s.type = HDLC_TYPE_NOT_IMPLEMENTED;
-            break;
-        default:
-            out_p->s.type = HDLC_TYPE_INVALID;
-    }
-}
-
-int command_set(packet_t *in_p, packet_t *out_p) {
-    switch (in_p->s.key) {
-        case HDLC_MOTOR_SPEED:
-            bool success = true;
-            int16_t speed;
-            speed = in_p->s.data32.data16[0].value;
-            success &= MotorDriver.setM1Speed(speed);
-
-            speed = in_p->s.data32.data16[1].value;
-            success &= MotorDriver.setM2Speed(speed);
-
-            (success) ? out_p->s.type = HDLC_TYPE_SUCCESS: out_p->s.type = HDLC_TYPE_FAILURE;
-            break;
-        case HDLC_CAMERA:
-            CamCtrl.yaw = in_p->s.data32.data16[0].value;
-            CamCtrl.pitch = in_p->s.data32.data16[1].value;
-            out_p->s.type = HDLC_TYPE_SUCCESS;
-            break;
-        case HDLC_LED:
-            led_set(in_p->s.data32.value);
-            out_p->s.type = HDLC_TYPE_SUCCESS;
-            break;
-        case HDLC_NETWORK_STATUS:
-            NetworkStatus.layer1 = in_p->bytes[0];
-            NetworkStatus.apc = in_p->bytes[1];
-            NetworkStatus.wan = in_p->bytes[2];
-            break;
-        case HDLC_STATUS:
-            switch(in_p->s.data32.value) {
-                case MCU_STATUS_OK:
-
-                case MCU_STATUS_POST:
-                    xTaskNotifyGive(TaskPOST_handle);
-                    break;
-                case MCU_STATUS_FAULT:
-                    fault_handler();
-                    break;
-            }
-            break;
-        default:
-            out_p->s.type = HDLC_TYPE_INVALID;
-    }
-}
-
-void led_set(uint8_t pwm) {
-    if (GlobalState != MCU_STATUS_FAULT) {
-        if (pwm == 0) {
-            // Turns off all pins - for preventing current leakage to +5V (fix in hw later)
-            digitalWrite(AIN1, LOW);
-            digitalWrite(AIN2, LOW);
-            digitalWrite(STBY, LOW);
-            analogWrite(PWMA, 0);
-        }
-        digitalWrite(AIN1, LOW);
-        digitalWrite(AIN2, HIGH);
-        digitalWrite(STBY, HIGH);
-        analogWrite(PWMA, pwm);
-    }
-}
-
-void fault_handler() {
-  SERIAL_DEBUG.println("Entering fault state");
-  GlobalState = MCU_STATUS_FAULT;
-
-  digitalWrite(STBY, LOW);
-  CamCtrl.disable();
-  MotorDriver.disable();
 }

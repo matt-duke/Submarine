@@ -24,6 +24,7 @@ typedef struct throttled {
 
 cam_status_t vcgencmd_camera_status();
 throttled_t vcgencmd_throttled();
-int vcgencmd_measure_temp();
+float vcgencmd_measure_temp();
+float vcgencmd_measure_volts();
 
 #endif

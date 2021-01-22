@@ -25,6 +25,11 @@ enum REDIS_KEY {
     REDIS_MCU_STATE,
     REDIS_MCU_FREE_MEM,
     REDIS_MPC_CPU_TEMP,
+    REDIS_MPC_CPU_IDLE,
+    REDIS_MPC_LOAD_AVG_1MIN,
+    REDIS_MPC_LOAD_AVG_5MIN,
+    REDIS_MPC_LOAD_AVG_15MIN,
+    REDIS_MPC_VOLTS,
     REDIS_MPC_UNDER_VOLT,
     REDIS_MPC_FREQ_CAP,
     REDIS_MPC_THROTTLED,
@@ -46,10 +51,10 @@ typedef struct redis_key_s {
     char *key;
     int retention;
     bool ts;
+    int type;
     int hdlc_key;
-    int hdlc_size;
     int hdlc_index;
-    redis_label_t labels;
+    //redis_label_t labels;
 } redis_key_t;
 
 extern redis_key_t REDIS_KEYS[];
@@ -60,5 +65,6 @@ int redis_create_keys(redisContext **c);
 
 int redis_fn_callback(void (*f)(), char *topic, void *privdata);
 int redis_init_context(redisContext **c);
+void push_to_redis(redisContext *c, int i, void *data);
 
 #endif

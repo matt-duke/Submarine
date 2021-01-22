@@ -6,17 +6,17 @@
 #include "vcgencmd.h"
 
 #define CAMERA_REGEX "supported=([[:digit:]])[[:space:]]detected=([[:digit:]])"
-#define THROTTLED_REGEX "throttled=([x[:digit:]]*)"
-#define TEMP_REGEX "temp=([[:digit:].]*)'C"
+#define VOLTAGE_REGEX "volt=([[:digit:].]+)V"
+#define THROTTLED_REGEX "throttled=([x[:digit:]]+)"
+#define TEMP_REGEX "temp=([[:digit:].]+)'C"
 #define VCGENCMD "/opt/vc/bin/vcgencmd "
+
+#define BUFFERSIZE 248
 
 #define BIT(hex, i) ((hex >> i) & 1)
 
-cam_status_t vcgencmd_camera_status();
-throttled_t vcgencmd_throttled();
-
 cam_status_t vcgencmd_camera_status() {
-    char output[128];
+    char output[BUFFERSIZE];
     char *pattern = CAMERA_REGEX;
 
     cam_status_t result;
@@ -25,7 +25,7 @@ cam_status_t vcgencmd_camera_status() {
     regex_t regex;
     regmatch_t pmatch[2];
 
-    if(run_cmd(VCGENCMD"get_camera", output)) {
+    if(run_cmd(VCGENCMD"get_camera", output, BUFFERSIZE)) {
         LOG_ERROR("Error running cmd");
         return result;
     }
@@ -45,23 +45,23 @@ cam_status_t vcgencmd_camera_status() {
 }
 
 char* vcgencmd_version() {
-    char output[128];
+    char output[BUFFERSIZE];
     char* result;
-    if(run_cmd(VCGENCMD"version", output)) {
+    if(run_cmd(VCGENCMD"version", output, BUFFERSIZE)) {
         LOG_ERROR("Error running cmd");
         return result;
     }
 }
 
 throttled_t vcgencmd_throttled() {
-    char output[128];
+    char output[BUFFERSIZE];
     char *pattern = THROTTLED_REGEX;
 
     throttled_t result = {-1,-1,-1,-1,-1,-1,-1,-1};
     regex_t regex;
     regmatch_t pmatch[1];
 
-    if(run_cmd(VCGENCMD"get_throttled", output)) {
+    if(run_cmd(VCGENCMD"get_throttled", output, BUFFERSIZE)) {
         LOG_ERROR("Error running cmd");
         return result;
     }
@@ -71,7 +71,7 @@ throttled_t vcgencmd_throttled() {
     int status = regexec(&regex, output, 1, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        /*int hex = (int)strtol(get_match(output, &pmatch[1]), NULL, 0);
+        int hex = (int)strtol(get_match(output, &pmatch[1]), NULL, 0);
         result.under_volt = BIT(hex, 0);
         result.freq_cap = BIT(hex, 1);
         result.throttled = BIT(hex, 2);
@@ -79,7 +79,7 @@ throttled_t vcgencmd_throttled() {
         result.under_volt_oc = BIT(hex, 16);
         result.freq_cap_oc = BIT(hex, 17);
         result.throttled_oc = BIT(hex, 18);
-        result.soft_temp_limit_oc = BIT(hex, 19);*/
+        result.soft_temp_limit_oc = BIT(hex, 19);
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;
@@ -87,26 +87,51 @@ throttled_t vcgencmd_throttled() {
     return result;
 }
 
-int vcgencmd_measure_temp() {
-    char output[128];
+float vcgencmd_measure_temp() {
+    char output[BUFFERSIZE];
     char *pattern = TEMP_REGEX;
 
-    int result =-1;
+    float result =-1;
     regex_t regex;
-    regmatch_t pmatch[1];
+    regmatch_t pmatch[2];
 
-    if(run_cmd(VCGENCMD"measure_temp", output)) {
+    if(run_cmd(VCGENCMD"measure_temp", output, BUFFERSIZE)) {
         LOG_ERROR("Error running cmd");
         return result;
     }
 
     if (regcomp(&regex, pattern, REG_EXTENDED) != 0)
         LOG_ERROR("regcomp error");
-    int status = regexec(&regex, output, 1, pmatch, 0);
+    int status = regexec(&regex, output, 2, pmatch, 0);
     regfree(&regex);
     if (!status) {
-        //float temp = (float)atof(get_match(output, &pmatch[1]));
-        //result = (int)(temp*100);
+        result = atof(get_match(output, &pmatch[1]));
+    } else {
+        LOG_ERROR("No match found: %s in %s", pattern, output);
+        return result;
+    }
+    return result;
+}
+
+float vcgencmd_measure_volts() {
+    char output[BUFFERSIZE];
+    char *pattern = VOLTAGE_REGEX;
+
+    float result =-1;
+    regex_t regex;
+    regmatch_t pmatch[2];
+
+    if(run_cmd(VCGENCMD"measure_volts", output, BUFFERSIZE)) {
+        LOG_ERROR("Error running cmd");
+        return result;
+    }
+
+    if (regcomp(&regex, pattern, REG_EXTENDED) != 0)
+        LOG_ERROR("regcomp error");
+    int status = regexec(&regex, output, 2, pmatch, 0);
+    regfree(&regex);
+    if (!status) {
+        result = atof(get_match(output, &pmatch[1]));
     } else {
         LOG_ERROR("No match found: %s in %s", pattern, output);
         return result;

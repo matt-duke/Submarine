@@ -63,17 +63,19 @@ struct netstatus_t {
 };
 
 extern netstatus_t NetworkStatus;
+
 extern TaskHandle_t TaskReadSerial_handle;
-extern TaskHandle_t TaskFaultMonitor_handle;
 extern TaskHandle_t TaskReadSensors_handle;
 extern TaskHandle_t TaskStatus_handle;
 extern TaskHandle_t TaskNetwork_handle;
 extern TaskHandle_t TaskCamera_handle;
-extern TaskHandle_t TaskPOST_handle;
+extern TaskHandle_t TaskWatchdog_handle;
 
 extern SemaphoreHandle_t interruptSemaphore; // For button press
 
 extern uint8_t GlobalState;
+extern data32_t last_post_result;
+
 extern MC33926Driver MotorDriver;
 extern CameraControl CamCtrl;
 
@@ -81,3 +83,4 @@ extern CameraControl CamCtrl;
 extern Sensor TotalCurrent;
 extern Sensor M1Current;
 extern Sensor M2Current;
+

@@ -9,13 +9,16 @@
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
+#include <assert.h>
+
+#include <redis.h>
 
 #include "mcu.h"
 
 /* Variables */
 extern const char *__progname;
 
-#define IO_REGEX "^(set|get)\\.io\\.([[:alnum:]_]+)$"
+#define IO_REGEX "^set\\.io\\.([[:alnum:]_]+)$"
 
 McuClass_t mcu;
 
@@ -27,8 +30,6 @@ static void do_running();
 static void do_fault();
 
 static void pubsub(redisAsyncContext *c, void *reply, void *privdata);
-static void mcu_to_redis(int key_index);
-static void redis_to_mcu(int key_index);
 
 int main(int argc, char *argv[]) {
     app_run_table[APP_STATE_INIT] = do_init;
@@ -39,43 +40,34 @@ int main(int argc, char *argv[]) {
     GlobalAppInit();
     mcuInit(&mcu);
 
-    if (0 != redis_fn_callback(&pubsub, "[sg]et.io.*", NULL)) {
+    //temporary
+    redis_create_keys(&GlobalApp.context);
+    //
+
+    if (0 != redis_fn_callback(&pubsub, "set.io.*", NULL)) {
         LOG_ERROR("Callback init failed.");
     }
 
     while (1) {
         GlobalApp.run();
         mcu.run(&mcu);
-        sleep(2);
+        sleep(0.1);
     }
 }
 
 void do_init() {
     GlobalApp.transition(APP_STATE_POST);
     mcu.transition(&mcu, MCU_STATE_POST);
-
-    //temporary
-    redis_create_keys(&GlobalApp.context);
-    //
 }
 
 void do_post() {
-    bool criteria = true;
-    if (mcu.state != MCU_STATE_POST) {
-        criteria = false;
+    if (mcu.state == MCU_STATE_POST) {
+        return;
     }
-    time_t start = time(NULL);
-    while (mcu.state == MCU_STATE_POST) {
-        if (time(NULL) - start > 30) {
-            criteria = false;
-            LOG_ERROR("POST failed.");
-            break;
-        }
-    }
-    if (!criteria) {
-        GlobalApp.transition(APP_STATE_FAULT);
-    } else {
+    else if (mcu.state == MCU_STATE_READY) {
         GlobalApp.transition(APP_STATE_RUNNING);
+    } else if (mcu.state == MCU_STATE_FAULT) {
+        GlobalApp.transition(APP_STATE_FAULT);
     }
 }
 
@@ -83,21 +75,40 @@ void do_running() {
     if (mcu.state == MCU_STATE_FAULT) {
         GlobalApp.transition(APP_STATE_FAULT);
     }
+    for (int i=0;i< REDIS_NUM_KEYS; i++) {
+        if (REDIS_KEYS[i].hdlc_key == HDLC_NOT_IMPLEMENTED) {
+            break;
+        }
+        data32_t data;
+        mcu.get(&mcu, REDIS_KEYS[i].hdlc_key, &data);
+        switch (REDIS_KEYS[i].type) {
+            case TYPE_FLOAT:
+                push_to_redis(GlobalApp.context, i, &data.f);
+                break;
+            case TYPE_UINT8:
+                push_to_redis(GlobalApp.context, i, &data.ui8[0]);
+                break;
+            case TYPE_INT8:
+                push_to_redis(GlobalApp.context, i, &data.i8[0]);
+                break;
+            case TYPE_UINT32:
+                push_to_redis(GlobalApp.context, i, &data.ui32);
+                break;
+            case TYPE_INT32:
+                push_to_redis(GlobalApp.context, i, &data.i32);
+                break;
+            default:
+                LOG_ERROR("Unexpected type");
+                break;
+        }
+    }
+
 }
 
 void do_fault() {
-    if (mcu.state != MCU_STATE_FAULT) {
-        mcu.transition(&mcu, MCU_STATE_POST);
+    if (mcu.state == MCU_STATE_READY) {
+        mcu.transition(&mcu, MCU_STATE_READY);
     }
-}
-
-void mcu_to_redis(int key_index ) {
-    redisReply *reply = redisCommand(GlobalApp.context, "");
-    
-}
-
-void redis_to_mcu(int key_index) {
-    
 }
 
 void pubsub(redisAsyncContext *c, void *reply, void *privdata) {
@@ -120,19 +131,17 @@ void pubsub(redisAsyncContext *c, void *reply, void *privdata) {
         return;
     }
     regex_t regex;
-    regmatch_t pmatch[3];
+    regmatch_t pmatch[2];
     if (regcomp(&regex, IO_REGEX, REG_EXTENDED) != 0) {
         LOG_ERROR("regcomp error");
         return;
     }
-    int status = regexec(&regex, msg, 3, pmatch, 0);
+    int status = regexec(&regex, msg, 2, pmatch, 0);
     char *key = NULL;
-    char *type = NULL;
     regfree(&regex);
     if (!status) { 
-        type = get_match(msg, &pmatch[1]); 
-        key = get_match(msg, &pmatch[2]);
-        if (key == NULL || type == NULL) {
+        key = get_match(msg, &pmatch[1]);
+        if (key == NULL) {
             LOG_ERROR("Failed to malloc pointer");
             return;
         }
@@ -140,7 +149,6 @@ void pubsub(redisAsyncContext *c, void *reply, void *privdata) {
         LOG_WARN("No match found");
         return;
     }
-    int data = (int)atoi(r->element[3]->str);
     int id = -1;
     for (int i = 0; i < REDIS_NUM_KEYS; i++) {
         if (REDIS_KEYS[i].key == NULL) {
@@ -160,10 +168,30 @@ void pubsub(redisAsyncContext *c, void *reply, void *privdata) {
         return;
     }
     free(key);
-    if (0 == strcmp("test", "get")) {
 
-    } else if (0 == strcmp("test", "set")) {
-
+    data32_t data;
+    switch(REDIS_KEYS[id].type) {
+        case TYPE_INT32:
+            data.i32 = (int32_t)atoi(r->element[3]->str);
+            break;
+        case TYPE_UINT32:
+            data.ui32 = (uint32_t)atoi(r->element[3]->str);
+            break;
+        case TYPE_INT16:
+            data.i16[0] = (int16_t)atoi(r->element[3]->str);
+            break;
+        case TYPE_UINT16:
+            data.ui16[0] = (uint16_t)atoi(r->element[3]->str);
+            break;
+        case TYPE_UINT8:
+            data.ui8[0] = (uint8_t)atoi(r->element[3]->str);
+            break;
+        case TYPE_INT8:
+            data.i8[0] = (int8_t)atoi(r->element[3]->str);
+            break;
+        default:
+            LOG_ERROR("Invalid hdlc type: %d", REDIS_KEYS[id].type);
+            return;
     }
-    free(type);
+    mcu.set(&mcu, REDIS_KEYS[id].hdlc_key, &data);
 }
