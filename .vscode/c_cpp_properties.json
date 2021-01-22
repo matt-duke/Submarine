@@ -11,7 +11,10 @@
                 "${workspaceFolder}/gullrock/firmware/**",
                 "/home/pi/Arduino/libraries/**",
                 "/home/pi/.arduino15/packages/arduino/tools/**",
-                "/home/$user/arduino-1.8.9/libraries/**"
+                "/home/$user/arduino-1.8.9/libraries/**",
+                "C:\\Program Files (x86)\\Arduino\\hardware\\tools\\**",
+                "C:\\Program Files (x86)\\Arduino\\libraries\\**",
+                "C:\\Users\\mattd\\Documents\\Arduino\\libraries\\**"
             ],
             "defines": [
                 "_DEBUG",
