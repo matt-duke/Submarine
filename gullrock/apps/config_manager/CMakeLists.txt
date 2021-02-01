@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(config_controller C)
+project(config_manager C)
 
 find_library(EVENT_LIBRARY NAMES libevent libevent-dev)
 

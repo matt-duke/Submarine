@@ -45,6 +45,11 @@ void redis_init_keys() {
             .ts = true,
             .type=TYPE_FLOAT,
             .retention=500};
+    REDIS_KEYS[REDIS_CAM_STATUS] =
+        (redis_key_t){
+            .key = "cam_status",
+            .ts = false,
+            .type=TYPE_INT};
     REDIS_KEYS[REDIS_MPC_VOLTS] =
         (redis_key_t){
             .key = "mpc_volts",

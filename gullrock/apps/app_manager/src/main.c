@@ -32,14 +32,17 @@ char* appNames[NUM_APPS] = {
 static void do_to_init();
 static void do_post();
 static void do_running();
+static void do_test();
 
 static int monitor_heartbeats(char *app_name);
 static int start_app(char* app_name);
 static int kill_app(char* app_name);
 
 int main() {
+  #ifdef TEST
+  run_test(); 
+  #else
   init_logging();
-
   app_transition_table[APP_STATE_INIT][APP_STATE_INIT] = do_to_init;
   app_run_table[APP_STATE_POST] = do_post;
   app_run_table[APP_STATE_RUNNING] = do_running;
@@ -49,6 +52,7 @@ int main() {
   while (1) {
     GlobalApp.run();
   }
+  #endif
 }
 
 void do_to_init() {
