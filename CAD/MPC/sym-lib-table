@@ -1,0 +1,3 @@
+(sym_lib_table
+  (lib (name MPC-eagle-import)(type Legacy)(uri ${KIPRJMOD}/MPC-eagle-import.lib)(options "")(descr ""))
+)

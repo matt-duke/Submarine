@@ -1,0 +1,615 @@
+EESchema Schematic File Version 4
+EELAYER 30 0
+EELAYER END
+$Descr User 11693 9551
+encoding utf-8
+Sheet 1 1
+Title ""
+Date ""
+Rev ""
+Comp ""
+Comment1 ""
+Comment2 ""
+Comment3 ""
+Comment4 ""
+$EndDescr
+Wire Wire Line
+	5100 2800 4200 2800
+Wire Wire Line
+	4200 2800 4200 2600
+Wire Wire Line
+	5100 2600 4400 2600
+Wire Wire Line
+	5100 3000 4700 3000
+Text Label 4700 3000 2    70   ~ 0
+AREF
+Wire Wire Line
+	5100 3100 4700 3100
+Wire Wire Line
+	4700 3100 4700 3500
+Wire Wire Line
+	4700 3500 4700 3600
+Wire Wire Line
+	4700 3600 4700 3700
+Wire Wire Line
+	4700 3700 4700 3800
+Wire Wire Line
+	4700 3800 4300 3800
+Wire Wire Line
+	5100 3500 4700 3500
+Wire Wire Line
+	5100 3600 4700 3600
+Wire Wire Line
+	5100 3700 4700 3700
+Wire Wire Line
+	5100 3800 4700 3800
+Text Label 4300 3800 2    70   ~ 0
+5V
+Connection ~ 4700 3500
+Connection ~ 4700 3600
+Connection ~ 4700 3700
+Connection ~ 4700 3800
+Wire Wire Line
+	2400 4300 2800 4300
+Wire Wire Line
+	3200 4300 2800 4300
+Wire Wire Line
+	2800 4300 2800 4100
+Text Label 2800 4100 0    70   ~ 0
+5V
+Connection ~ 2800 4300
+Wire Wire Line
+	3300 6100 3500 6100
+Text Label 3500 6100 0    70   ~ 0
+5V
+Wire Wire Line
+	2400 2500 2200 2500
+Wire Wire Line
+	2200 2500 2200 2700
+Text Label 2200 2700 2    70   ~ 0
+5V
+Wire Wire Line
+	2900 7700 3600 7700
+Text Label 3600 7700 0    70   ~ 0
+5V
+Wire Wire Line
+	5100 3900 4900 3900
+Wire Wire Line
+	4900 3900 4700 3900
+Wire Wire Line
+	4700 3900 4300 3900
+Wire Wire Line
+	5100 4000 4700 4000
+Wire Wire Line
+	4700 4000 4700 3900
+Wire Wire Line
+	5100 4100 4700 4100
+Wire Wire Line
+	4700 4100 4700 4000
+Wire Wire Line
+	5100 4200 4700 4200
+Wire Wire Line
+	4700 4200 4700 4100
+Wire Wire Line
+	5100 3200 4900 3200
+Wire Wire Line
+	4900 3200 4900 3900
+Text Label 4300 3900 2    70   ~ 0
+GND
+Connection ~ 4900 3900
+Connection ~ 4700 4000
+Connection ~ 4700 4100
+Connection ~ 4700 3900
+Wire Wire Line
+	4300 2300 4300 2200
+Text Label 4300 2200 0    70   ~ 0
+GND
+Wire Wire Line
+	2800 4600 2800 4800
+Text Label 2800 4800 0    70   ~ 0
+GND
+Wire Wire Line
+	2400 5600 2200 5600
+Text Label 2200 5600 2    70   ~ 0
+GND
+Wire Wire Line
+	2400 6100 2200 6100
+Text Label 2200 6100 2    70   ~ 0
+GND
+Wire Wire Line
+	5100 2400 4700 2400
+Text Label 4700 2400 2    70   ~ 0
+RST
+Wire Wire Line
+	3000 2500 3000 2700
+Wire Wire Line
+	3000 2500 3200 2500
+Wire Wire Line
+	2800 2500 3000 2500
+Text Label 3200 2500 0    70   ~ 0
+RST
+Connection ~ 3000 2500
+Wire Wire Line
+	8300 3300 7900 3300
+Text Label 8300 3300 0    70   ~ 0
+13
+Wire Wire Line
+	3300 5600 3500 5600
+Text Label 3500 5600 0    70   ~ 0
+13
+Wire Wire Line
+	8300 3100 7900 3100
+Text Label 8300 3100 0    70   ~ 0
+22
+Wire Wire Line
+	5100 4900 4700 4900
+Text Label 4700 4900 2    70   ~ 0
+42
+Wire Wire Line
+	3000 3000 3000 3200
+Text Label 3000 3200 0    70   ~ 0
+DTR
+Wire Wire Line
+	3000 5600 2800 5600
+Wire Wire Line
+	2800 6100 3000 6100
+Wire Wire Line
+	5100 5600 4700 5600
+Text Label 4700 5600 2    70   ~ 0
+49
+Wire Wire Line
+	5100 5500 4700 5500
+Text Label 4700 5500 2    70   ~ 0
+48
+Wire Wire Line
+	5100 5400 4700 5400
+Text Label 4700 5400 2    70   ~ 0
+47
+Wire Wire Line
+	5100 5300 4700 5300
+Text Label 4700 5300 2    70   ~ 0
+46
+Wire Wire Line
+	5100 5200 4700 5200
+Text Label 4700 5200 2    70   ~ 0
+45
+Wire Wire Line
+	5100 5100 4700 5100
+Text Label 4700 5100 2    70   ~ 0
+44
+Wire Wire Line
+	5100 5000 4700 5000
+Text Label 4700 5000 2    70   ~ 0
+43
+Wire Wire Line
+	5100 5800 4700 5800
+Text Label 4700 5800 2    70   ~ 0
+A15
+Wire Wire Line
+	5100 5900 4700 5900
+Text Label 4700 5900 2    70   ~ 0
+A14
+Wire Wire Line
+	5100 6000 4700 6000
+Text Label 4700 6000 2    70   ~ 0
+A13
+Wire Wire Line
+	5100 6100 4700 6100
+Text Label 4700 6100 2    70   ~ 0
+A12
+Wire Wire Line
+	5100 6200 4700 6200
+Text Label 4700 6200 2    70   ~ 0
+A11
+Wire Wire Line
+	5100 6300 4700 6300
+Text Label 4700 6300 2    70   ~ 0
+A10
+Wire Wire Line
+	5100 6400 4700 6400
+Text Label 4700 6400 2    70   ~ 0
+A9
+Wire Wire Line
+	5100 6500 4700 6500
+Text Label 4700 6500 2    70   ~ 0
+A8
+Wire Wire Line
+	5100 7400 4700 7400
+Text Label 4700 7400 2    70   ~ 0
+RX3
+Wire Wire Line
+	5100 7300 4700 7300
+Text Label 4700 7300 2    70   ~ 0
+TX3
+Wire Wire Line
+	5100 8300 4700 8300
+Text Label 4700 8300 2    70   ~ 0
+RX2
+Wire Wire Line
+	5100 8200 4700 8200
+Text Label 4700 8200 2    70   ~ 0
+TX2
+Wire Wire Line
+	5100 8000 4700 8000
+Text Label 4700 8000 2    70   ~ 0
+6
+Wire Wire Line
+	5100 7900 4700 7900
+Text Label 4700 7900 2    70   ~ 0
+7
+Wire Wire Line
+	5100 7800 4700 7800
+Text Label 4700 7800 2    70   ~ 0
+8
+Wire Wire Line
+	5100 7700 4700 7700
+Text Label 4700 7700 2    70   ~ 0
+9
+Wire Wire Line
+	8300 7800 7900 7800
+Text Label 8300 7800 0    70   ~ 0
+4
+Wire Wire Line
+	8300 8300 7900 8300
+Text Label 8300 8300 0    70   ~ 0
+41
+Wire Wire Line
+	8300 8200 7900 8200
+Text Label 8300 8200 0    70   ~ 0
+40
+Wire Wire Line
+	8300 8100 7900 8100
+Text Label 8300 8100 0    70   ~ 0
+39
+Wire Wire Line
+	8300 6900 7900 6900
+Text Label 8300 6900 0    70   ~ 0
+A7
+Wire Wire Line
+	8300 7000 7900 7000
+Text Label 8300 7000 0    70   ~ 0
+A6
+Wire Wire Line
+	8300 7100 7900 7100
+Text Label 8300 7100 0    70   ~ 0
+A5
+Wire Wire Line
+	8300 7200 7900 7200
+Text Label 8300 7200 0    70   ~ 0
+A4
+Wire Wire Line
+	8300 7300 7900 7300
+Text Label 8300 7300 0    70   ~ 0
+A3
+Wire Wire Line
+	8300 7400 7900 7400
+Text Label 8300 7400 0    70   ~ 0
+A2
+Wire Wire Line
+	8300 7500 7900 7500
+Text Label 8300 7500 0    70   ~ 0
+A1
+Wire Wire Line
+	8300 7600 7900 7600
+Text Label 8300 7600 0    70   ~ 0
+A0
+Wire Wire Line
+	8300 6700 7900 6700
+Text Label 8300 6700 0    70   ~ 0
+RX0
+Wire Wire Line
+	8300 6600 7900 6600
+Text Label 8300 6600 0    70   ~ 0
+TX0
+Wire Wire Line
+	8300 6400 7900 6400
+Text Label 8300 6400 0    70   ~ 0
+5
+Wire Wire Line
+	8300 6300 7900 6300
+Text Label 8300 6300 0    70   ~ 0
+2
+Wire Wire Line
+	8300 6200 7900 6200
+Text Label 8300 6200 0    70   ~ 0
+3
+Wire Wire Line
+	8300 5800 7900 5800
+Text Label 8300 5800 0    70   ~ 0
+21
+Wire Wire Line
+	8300 5700 7900 5700
+Text Label 8300 5700 0    70   ~ 0
+20
+Wire Wire Line
+	8300 5600 7900 5600
+Text Label 8300 5600 0    70   ~ 0
+RX1
+Wire Wire Line
+	8300 5500 7900 5500
+Text Label 8300 5500 0    70   ~ 0
+TX1
+Wire Wire Line
+	8300 5100 7900 5100
+Text Label 8300 5100 0    70   ~ 0
+38
+Wire Wire Line
+	8300 4900 7900 4900
+Text Label 8300 4900 0    70   ~ 0
+37
+Wire Wire Line
+	8300 4800 7900 4800
+Text Label 8300 4800 0    70   ~ 0
+36
+Wire Wire Line
+	8300 4700 7900 4700
+Text Label 8300 4700 0    70   ~ 0
+35
+Wire Wire Line
+	8300 4600 7900 4600
+Text Label 8300 4600 0    70   ~ 0
+34
+Wire Wire Line
+	8300 4500 7900 4500
+Text Label 8300 4500 0    70   ~ 0
+33
+Wire Wire Line
+	8300 4400 7900 4400
+Text Label 8300 4400 0    70   ~ 0
+32
+Wire Wire Line
+	8300 4300 7900 4300
+Text Label 8300 4300 0    70   ~ 0
+31
+Wire Wire Line
+	8300 4200 7900 4200
+Text Label 8300 4200 0    70   ~ 0
+30
+Wire Wire Line
+	8300 4000 7900 4000
+Text Label 8300 4000 0    70   ~ 0
+53
+Wire Wire Line
+	8300 3900 7900 3900
+Text Label 8300 3900 0    70   ~ 0
+52
+Wire Wire Line
+	8300 3800 7900 3800
+Text Label 8300 3800 0    70   ~ 0
+51
+Wire Wire Line
+	8300 3700 7900 3700
+Text Label 8300 3700 0    70   ~ 0
+50
+Wire Wire Line
+	8300 3600 7900 3600
+Text Label 8300 3600 0    70   ~ 0
+10
+Wire Wire Line
+	8300 3500 7900 3500
+Text Label 8300 3500 0    70   ~ 0
+11
+Wire Wire Line
+	8300 3400 7900 3400
+Text Label 8300 3400 0    70   ~ 0
+12
+Wire Wire Line
+	8300 2400 7900 2400
+Text Label 8300 2400 0    70   ~ 0
+29
+Wire Wire Line
+	8300 2500 7900 2500
+Text Label 8300 2500 0    70   ~ 0
+28
+Wire Wire Line
+	8300 2600 7900 2600
+Text Label 8300 2600 0    70   ~ 0
+27
+Wire Wire Line
+	8300 2700 7900 2700
+Text Label 8300 2700 0    70   ~ 0
+26
+Wire Wire Line
+	8300 2800 7900 2800
+Text Label 8300 2800 0    70   ~ 0
+25
+Wire Wire Line
+	8300 2900 7900 2900
+Text Label 8300 2900 0    70   ~ 0
+24
+Wire Wire Line
+	8300 3000 7900 3000
+Text Label 8300 3000 0    70   ~ 0
+23
+Wire Wire Line
+	2700 7700 2300 7700
+Text Label 2300 7700 2    70   ~ 0
+VUSB
+$Comp
+L MPC-eagle-import:ATMEGA2560 ATMEGA2560
+U 1 1 BD0714B6
+P 6500 5300
+F 0 "ATMEGA2560" H 5300 8350 59  0000 L BNN
+F 1 "ATMEGA2560" H 5300 2100 59  0000 L BNN
+F 2 "MPC:TQFP100" H 6500 5300 50  0001 C CNN
+F 3 "" H 6500 5300 50  0001 C CNN
+	1    6500 5300
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:RESONATOR XTAL1
+U 1 1 9FAA3198
+P 4300 2500
+F 0 "XTAL1" H 4400 2640 59  0000 L BNN
+F 1 "16M" H 4400 2300 59  0000 L BNN
+F 2 "MPC:RESONATOR" H 4300 2500 50  0001 C CNN
+F 3 "" H 4300 2500 50  0001 C CNN
+	1    4300 2500
+	-1   0    0    1   
+$EndComp
+$Comp
+L MPC-eagle-import:RESISTOR-SMD-0805 R1
+U 1 1 5FC72806
+P 2600 5600
+F 0 "R1" H 2450 5659 59  0000 L BNN
+F 1 "10k" H 2450 5470 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 2600 5600 50  0001 C CNN
+F 3 "" H 2600 5600 50  0001 C CNN
+	1    2600 5600
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:RESISTOR-SMD-0805 R2
+U 1 1 8EFFCFBB
+P 2600 6100
+F 0 "R2" H 2450 6159 59  0000 L BNN
+F 1 "10k" H 2450 5970 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 2600 6100 50  0001 C CNN
+F 3 "" H 2600 6100 50  0001 C CNN
+	1    2600 6100
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:RESISTOR-SMD-0805 R3
+U 1 1 A352A37C
+P 2600 2500
+F 0 "R3" H 2450 2559 59  0000 L BNN
+F 1 " 10k" H 2450 2370 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 2600 2500 50  0001 C CNN
+F 3 "" H 2600 2500 50  0001 C CNN
+	1    2600 2500
+	-1   0    0    1   
+$EndComp
+$Comp
+L MPC-eagle-import:LED-SMD-0805 ORANGE1
+U 1 1 F7FB53E4
+P 3200 5600
+F 0 "ORANGE1" V 3340 5420 59  0000 L BNN
+F 1 "  L" H 3200 5600 50  0001 C CNN
+F 2 "MPC:SMD-0805-LED" H 3200 5600 50  0001 C CNN
+F 3 "" H 3200 5600 50  0001 C CNN
+	1    3200 5600
+	0    1    1    0   
+$EndComp
+$Comp
+L MPC-eagle-import:LED-SMD-0805 BLUE1
+U 1 1 A71B6AF1
+P 3200 6100
+F 0 "BLUE1" V 3340 5920 59  0000 L BNN
+F 1 "L" H 3200 6100 50  0001 C CNN
+F 2 "MPC:SMD-0805-LED" H 3200 6100 50  0001 C CNN
+F 3 "" H 3200 6100 50  0001 C CNN
+	1    3200 6100
+	0    1    1    0   
+$EndComp
+$Comp
+L MPC-eagle-import:CAPACITOR-SMD-0805 C2
+U 1 1 9A5D000D
+P 2800 4400
+F 0 "C2" H 2840 4425 59  0000 L BNN
+F 1 " .1uF" H 2840 4235 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 2800 4400 50  0001 C CNN
+F 3 "" H 2800 4400 50  0001 C CNN
+	1    2800 4400
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:CAPACITOR-SMD-0805 C3
+U 1 1 5B8E32D7
+P 3200 4400
+F 0 "C3" H 3240 4425 59  0000 L BNN
+F 1 ".1uF" H 3240 4235 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 3200 4400 50  0001 C CNN
+F 3 "" H 3200 4400 50  0001 C CNN
+	1    3200 4400
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:CAPACITOR-SMD-0805 C4
+U 1 1 D01FBD6C
+P 3000 2800
+F 0 "C4" H 3040 2825 59  0000 L BNN
+F 1 ".1uF" H 3040 2635 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 3000 2800 50  0001 C CNN
+F 3 "" H 3000 2800 50  0001 C CNN
+	1    3000 2800
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:LOGO U$1
+U 1 1 89E33A62
+P 6000 900
+F 0 "U$1" H 6000 900 50  0001 C CNN
+F 1 "LOGO" H 6000 900 50  0001 C CNN
+F 2 "MPC:LOGO-S" H 6000 900 50  0001 C CNN
+F 3 "" H 6000 900 50  0001 C CNN
+	1    6000 900 
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:DIODE SCHOTTKY1
+U 1 1 7502D5A7
+P 2800 7700
+F 0 "SCHOTTKY1" H 2900 7719 59  0000 L BNN
+F 1 "DIODE" H 2900 7609 59  0000 L BNN
+F 2 "MPC:SOD-323" H 2800 7700 50  0001 C CNN
+F 3 "" H 2800 7700 50  0001 C CNN
+	1    2800 7700
+	1    0    0    -1  
+$EndComp
+$Comp
+L MPC-eagle-import:DOCFRAME U$3
+U 1 1 6E1B97F5
+P 1800 1900
+F 0 "U$3" H 1800 1900 50  0001 C CNN
+F 1 "DOCFRAME" H 1800 1900 50  0001 C CNN
+F 2 "MPC:CREATIVECOMMONS" H 1800 1900 50  0001 C CNN
+F 3 "" H 1800 1900 50  0001 C CNN
+	1    1800 1900
+	1    0    0    -1  
+$EndComp
+Wire Notes Line
+	8800 8700 8800 700 
+Wire Notes Line
+	8800 700  1800 700 
+Text Notes 5400 1600 0    100  ~ 0
+II
+Wire Notes Line
+	1800 3500 3800 3500
+Wire Notes Line
+	1800 5100 3800 5100
+Wire Notes Line
+	1800 6700 3800 6700
+Text Notes 1900 7000 0    66   ~ 13
+Reverse Current Protection\nfor USB
+Text Notes 2300 5300 0    66   ~ 13
+Indicator LED's
+Text Notes 2300 3700 0    66   ~ 13
+Bypass Capacitors
+Text Notes 2300 2100 0    66   ~ 13
+USB to Serial DTR
+Wire Notes Line
+	1800 8700 8800 8700
+Wire Notes Line
+	1800 700  1800 8700
+Wire Notes Line
+	3800 1900 3800 8700
+Connection ~ 2800 4600
+Wire Wire Line
+	3200 4600 2800 4600
+$Comp
+L MPC-eagle-import:CAPACITOR-SMD-0805 C1
+U 1 1 24F56349
+P 2400 4400
+F 0 "C1" H 2440 4425 59  0000 L BNN
+F 1 "CAPACITOR-SMD-0805" H 2440 4235 59  0000 L BNN
+F 2 "MPC:SMD-0805" H 2400 4400 50  0001 C CNN
+F 3 "" H 2400 4400 50  0001 C CNN
+	1    2400 4400
+	1    0    0    -1  
+$EndComp
+Text Notes 2450 4550 0    59   ~ 0
+.1uF
+Wire Wire Line
+	2400 4600 2800 4600
+$EndSCHEMATC
