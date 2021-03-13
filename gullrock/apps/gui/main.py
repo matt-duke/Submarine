@@ -33,7 +33,7 @@ class MainWindow(QMainWindow):
         #self.setWindowFlags(flags)
 
     def start(self):
-        #self.stream.start()
+        self.stream.connect()
         self.gamepad.start()
 
     def resizeEvent(self, e):

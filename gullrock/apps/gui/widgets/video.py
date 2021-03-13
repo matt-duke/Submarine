@@ -1,20 +1,36 @@
-import sys, gi
+import sys
+import gi
 gi.require_version('Gst', '1.0')
 from gi.repository import GObject, Gst
-GObject.threads_init()
-Gst.init()
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 
-class Webcam(QWidget):
+class VideoStream(QWidget):
 
-    def __init__(self, windowId):
+    def __init__(self):
         super().__init__()
-        self.wid = windowId
-        self.videoPipeline()
 
-    def videoPipeline(self):
+    def connect(self):
+        try:
+            #test connection
+            self.init_pipeline()
+        except:
+            self.pipeline_failed()
+
+    def pipeline_failed(self):
+        self.layout = QVBoxLayout()
+        self.painter = QPainter
+        self.painter.setPen(Qt.blue)
+        self.painter.setFont(QFont("Arial", 30))
+        self.painter.drawText("Test", Qt.AlignCenter, "Qt")
+        self.layout.addWidget(self.painter)
+        self.setLayout(self.layout)
+
+    def init_pipeline(self):
+        GObject.threads_init()
+        Gst.init(None)
+
         self.pipeline = Gst.Pipeline()
         self.tcpsrc = Gst.ElementFactory.make('tcpclientsrc', 'tcpsrc')
         self.tcpsrc.set_property('host', '192.168.10.168')
@@ -37,6 +53,7 @@ class Webcam(QWidget):
         self.avdec.link(self.vidconvert)
         self.vidconvert.link(self.asink)
         bus = self.pipeline.get_bus()
+        
         bus.add_signal_watch()
         bus.enable_sync_message_emission()
         bus.connect('message', self.on_message)
@@ -56,8 +73,7 @@ class Webcam(QWidget):
             return
         message_name = message.structure.get_name()
         if message_name == 'prepare-xwindow-id':
-            win_id = self.wid
-            assert win_id
+            assert self.winId
             imagesink = message.src
             imagesink.set_property('force-aspect-ratio', True)
             imagesink.set_xwindow_id(win_id)

@@ -1,4 +1,4 @@
-from inputs import get_gamepad
+import inputs
 import redis
 from threading import Thread
 from time import sleep
@@ -29,19 +29,23 @@ class Gamepad(Thread):
 
     def run(self):
         while True:
-            events = get_gamepad()
-            for event in events:
-                #print(event.ev_type, event.code, event.state)
-                if event.code == "ABS_RZ":
-                    self.setMotorR(event.state)
-                elif event.code == "ABS_Z":
-                    self.setMotorL(event.state)
-                elif event.code == "BTN_TR" and event.state == 0:
-                    self.setHeadlight()
-                elif event.code == "ABS_HAT0X":
-                    self.dPad(event.state)
-                else:
-                    pass#print(event.code, event.state)
+            try:
+                events = inputs.get_gamepad()
+                for event in events:
+                    #print(event.ev_type, event.code, event.state)
+                    if event.code == "ABS_RZ":
+                        self.setMotorR(event.state)
+                    elif event.code == "ABS_Z":
+                        self.setMotorL(event.state)
+                    elif event.code == "BTN_TR" and event.state == 0:
+                        self.setHeadlight()
+                    elif event.code == "ABS_HAT0X":
+                        self.dPad(event.state)
+                    else:
+                        pass#print(event.code, event.state)
+            except inputs.UnpluggedError as e:
+                print("No gamepad connected.")
+                return
 
     def dPad(self, state):
         self.signals.DPAD_X.emit(state)

@@ -9,7 +9,8 @@ from threading import Thread
 class HUD(QWidget):
     def __init__(self, parent):
         super().__init__(parent)
-
+        
+        self.db = redis.Redis(host='localhost', port=6379, db=0, health_check_interval=10)
         self.layout = QVBoxLayout()
         self.setLayout(self.layout)
 
@@ -77,21 +78,24 @@ class HUD(QWidget):
         self.layout.setAlignment(self.bottom_widget, Qt.AlignBottom)
 
     def initDatabase(self):
-
-        def run(poll_rate, update_fn):
+        def run(self):
             while True:
-                update_fn()
-                sleep(poll_rate/1000)
+                try:
+                    self.db.ping()
+                    self.update_fn()
+                except:
+                    print("Refresh failed")
+                finally:
+                    sleep(self.poll_rate/1000)
 
         if self.update_thread.is_alive():
             print("unable to start poll thread: already active")
 
-        self.update_thread = Thread(target=run, args=(self.poll_rate, self.updateData))
+        self.update_thread = Thread(target=run, args=(self,))
         self.update_thread.daemon = True
         self.update_thread.start()
 
     def updateData(self):
-        db = redis.Redis(host='localhost', port=6379, db=0, health_check_interval=10)
         self.depth.setText(f'{float(db.get("depth"))} m')
         self.battery_voltage.setText(f'{float(db.get("battery_voltage"))} V')
 
