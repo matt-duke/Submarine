@@ -1,6 +1,8 @@
 cmake_minimum_required(VERSION 3.5.0)
-project(mcu_manager C)
+set(CMAKE_SYSTEM_NAME Linux)
+set(CMAKE_SYSTEM_PROCESSOR arm)
 
+project(mcu_manager C)
 include(ExternalProject)
 
 SET(CMAKE_CXX_FLAGS  "-g")
@@ -17,6 +19,11 @@ get_filename_component(DRIVER_DIR
 
 add_subdirectory(${THIRDPARTY_DIR}/c-logger ${CMAKE_CURRENT_BINARY_DIR}/c-logger)
 add_subdirectory(${THIRDPARTY_DIR}/hiredis ${CMAKE_CURRENT_BINARY_DIR}/hiredis)
+option(EVENT__DISABLE_OPENSSL
+    "Define if libevent should build without support for OpenSSL encryption" ON)
+option(EVENT__DISABLE_MBEDTLS
+    "Define if libevent should build without support for mbed TLS encryption" ON)
+add_subdirectory(${THIRDPARTY_DIR}/libevent ${CMAKE_CURRENT_BINARY_DIR}/libevent)
 
 set(SERIALPORT_DIR ${THIRDPARTY_DIR}/libserialport)
 set(SERIALPORT_BIN ${CMAKE_CURRENT_BINARY_DIR}/libserialport)

@@ -12,6 +12,11 @@ get_filename_component(THIRDPARTY_DIR
 
 add_subdirectory(${THIRDPARTY_DIR}/c-logger ${CMAKE_CURRENT_BINARY_DIR}/c-logger)
 add_subdirectory(${THIRDPARTY_DIR}/hiredis ${CMAKE_CURRENT_BINARY_DIR}/hiredis)
+option(EVENT__DISABLE_OPENSSL
+    "Define if libevent should build without support for OpenSSL encryption" ON)
+option(EVENT__DISABLE_MBEDTLS
+    "Define if libevent should build without support for mbed TLS encryption" ON)
+add_subdirectory(${THIRDPARTY_DIR}/libevent ${CMAKE_CURRENT_BINARY_DIR}/libevent)
 
 file(GLOB COMMON "${COMMON_SOURCE_DIR}/src/*.c")
 file(GLOB_RECURSE SOURCES "${CMAKE_CURRENT_LIST_DIR}/src/*.c")
