@@ -28,3 +28,6 @@
 [submodule "gullrock/thirdparty/ArduinoHDLC"]
 	path = gullrock/thirdparty/ArduinoHDLC
 	url = https://github.com/mengguang/ArduinoHDLC.git
+[submodule "gullrock/thirdparty/libevent"]
+	path = gullrock/thirdparty/libevent
+	url = https://github.com/libevent/libevent.git
