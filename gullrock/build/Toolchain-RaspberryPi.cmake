@@ -2,8 +2,8 @@ SET(CMAKE_SYSTEM_NAME Linux)
 SET(CMAKE_SYSTEM_VERSION 1)
 
 # Specify the cross compiler
-SET(CMAKE_C_COMPILER $ENV{HOME}/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-gcc)
-SET(CMAKE_CXX_COMPILER $ENV{HOME}/rpi/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++)
+SET(CMAKE_C_COMPILER ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-gcc)
+SET(CMAKE_CXX_COMPILER ${CMAKE_CURRENT_SOURCE_DIR}/../../thirdparty/tools/arm-bcm2708/gcc-linaro-arm-linux-gnueabihf-raspbian-x64/bin/arm-linux-gnueabihf-g++)
 
 # Where is the target environment
 #SET(CMAKE_FIND_ROOT_PATH $ENV{HOME}/rpi/rootfs)
