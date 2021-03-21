@@ -31,3 +31,6 @@
 [submodule "gullrock/thirdparty/libevent"]
 	path = gullrock/thirdparty/libevent
 	url = https://github.com/libevent/libevent.git
+[submodule "gullrock/thirdparty/tools"]
+	path = gullrock/thirdparty/tools
+	url = https://github.com/raspberrypi/tools.git
