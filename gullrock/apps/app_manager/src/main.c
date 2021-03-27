@@ -58,7 +58,7 @@ int main() {
 void do_to_init() {
   // TODO: Move starting redis server to startup script
   char buffer[128];
-  if (run_cmd(buffer, START_REDIS) != 0) {
+  if (run_cmd(START_REDIS, buffer, 128) != 0) {
     LOG_ERROR("Error starting redis server");
     GlobalApp.transition(APP_STATE_FAULT);
     return;

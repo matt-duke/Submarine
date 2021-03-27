@@ -4,6 +4,9 @@
 			"path": "."
 		},
 		{
+			"path": "gullrock"
+		},
+		{
 			"path": "gullrock/apps/camera_controller"
 		},
 		{

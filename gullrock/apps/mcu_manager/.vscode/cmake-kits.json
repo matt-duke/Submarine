@@ -1,6 +1,0 @@
-[   
-    {
-      "name": "Raspberry Pi",
-      "toolchainFile": "./../../build/Toolchain-RaspberryPi.cmake"
-    }
-]

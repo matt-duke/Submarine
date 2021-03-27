@@ -34,3 +34,6 @@
 [submodule "gullrock/thirdparty/tools"]
 	path = gullrock/thirdparty/tools
 	url = https://github.com/raspberrypi/tools.git
+[submodule "gullrock/thirdparty/zlib"]
+	path = gullrock/thirdparty/zlib
+	url = https://github.com/madler/zlib.git
